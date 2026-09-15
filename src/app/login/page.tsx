@@ -3,48 +3,30 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useTranslations } from "next-intl";
 import AuthForm from '@/components/AuthForm';
 
 export default function LoginPage() {
+  const t = useTranslations("auth");
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <>
-      {/* Desktop — t3 editorial auth */}
+      {/* Desktop, split-screen auth (referensi: halaman login.png) */}
       <div className="hidden lg:block">
-        <div className="flex min-h-dvh flex-col bg-secondary/40">
-          <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-12 sm:px-6 md:py-16">
-            <header className="hero-anim hero-fade mx-auto w-full max-w-5xl">
-              <p className="overline">Plant Health Platform</p>
-              <h2 className="mt-3 max-w-2xl text-3xl font-extrabold leading-[1.1] tracking-[-0.03em] md:text-5xl">
-                Pahami kesehatan{' '}
-                <span className="font-playfair">tanamanmu</span>.
-              </h2>
-              <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-                Diagnosis penyakit tanaman lewat foto, pengingat penyiraman, dan forum komunitas —
-                semua dalam satu tempat.
-              </p>
-            </header>
-            <div
-              className="hero-anim hero-fade mx-auto mt-12 flex w-full max-w-5xl flex-1 items-center"
-              style={{ animationDelay: '0.15s' }}
-            >
-              <AuthForm mode="login" />
-            </div>
-          </main>
-        </div>
+        <AuthForm mode="login" />
       </div>
 
-      {/* Mobile — mobile1 Figma */}
+      {/* Mobile, mobile1 Figma */}
       <div className="auth-page flex flex-col justify-center px-6 py-10 lg:hidden">
         <div className="auth-content space-y-7">
           <div>
-            <h1 className="text-[28px] leading-[1.15] font-bold tracking-[-.03em] text-ink mb-2">Selamat Datang Kembali</h1>
-            <p className="text-ink/70">Masuk untuk rawat tanaman Anda</p>
+            <h1 className="text-[28px] leading-[1.15] font-bold tracking-[-.03em] text-ink mb-2">{t("selamatDatang")}</h1>
+            <p className="text-ink/70">{t("masukSub")}</p>
           </div>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-ink mb-2">Email</label>
+              <label className="block text-sm font-semibold text-ink mb-2">{t("email")}</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/70 pointer-events-none" />
                 <input
@@ -55,28 +37,28 @@ export default function LoginPage() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-ink mb-2">Password</label>
+              <label className="block text-sm font-semibold text-ink mb-2">{t("password")}</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/70 pointer-events-none" />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Password Anda"
+                  placeholder={t("password")}
                   className="auth-input w-full pl-12 pr-12"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Sembunyikan password' : 'Lihat password'}
+                  aria-label={showPassword ? t('sembunyikan') : t('tampilkan')}
                   className="absolute inset-y-0 right-0 pr-4 flex items-center text-ink/70"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
               <div className="text-right mt-2">
-                <Link href="#" className="text-sm text-[#1B5E20] font-semibold">Lupa Password?</Link>
+                <Link href="#" className="text-sm text-[#1B5E20] font-semibold">{t("lupaPassword")}</Link>
               </div>
             </div>
-            <button className="auth-button w-full text-white font-bold">Masuk</button>
+            <button className="auth-button w-full text-white font-bold">{t("masuk")}</button>
           </div>
 
           <div className="relative">
@@ -84,7 +66,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-ink/15" />
             </div>
             <div className="relative flex justify-center">
-              <span className="px-3 bg-background text-[13px] text-ink/70">atau masuk dengan</span>
+              <span className="px-3 bg-background text-[13px] text-ink/70">{t("atauMasuk")}</span>
             </div>
           </div>
 
@@ -107,8 +89,8 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-ink/70">
-            Belum punya akun?{' '}
-            <Link href="/register" className="text-[#1B5E20] font-bold">Daftar Sekarang</Link>
+            {t("belumPunya")}{' '}
+            <Link href="/register" className="text-[#1B5E20] font-bold">{t("daftarSekarang")}</Link>
           </p>
         </div>
       </div>

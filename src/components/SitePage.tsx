@@ -4,7 +4,7 @@ import Footer from './Footer';
 
 /**
  * App shell: sticky navbar, page canvas, footer only on app pages.
- * Full-bleed canvas — hero bands own their own container; body content
+ * Full-bleed canvas, hero bands own their own container; body content
  * wraps itself in max-w-7xl px-4 sm:px-6.
  */
 export default function SitePage({

@@ -3,6 +3,7 @@
 import SitePage from '@/components/SitePage';
 import ScanResult from '@/components/ScanResultPage';
 import BottomNav from '@/components/BottomNav';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, Check, Sparkles, ClipboardList, TriangleAlert, ShieldCheck } from 'lucide-react';
 import { getContent } from '@/lib/scan-content';
 import { useScanResult, useScanPhoto } from '@/lib/use-scan-result';
@@ -13,6 +14,7 @@ interface ScanData {
 }
 
 export default function ScanResultPage() {
+  const t = useTranslations('scan');
   const data = useScanResult<ScanData>();
   const photo = useScanPhoto();
 
@@ -32,10 +34,10 @@ export default function ScanResultPage() {
       <div className="result-page app-shell pb-20 lg:hidden">
       <header className="result-header sticky top-0 z-20">
         <div className="app-container h-full px-4 flex items-center justify-between">
-          <button className="result-back-button" aria-label="Kembali" onClick={() => window.history.back()}>
+          <button className="result-back-button" aria-label={t("kembali")} onClick={() => window.history.back()}>
             <ArrowLeft className="w-5 h-5 text-ink" />
           </button>
-          <h1 className="text-[24px] font-semibold tracking-[-.035em]">Hasil Analisis</h1>
+          <h1 className="text-[24px] font-semibold tracking-[-.035em]">{t("hasilAnalisis")}</h1>
           <div aria-hidden="true" className="result-header-spacer" />
         </div>
       </header>
@@ -44,15 +46,15 @@ export default function ScanResultPage() {
         <main className="app-container scan-result-main">
           <div className="result-block">
             <p className="result-copy">
-              {data ? 'Kelas tidak dikenali mesin scan.' : 'Belum ada hasil. Ambil foto dari halaman Scan.'}
+              {data ? t('kelasDikenali') : t('belumAdaHasil')}
             </p>
           </div>
         </main>
       ) : (
       <main className="app-container scan-result-main">
         <div className="result-photo relative">
-          <img src={photo || '/figma-assets/scanned-leaf.png'} alt="Daun yang dianalisis" />
-          <div className="result-accuracy absolute bg-white/90 text-ink/70"><Check className="w-3.5 h-3.5 text-[#1B5E20]" strokeWidth={3} /> {accuracy}% Akurat</div>
+          <img src={photo || '/figma-assets/scanned-leaf.png'} alt={t("daunAnalisis")} />
+          <div className="result-accuracy absolute bg-white/90 text-ink/70"><Check className="w-3.5 h-3.5 text-[#1B5E20]" strokeWidth={3} /> {accuracy}% {t("akurat")}</div>
         </div>
 
         <section className="result-section">
@@ -74,16 +76,16 @@ export default function ScanResultPage() {
         <div className="result-hero-divider" aria-hidden="true" />
 
         <section className="result-block ai-block">
-          <h3 className="result-block-title text-ink"><Sparkles className="w-5 h-5 text-[#1B5E20]" /> Analisis AI</h3>
+          <h3 className="result-block-title text-ink"><Sparkles className="w-5 h-5 text-[#1B5E20]" /> {t("analisisAI")}</h3>
           <p className="result-copy">{content.aiAnalysis}</p>
           <div className="result-meta">
-            <div><p className="result-meta-label">{content.healthy ? 'Ciri-ciri yang Terdeteksi' : 'Gejala Utama'}</p><p className="result-meta-value">{content.symptoms.join(', ')}</p></div>
-            <div><p className="result-meta-label">{content.healthy ? 'Bagian Diperiksa' : 'Bagian Terdampak'}</p><p className="result-meta-value">{content.affectedParts}</p></div>
+            <div><p className="result-meta-label">{content.healthy ? t('ciriTerdeteksi') : t('gejalaUtama')}</p><p className="result-meta-value">{content.symptoms.join(', ')}</p></div>
+            <div><p className="result-meta-label">{content.healthy ? t('bagianDiperiksa') : t('bagianTerdampak')}</p><p className="result-meta-value">{content.affectedParts}</p></div>
           </div>
         </section>
 
         <section className="result-block recommendation-block">
-          <h3 className="result-block-title"><ClipboardList className="w-5 h-5 text-[#1B5E20]" /> {content.healthy ? 'Rekomendasi Perawatan' : 'Rekomendasi Penanganan'}</h3>
+          <h3 className="result-block-title"><ClipboardList className="w-5 h-5 text-[#1B5E20]" /> {content.healthy ? t('rekomendasiPerawatan') : t('rekomendasiPenanganan')}</h3>
           <div className="treatment-list">
             {content.treatments.map((t, index) => (
               <article className="treatment-card" key={t.title}>
@@ -95,7 +97,7 @@ export default function ScanResultPage() {
         </section>
 
         <section className="result-block result-products">
-          <h3 className="text-[18px] font-bold">Produk Rekomendasi</h3>
+          <h3 className="text-[18px] font-bold">{t("produkRekomendasi")}</h3>
           {content.products.map((p) => (
             <div className="product-row" key={p.name}>
               <div><h4 className="product-name">{p.name}</h4><p className="product-copy">{p.note}</p></div>
@@ -108,8 +110,8 @@ export default function ScanResultPage() {
       {data && content && (
       <div className="result-actions">
         <div className="app-container grid gap-2">
-          <button className="bg-[#1B5E20] text-white">Simpan ke Riwayat</button>
-          <button className="bg-primary/10 text-[#1B5E20] font-semibold">Tanya Ahli</button>
+          <button className="bg-[#1B5E20] text-white">{t("simpanRiwayat")}</button>
+          <button className="bg-primary/10 text-[#1B5E20] font-semibold">{t("tanyaAhli")}</button>
         </div>
       </div>
       )}

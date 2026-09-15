@@ -1,5 +1,7 @@
+'use client';
+
 import Link from "next/link";
-import { Leaf } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -15,12 +17,16 @@ export function isActivePath(pathname: string, href: string) {
 }
 
 export function Logo({ className, dark = false }: { className?: string; dark?: boolean }) {
+  const t = useTranslations('nav');
   return (
-    <Link href="/" className={cn("flex items-center gap-2", className)} aria-label="TanamanKu, Beranda">
-      <Leaf className={cn("h-6 w-6", dark ? "text-white" : "text-primary")} />
-      <span className={cn("font-playfair text-2xl", dark ? "text-white" : "text-ink")}>
-        TanamanKu
-      </span>
+    <Link href="/" className={cn("flex items-center", className)} aria-label={`TanamanKu, ${t('beranda')}`}>
+      {/* wordmark resmi dari file Figma (leaf hijau + teks) */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={dark ? '/figma-assets/logo-fix.svg' : '/figma-assets/logo-fix-ink.svg'}
+        alt="TanamanKu"
+        className="h-8 w-auto"
+      />
     </Link>
   );
 }

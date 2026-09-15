@@ -5,21 +5,30 @@ import BottomNav from '@/components/BottomNav';
 import SitePage from '@/components/SitePage';
 import ForumSection, { forumPosts } from '@/components/ForumPage';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { CategoryText } from '@/components/ForumPage';
 import { ThumbsUp, MessageCircle, Share2, Plus } from 'lucide-react';
 
 export default function ForumPage() {
-  const categories = ['Semua', 'Hama & Penyakit', 'Perawatan', 'Nutrisi'];
+  const t = useTranslations('forum');
+  const tc = useTranslations('common');
+  const categories = [
+    { id: 'Semua', key: 'semua', section: 'common' },
+    { id: 'Hama & Penyakit', key: 'hama', section: 'forum' },
+    { id: 'Perawatan', key: 'perawatan', section: 'forum' },
+    { id: 'Nutrisi', key: 'nutrisi', section: 'forum' },
+  ];
 
   return (
     <>
-      {/* Desktop — t3 (tidak berubah) */}
+      {/* Desktop, t3 (tidak berubah) */}
       <div className="hidden lg:block">
         <SitePage>
           <ForumSection />
         </SitePage>
       </div>
 
-      {/* Mobile — mobile1 Figma */}
+      {/* Mobile, mobile1 Figma */}
       <div className="app-shell pb-[86px] lg:hidden">
         <Header showSearch showProfile />
 
@@ -29,14 +38,14 @@ export default function ForumPage() {
           <div className="flex gap-2">
             {categories.map((cat, idx) => (
               <button
-                key={cat}
+                key={cat.id}
                 className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-semibold ${
                   idx === 0
                     ? 'bg-[#1B5E20] text-white'
                     : 'bg-white text-ink border border-ink/15'
                 }`}
               >
-                {cat}
+                {cat.section === 'common' ? tc(cat.key) : t(cat.key)}
               </button>
             ))}
           </div>
@@ -53,7 +62,7 @@ export default function ForumPage() {
               {/* Author */}
               <div className="flex items-center gap-3 mb-3">
                 <img
-                  src={post.avatar ?? '/figma-assets/avatar.png'}
+                  src={post.avatar ?? '/figma-assets/profile-1.jpg'}
                   alt={post.author}
                   className="w-12 h-12 rounded-full"
                 />
@@ -86,7 +95,7 @@ export default function ForumPage() {
                   <MessageCircle className="w-5 h-5" />
                   {post.comments.length}
                 </span>
-                <button className="ml-auto" aria-label="Bagikan">
+                <button className="ml-auto" aria-label={t("bagikan")}>
                   <Share2 className="w-5 h-5" />
                 </button>
               </div>
@@ -98,7 +107,7 @@ export default function ForumPage() {
       {/* FAB */}
       <Link
         href="/forum/create"
-        aria-label="Buat postingan"
+        aria-label={t("buatPostingan")}
         className="fixed bottom-24 right-[max(24px,calc((100vw-390px)/2+24px))] w-14 h-14 bg-[#1B5E20] rounded-full flex items-center justify-center shadow-lg"
       >
         <Plus className="w-6 h-6 text-white" strokeWidth={2.5} />

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Leaf } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface HeaderProps {
   showBack?: boolean;
@@ -11,6 +11,7 @@ interface HeaderProps {
 }
 
 export default function Header({ showBack, title, showProfile, showSearch }: HeaderProps) {
+  const home = useTranslations('home');
   return (
     <header className="page-header sticky top-0 z-20">
       <div className="app-container h-full px-4 flex items-center justify-between">
@@ -22,15 +23,14 @@ export default function Header({ showBack, title, showProfile, showSearch }: Hea
               </svg>
             </button>
           ) : (
-            <div className="w-8 h-8 flex items-center justify-center">
-              <Leaf className="w-6 h-6 text-primary" aria-hidden="true" />
-            </div>
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src="/figma-assets/logo-mark.png" alt="" aria-hidden="true" className="w-8 h-8 rounded-lg object-cover" />
           )}
           {title && <h1 className="text-xl font-bold tracking-[-.03em]">{title}</h1>}
         </div>
         <div className="desktop-header-context hidden lg:block">
           <span>PLANT CARE WORKSPACE</span>
-          <strong>{title || 'Ringkasan kebun'}</strong>
+          <strong>{title || home('ringkasanKebun')}</strong>
         </div>
         
         <div className="flex items-center gap-3">
@@ -44,7 +44,7 @@ export default function Header({ showBack, title, showProfile, showSearch }: Hea
           )}
           {showProfile && (
             <Link href="/profil" className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-              <img src="/figma-assets/avatar.png" alt="Profile" className="w-full h-full object-cover" />
+              <img src="/figma-assets/profile-1.jpg" alt="Profile" className="w-full h-full object-cover" />
             </Link>
           )}
         </div>

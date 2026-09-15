@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 /**
- * Ink CTA band closing long pages — pattern from landing cta-band.tsx.
+ * Ink CTA band closing long pages, pattern from landing cta-band.tsx.
  * Green identity band, Playfair accent heading, rounded-full buttons.
  */
 export function PageCtaBand({
@@ -41,7 +41,7 @@ export function PageCtaBand({
           )}
         </h2>
         {description && (
-          <p className="mx-auto mt-6 max-w-md text-base leading-relaxed text-ink/15">
+          <p className="mx-auto mt-6 max-w-md text-base leading-relaxed text-white/80">
             {description}
           </p>
         )}

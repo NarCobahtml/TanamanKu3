@@ -3,41 +3,23 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useTranslations } from "next-intl";
 import AuthForm from '@/components/AuthForm';
 
 export default function RegisterPage() {
+  const t = useTranslations("auth");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
 
   return (
     <>
-      {/* Desktop — t3 editorial auth */}
+      {/* Desktop, split-screen auth (referensi: halaman login.png) */}
       <div className="hidden lg:block">
-        <div className="flex min-h-dvh flex-col bg-secondary/40">
-          <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-12 sm:px-6 md:py-16">
-            <header className="hero-anim hero-fade mx-auto w-full max-w-5xl">
-              <p className="overline">Plant Health Platform</p>
-              <h2 className="mt-3 max-w-2xl text-3xl font-extrabold leading-[1.1] tracking-[-0.03em] md:text-5xl">
-                Mulai perjalanan{' '}
-                <span className="font-playfair">menanam</span>.
-              </h2>
-              <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-                5 scan AI gratis setiap bulan, pengingat penyiraman otomatis, dan akses penuh
-                forum komunitas.
-              </p>
-            </header>
-            <div
-              className="hero-anim hero-fade mx-auto mt-12 flex w-full max-w-5xl flex-1 items-center"
-              style={{ animationDelay: '0.15s' }}
-            >
-              <AuthForm mode="register" />
-            </div>
-          </main>
-        </div>
+        <AuthForm mode="register" />
       </div>
 
-      {/* Mobile — mobile1 Figma */}
+      {/* Mobile, mobile1 Figma */}
       <div className="auth-page flex flex-col justify-center px-6 py-10 lg:hidden">
       <div className="auth-content space-y-6">
         {/* Logo */}
@@ -51,20 +33,20 @@ export default function RegisterPage() {
 
         {/* Welcome Text */}
         <div>
-          <h1 className="text-[28px] leading-[1.15] font-bold tracking-[-.03em] text-ink mb-2">Bergabung dengan TanamanKu</h1>
-          <p className="text-ink/70">Mulai perjalanan merawat tanaman Anda</p>
+          <h1 className="text-[28px] leading-[1.15] font-bold tracking-[-.03em] text-ink mb-2">{t("bergabung")}</h1>
+          <p className="text-ink/70">{t("daftarSub")}</p>
         </div>
 
         {/* Form */}
         <div className="space-y-4">
           {/* Name Input */}
           <div>
-            <label className="block text-sm font-semibold text-ink mb-2">Nama Lengkap</label>
+            <label className="block text-sm font-semibold text-ink mb-2">{t("namaLengkap")}</label>
             <div className="relative">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/60 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Nama Lengkap"
+                placeholder={t("namaLengkap")}
                 className="auth-input w-full pl-12 pr-4"
               />
             </div>
@@ -72,7 +54,7 @@ export default function RegisterPage() {
 
           {/* Email Input */}
           <div>
-            <label className="block text-sm font-semibold text-ink mb-2">Email</label>
+            <label className="block text-sm font-semibold text-ink mb-2">{t("email")}</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/60 pointer-events-none" />
               <input
@@ -85,18 +67,18 @@ export default function RegisterPage() {
 
           {/* Password Input */}
           <div>
-            <label className="block text-sm font-semibold text-ink mb-2">Password</label>
+            <label className="block text-sm font-semibold text-ink mb-2">{t("password")}</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/60 pointer-events-none" />
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
+                placeholder={t("password")}
                 className="auth-input w-full pl-12 pr-12"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Sembunyikan password' : 'Lihat password'}
+                aria-label={showPassword ? t('sembunyikan') : t('tampilkan')}
                 className="absolute inset-y-0 right-0 pr-4 flex items-center text-ink/60"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -106,18 +88,18 @@ export default function RegisterPage() {
 
           {/* Confirm Password Input */}
           <div>
-            <label className="block text-sm font-semibold text-ink mb-2">Konfirmasi Password</label>
+            <label className="block text-sm font-semibold text-ink mb-2">{t("konfirmasiPassword")}</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/60 pointer-events-none" />
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Konfirmasi Password"
+                placeholder={t("konfirmasiPassword")}
                 className="auth-input w-full pl-12 pr-12"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                aria-label={showConfirmPassword ? 'Sembunyikan password' : 'Lihat password'}
+                aria-label={showConfirmPassword ? t('sembunyikan') : t('tampilkan')}
                 className="absolute inset-y-0 right-0 pr-4 flex items-center text-ink/60"
               >
                 {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -134,13 +116,13 @@ export default function RegisterPage() {
               className="mt-1 w-4 h-4 accent-primary"
             />
             <label className="text-sm text-ink/70">
-              Saya setuju dengan{' '}
+              {t("sayaSetuju")}{' '}
               <Link href="/terms" className="text-primary font-semibold">
-                Syarat &amp; Ketentuan
+                {t("syarat")}
               </Link>{' '}
-              dan{' '}
+              {t("dan")}{' '}
               <Link href="/privacy" className="text-primary font-semibold">
-                Kebijakan Privasi
+                {t("kebijakan")}
               </Link>
             </label>
           </div>
@@ -150,7 +132,7 @@ export default function RegisterPage() {
             disabled={!agreed}
             className="auth-button w-full text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Daftar Sekarang
+            {t("daftarSekarang")}
           </button>
 
           {/* Divider */}
@@ -159,7 +141,7 @@ export default function RegisterPage() {
               <div className="w-full border-t border-ink/15" />
             </div>
             <div className="relative flex justify-center">
-              <span className="px-3 bg-background text-[13px] text-ink/60">atau daftar dengan</span>
+              <span className="px-3 bg-background text-[13px] text-ink/60">{t("atauDaftar")}</span>
             </div>
           </div>
 
@@ -185,9 +167,9 @@ export default function RegisterPage() {
 
         {/* Login Link */}
         <p className="text-center text-ink/70">
-          Sudah punya akun?{' '}
+          {t("sudahPunya")}{' '}
           <Link href="/login" className="text-primary font-bold">
-            Masuk
+            {t("masuk")}
           </Link>
         </p>
       </div>

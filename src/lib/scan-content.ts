@@ -1,5 +1,5 @@
 // Konten edukatif per kelas output model Roboflow (resnet34-t1, 4 kelas).
-// Akurasi TIDAK di sini — datang dari response Roboflow di runtime.
+// Akurasi TIDAK di sini, datang dari response Roboflow di runtime.
 
 export type ScanClass =
   | 'Apple___Black_rot'

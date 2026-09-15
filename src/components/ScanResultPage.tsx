@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { toast } from 'sonner';
 import {
   BookmarkPlus,
   ScanLine,
@@ -11,10 +10,12 @@ import {
   ShieldCheck,
   FlaskConical,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { PageHeader, SectionHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
 import { getContent } from '@/lib/scan-content';
+import { useLocale } from '@/components/LocaleProvider';
 import { useScanResult, useScanPhoto } from '@/lib/use-scan-result';
 
 interface ScanData {
@@ -23,35 +24,36 @@ interface ScanData {
 }
 
 export default function ScanResultPage() {
+  const t = useTranslations('scanResult');
   const [saved, setSaved] = useState(false);
   const data = useScanResult<ScanData>();
   const photo = useScanPhoto();
 
   const handleSave = () => {
     setSaved(true);
-    toast.success('Hasil scan tersimpan ke riwayat.');
   };
 
   const content = data ? getContent(data.class) : null;
   const accuracy = data ? Math.round(data.confidence * 100) : 0;
-  const timestamp = new Intl.DateTimeFormat('id-ID', { dateStyle: 'short', timeStyle: 'short' }).format(new Date());
+  const { locale } = useLocale();
+  const timestamp = new Intl.DateTimeFormat(locale, { dateStyle: 'short', timeStyle: 'short' }).format(new Date());
 
   if (!data || !content) {
     return (
       <div>
         <PageHeader
-          overline="Laporan AI"
-          title="Hasil Diagnosis"
-          accent="Diagnosis"
+          overline={t("laporanAI")}
+          title={t("hasilDiagnosis")}
+          accent={t("diagnosis")}
           tone="ink"
-          description="Laporan analisis kondisi tanaman berdasarkan foto yang diperiksa."
+          description={t("laporanDesc")}
         />
         <div className="mx-auto w-full max-w-3xl px-4 pt-14 sm:px-6">
           <p className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
-            {data ? 'Kelas tidak dikenali mesin scan.' : 'Belum ada hasil. Ambil foto dari halaman Scan.'}
+            {data ? t('kelasDikenali') : t('belumAdaHasil')}
           </p>
           <Button asChild variant="outline" className="mt-6 rounded-full">
-            <Link href="/scan">Kembali ke Scan</Link>
+            <Link href="/scan">{t("kembaliScan")}</Link>
           </Button>
         </div>
       </div>
@@ -61,58 +63,58 @@ export default function ScanResultPage() {
   return (
     <div>
       <PageHeader
-        overline="Laporan AI"
-        title="Hasil Diagnosis"
-        accent="Diagnosis"
+        overline={t("laporanAI")}
+        title={t("hasilDiagnosis")}
+        accent={t("diagnosis")}
         tone="ink"
-        description="Laporan analisis kondisi tanaman berdasarkan foto yang diperiksa."
+        description={t("laporanDesc")}
         actions={
           <>
             <Button asChild variant="outline" className="rounded-full border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white">
               <Link href="/scan">
                 <ScanLine className="h-4 w-4" aria-hidden="true" />
-                Scan Ulang
+                {t("scanUlang")}
               </Link>
             </Button>
             <Button onClick={handleSave} disabled={saved} className="btn-cta rounded-full bg-white px-6 text-[#123526] hover:bg-primary/10">
               <BookmarkPlus className="h-4 w-4" aria-hidden="true" />
-              {saved ? 'Tersimpan' : 'Simpan ke Riwayat'}
+              {saved ? t('tersimpan') : t('simpanRiwayat')}
             </Button>
           </>
         }
       >
         <div className="flex flex-wrap items-end gap-x-12 gap-y-6">
           <div>
-            <p className="overline text-primary/10">Keyakinan Model</p>
+            <p className="overline text-[#7ed8a4]">{t("keyakinanModel")}</p>
             <p className="tnum mt-2 text-4xl font-extrabold leading-none text-white md:text-5xl">{accuracy}%</p>
           </div>
           <div>
-            <p className="overline text-primary/10">Tingkat Risiko</p>
+            <p className="overline text-[#7ed8a4]">{t("tingkatRisiko")}</p>
             <div className="mt-2.5 flex items-center gap-2.5">
-              <span className={`h-2.5 w-2.5 ${content.healthy ? 'bg-primary/10' : 'bg-warning'}`} aria-hidden="true" />
-              <span className="text-2xl font-bold text-white">{content.healthy ? 'Rendah' : 'Sedang'}</span>
+              <span className={`h-2.5 w-2.5 ${content.healthy ? 'bg-[#7ed8a4]' : 'bg-warning'}`} aria-hidden="true" />
+              <span className="text-2xl font-bold text-white">{content.healthy ? t('rendah') : t('sedang')}</span>
             </div>
           </div>
           <div>
-            <p className="overline text-primary/10">Spesimen</p>
+            <p className="overline text-[#7ed8a4]">{t("spesimen")}</p>
             <p className="mt-2 text-2xl font-bold leading-tight text-white">{content.crop}</p>
-            <p className="text-sm italic text-ink/15">{content.healthy ? 'Tanaman sehat' : content.label}</p>
+            <p className="text-sm italic text-white/70">{content.healthy ? t('tanamanSehat') : content.label}</p>
           </div>
         </div>
       </PageHeader>
 
       <div className="mx-auto w-full max-w-7xl space-y-16 px-4 pt-14 sm:px-6">
-      <section aria-label="Ringkasan diagnosis">
+      <section aria-label={t("ringkasan")}>
         <TkRevealClient>
           <div className="grid overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40 md:grid-cols-[1fr_1.4fr]">
             <div className="relative">
               <img
                 src={photo || '/figma-assets/scanned-leaf.png'}
-                alt="Daun tanaman yang dianalisis"
+                alt={t("daunAnalisis")}
                 className="aspect-[4/3] h-full w-full object-cover md:aspect-auto"
               />
               <p className="absolute inset-x-0 bottom-0 bg-ink/80 px-4 py-2 text-xs font-medium text-white">
-                Spesimen dianalisis · {timestamp}
+                {t("spesimen")} · {timestamp}
               </p>
             </div>
 
@@ -120,7 +122,7 @@ export default function ScanResultPage() {
               <div>
                 <p className="overline flex items-center gap-1.5">
                   {content.healthy ? <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" /> : <Bug className="h-3.5 w-3.5" aria-hidden="true" />}
-                  Diagnosis
+                  {t("diagnosis")}
                 </p>
                 <p className={`mt-2 text-3xl font-extrabold tracking-tight md:text-4xl ${content.healthy ? 'text-primary' : 'text-destructive'}`}>
                   {content.label}{' '}
@@ -148,7 +150,7 @@ export default function ScanResultPage() {
       <div className="grid gap-12 lg:grid-cols-2">
         <TkRevealClient>
         <section aria-labelledby="gejala">
-          <SectionHeader title={content.healthy ? 'Ciri-ciri Terdeteksi' : 'Gejala Terdeteksi'} />
+          <SectionHeader title={content.healthy ? t('ciriTerdeteksi') : t('gejalaTerdeteksi')} />
           <ul className="divide-y divide-border rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
             {content.symptoms.map((s) => (
               <li key={s} className="flex gap-3 px-5 py-4 transition-colors hover:bg-secondary/60">
@@ -162,7 +164,7 @@ export default function ScanResultPage() {
 
         <TkRevealClient>
         <section aria-labelledby="penanganan">
-          <SectionHeader title={content.healthy ? 'Rekomendasi Perawatan' : 'Rekomendasi Penanganan'} />
+          <SectionHeader title={content.healthy ? t('rekomendasiPerawatan') : t('rekomendasiPenanganan')} />
           <ol className="divide-y divide-border rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
             {content.treatments.map((t, i) => (
               <li key={t.title} className="flex gap-4 px-5 py-4 transition-colors hover:bg-secondary/60">
@@ -184,7 +186,7 @@ export default function ScanResultPage() {
         <section aria-labelledby="pencegahan" className="rounded-xl border border-border p-6 sage-wash md:p-10">
           <div className="flex items-center gap-2.5">
             <ShieldCheck className="h-5 w-5 text-primary" aria-hidden="true" />
-            <h2 id="pencegahan" className="text-lg font-bold tracking-tight">Produk Rekomendasi</h2>
+            <h2 id="pencegahan" className="text-lg font-bold tracking-tight">{t("produkRekomendasi")}</h2>
           </div>
           <ul className="mt-5 grid gap-4 md:grid-cols-2">
             {content.products.map((p) => (
@@ -199,11 +201,11 @@ export default function ScanResultPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-8">
         <Button asChild variant="outline" className="rounded-full bg-card hover:bg-accent/60">
-          <Link href="/">Kembali ke Beranda</Link>
+          <Link href="/">{t("kembaliBeranda")}</Link>
         </Button>
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <FlaskConical className="h-3.5 w-3.5" aria-hidden="true" />
-          Diagnosis AI — untuk diagnosis lanjutan konsultasikan dengan ahli.
+          {t("disclaimer")}
         </p>
       </div>
       </div>

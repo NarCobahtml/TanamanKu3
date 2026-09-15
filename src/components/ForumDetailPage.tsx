@@ -1,17 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Heart, Share2, ArrowLeft, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
-import { forumPosts, ExpertBadge } from '@/components/ForumPage';
+import { forumPosts, ExpertBadge, CategoryText } from '@/components/ForumPage';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 
 export default function ForumDetailPage({ id }: { id: string }) {
+  const t = useTranslations('forum');
   const post = forumPosts.find((p) => p.id === id) ?? forumPosts[0];
   const related = forumPosts.filter((p) => p.id !== post.id).slice(0, 3);
 
@@ -27,21 +28,19 @@ export default function ForumDetailPage({ id }: { id: string }) {
     } else {
       setLikes((n) => n + 1);
       setLiked(true);
-      toast.success('Kamu menyukai postingan ini');
     }
   };
 
   const submitComment = () => {
     const text = draft.trim();
     if (!text) return;
-    setComments((list) => [...list, { author: 'Alex Saputra', time: 'Baru saja', text }]);
+    setComments((list) => [...list, { author: 'Alex Saputra', time: t('baruSaja'), text }]);
     setDraft('');
-    toast.success('Komentar terkirim');
   };
 
   return (
     <div>
-      {/* ============ SUB-HERO — breadcrumb overline + post title ============ */}
+      {/* ============ SUB-HERO, breadcrumb overline + post title ============ */}
       <header className="sage-wash border-b border-border">
         <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 md:py-16">
           <nav
@@ -50,7 +49,7 @@ export default function ForumDetailPage({ id }: { id: string }) {
           >
             <Link href="/forum" className="flex items-center gap-1.5 transition-colors hover:text-foreground">
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              Forum
+              {t("forum")}
             </Link>
             <span aria-hidden="true">/</span>
             <span className="max-w-[280px] truncate normal-case tracking-normal text-foreground" aria-current="page">
@@ -82,7 +81,7 @@ export default function ForumDetailPage({ id }: { id: string }) {
                   {post.expert && <ExpertBadge />}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {post.time} · {post.category}
+                  {post.time} · <CategoryText category={post.category} />
                 </p>
               </div>
             </div>
@@ -90,9 +89,9 @@ export default function ForumDetailPage({ id }: { id: string }) {
         </div>
       </header>
 
-      {/* ============ BODY — editorial two-column: article | sticky aside ============ */}
+      {/* ============ BODY, editorial two-column: article | sticky aside ============ */}
       <div className="mx-auto grid w-full max-w-7xl gap-16 px-4 py-14 sm:px-6 lg:grid-cols-[1.6fr_1fr]">
-        {/* Article — reading column */}
+        {/* Article, reading column */}
         <article className="min-w-0">
           <TkRevealClient>
             <div className="space-y-5 text-[15px] leading-8">
@@ -104,7 +103,7 @@ export default function ForumDetailPage({ id }: { id: string }) {
             {post.image && (
               <img
                 src={post.image}
-                alt={`Foto pendamping diskusi: ${post.title}`}
+                alt={t("fotoPendamping", { title: post.title })}
                 className="mt-10 aspect-video w-full rounded-xl border border-border object-cover"
               />
             )}
@@ -121,16 +120,16 @@ export default function ForumDetailPage({ id }: { id: string }) {
                   className={liked ? 'h-4 w-4 fill-destructive text-destructive' : 'h-4 w-4'}
                   aria-hidden="true"
                 />
-                Suka · <span className="tnum">{likes}</span>
+                {t("sukaDot")} · <span className="tnum">{likes}</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 className="rounded-full bg-card hover:bg-accent/60"
-                onClick={() => toast.success('Tautan disalin (demo)')}
+                aria-label={t("bagikan")}
               >
                 <Share2 className="h-4 w-4" aria-hidden="true" />
-                Bagikan
+                {t("bagikan")}
               </Button>
             </div>
           </TkRevealClient>
@@ -139,7 +138,7 @@ export default function ForumDetailPage({ id }: { id: string }) {
           <section aria-labelledby="komentar" className="mt-16 border-t border-border pt-10">
             <h2 id="komentar" className="flex items-center gap-2 text-lg font-bold tracking-tight">
               <MessageSquare className="h-5 w-5 text-primary" aria-hidden="true" />
-              Komentar (<span className="tnum">{comments.length}</span>)
+              {t("komentarJudul")} (<span className="tnum">{comments.length}</span>)
             </h2>
             <TkRevealClient>
               <ul className="mt-6 divide-y divide-border border-t border-border">
@@ -169,30 +168,30 @@ export default function ForumDetailPage({ id }: { id: string }) {
             {/* Composer */}
             <div className="mt-8 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40">
               <label htmlFor="comment" className="text-sm font-semibold">
-                Tulis komentar
+                {t("tulisKomentar")}
               </label>
               <Textarea
                 id="comment"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder="Bagikan pengalaman atau jawabanmu…"
+                placeholder={t("bagikanJawaban")}
                 className="mt-2"
               />
               <div className="mt-3 flex justify-end">
                 <Button onClick={submitComment} className="btn-cta rounded-full" disabled={draft.trim() === ''}>
-                  Kirim Komentar
+                  {t("kirimKomentar")}
                 </Button>
               </div>
             </div>
           </section>
         </article>
 
-        {/* Sidebar — sticky info cards hairline */}
+        {/* Sidebar, sticky info cards hairline */}
         <aside className="hidden lg:block">
           <div className="sticky top-24 space-y-6">
             <div className="overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
               <h3 className="border-b border-border px-5 py-3.5 text-sm font-bold">
-                Diskusi Terkait
+                {t("diskusiTerkait")}
               </h3>
               <ul className="divide-y divide-border">
                 {related.map((r) => (
@@ -203,7 +202,7 @@ export default function ForumDetailPage({ id }: { id: string }) {
                     >
                       <p className="line-clamp-2 text-sm font-medium leading-snug">{r.title}</p>
                       <p className="tnum mt-1 text-xs text-muted-foreground">
-                        {r.likes} suka · {r.comments.length} komentar
+                        {t("sukaKomentarN", { likes: r.likes, n: r.comments.length })}
                       </p>
                     </Link>
                   </li>
@@ -213,13 +212,13 @@ export default function ForumDetailPage({ id }: { id: string }) {
 
             <div className="ink-panel rounded-xl p-6">
               <h3 className="font-bold tracking-tight">
-                Bagikan <span className="font-playfair">pengalamanmu</span>
+                {t("bagikan")} <span className="font-playfair">{t("pengalamanMu")}</span>
               </h3>
-              <p className="mt-1.5 text-sm text-ink/15">
-                Cerita perawatan atau kendala tanamanmu bisa jadi jawaban untuk yang lain.
+              <p className="mt-1.5 text-sm text-white/80">
+                {t("ceritaJawaban")}
               </p>
               <Button asChild className="mt-4 rounded-full bg-white text-[#123526] hover:bg-primary/10">
-                <Link href="/forum/create">Buat Postingan</Link>
+                <Link href="/forum/create">{t("buatPostingan")}</Link>
               </Button>
             </div>
           </div>

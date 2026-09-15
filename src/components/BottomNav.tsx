@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function BottomNav({ plantMode = false }: { plantMode?: boolean }) {
   const pathname = usePathname();
+  const nav = useTranslations('nav');
 
   const figmaIcons: Record<string, string> = {
     home: '/figma-assets/icons-scan/scan-6.svg',
@@ -17,11 +19,11 @@ export default function BottomNav({ plantMode = false }: { plantMode?: boolean }
   };
 
   const navItems = plantMode ? [
-    { name: 'Beranda', href: '/', icon: 'home' }, { name: 'Tanaman', href: '/siram', icon: 'plant' },
-    { name: 'Scan', href: '/scan', icon: 'scan' }, { name: 'Tips', href: '/forum', icon: 'tips' }, { name: 'Profil', href: '/profil', icon: 'profile' },
+    { name: nav('beranda'), href: '/', icon: 'home' }, { name: nav('tanaman'), href: '/siram', icon: 'plant' },
+    { name: nav('scan'), href: '/scan', icon: 'scan' }, { name: nav('tips'), href: '/forum', icon: 'tips' }, { name: nav('profil'), href: '/profil', icon: 'profile' },
   ] : [
-    { name: 'Beranda', href: '/', icon: 'home' }, { name: 'Scan', href: '/scan', icon: 'scan' },
-    { name: 'Forum', href: '/forum', icon: 'forum' }, { name: 'Siram', href: '/siram', icon: 'siram' },
+    { name: nav('beranda'), href: '/', icon: 'home' }, { name: nav('scan'), href: '/scan', icon: 'scan' },
+    { name: nav('forum'), href: '/forum', icon: 'forum' }, { name: nav('siram'), href: '/siram', icon: 'siram' },
   ];
 
   const isActive = (href: string) => {
@@ -36,7 +38,7 @@ export default function BottomNav({ plantMode = false }: { plantMode?: boolean }
           <span className="desktop-brand-mark">T</span>
           <span>
             <strong>TanamanKu</strong>
-            <small>Ruang rawat tanaman</small>
+            <small>{nav('ruangRawat')}</small>
           </span>
         </div>
         {navItems.map((item) => (

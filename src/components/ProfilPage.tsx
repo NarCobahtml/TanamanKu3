@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { LogOut, Pencil, Sparkles, UserCog, CreditCard, Bell, BellRing, Languages } from 'lucide-react';
+import { LogOut, Pencil, Sparkles, UserCog, CreditCard, Bell, BellRing } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useLocale as useLocaleSetting } from '@/components/LocaleProvider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -17,23 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { PageHeader } from '@/components/PageHeader';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { href: '#account', label: 'Akun', icon: UserCog },
-  { href: '/riwayat', label: 'Riwayat Scan', icon: BellRing },
-  { href: '/langganan', label: 'Langganan', icon: CreditCard },
-  { href: '#preferences', label: 'Preferensi', icon: Bell },
-  { href: '#keluar', label: 'Keluar', icon: LogOut },
-];
-
-const notifPrefs = [
-  { id: 'reminder', label: 'Notifikasi', desc: 'Pengingat penyiraman tanaman', defaultChecked: true },
-  { id: 'result', label: 'Hasil scan', desc: 'Notifikasi saat hasil scan siap dilihat', defaultChecked: true },
-  { id: 'tips', label: 'Tips mingguan', desc: 'Tips perawatan tanaman tiap minggu', defaultChecked: false },
-];
 
 /** Manual switch - track w-9 h-5, knob w-4 (rounded-full allowed: switch track). */
 function Switch({
@@ -85,33 +71,44 @@ function SettingsHeading({ icon: Icon, title, desc }: { icon: typeof UserCog; ti
 }
 
 export default function ProfilPage() {
+  const t = useTranslations('profil');
+  const tc = useTranslations('common');
+  const { locale, setLocale } = useLocaleSetting();
   const router = useRouter();
   const [name, setName] = useState('Alex Saputra');
   const [email, setEmail] = useState('alex.saputra@email.com');
   const [editOpen, setEditOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [theme, setTheme] = useState<'terang' | 'gelap'>('terang');
-  const [checked, setChecked] = useState<Record<string, boolean>>(
-    Object.fromEntries(notifPrefs.map((p) => [p.id, p.defaultChecked])),
-  );
+  const [checked, setChecked] = useState<Record<string, boolean>>({
+    reminder: true,
+    result: true,
+    tips: false,
+  });
 
   const togglePref = (id: string, v: boolean) => {
     setChecked((c) => ({ ...c, [id]: v }));
-    toast.success('Preferensi notifikasi tersimpan.');
   };
+
+  const navItems = [
+    { href: '#account', label: t('akun'), icon: UserCog },
+    { href: '/riwayat', label: t('riwayatScan'), icon: BellRing },
+    { href: '/langganan', label: t('langganan'), icon: CreditCard },
+    { href: '#preferences', label: t('preferensi'), icon: Bell },
+    { href: '#keluar', label: t('keluar'), icon: LogOut },
+  ];
+
+  const notifPrefs = [
+    { id: 'reminder', label: t('notifikasi'), desc: t('notifikasiDesc'), defaultChecked: true },
+    { id: 'result', label: t('hasilScan'), desc: t('hasilScanDesc'), defaultChecked: true },
+    { id: 'tips', label: t('tipsMingguan'), desc: t('tipsDesc'), defaultChecked: false },
+  ];
 
   return (
     <div>
-      <PageHeader
-        overline="Akun"
-        title="Pengaturan"
-        accent="Pengaturan"
-        description="Kelola akun, langganan, dan preferensi aplikasi TanamanKu."
-      />
-
       <div className="mx-auto grid w-full max-w-7xl items-start gap-12 px-4 pt-12 sm:px-6 lg:grid-cols-[220px_1fr]">
-        {/* Settings nav rail — vertical pills, konsisten pill nav */}
-        <nav className="lg:sticky lg:top-24" aria-label="Navigasi pengaturan">
+        {/* Settings nav rail, vertical pills, konsisten pill nav */}
+        <nav className="lg:sticky lg:top-24" aria-label={t('akun')}>
           <ul className="flex gap-1.5 overflow-x-auto lg:flex-col lg:gap-1">
             {navItems.map((item) => (
               <li key={item.href} className="shrink-0">
@@ -141,7 +138,7 @@ export default function ProfilPage() {
           {/* Account */}
           <TkRevealClient>
           <section id="account" className="scroll-mt-24">
-            <SettingsHeading icon={UserCog} title="Akun" />
+            <SettingsHeading icon={UserCog} title={t('akun')} />
             <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
               <div className="flex flex-wrap items-center gap-4 p-5">
                 <Avatar className="h-16 w-16">
@@ -153,25 +150,25 @@ export default function ProfilPage() {
                 </div>
                 <Button variant="outline" size="sm" className="rounded-full" onClick={() => setEditOpen(true)}>
                   <Pencil className="h-4 w-4" aria-hidden="true" />
-                  Edit Profil
+                  {t('editProfil')}
                 </Button>
               </div>
               <dl className="grid gap-x-8 gap-y-4 border-t border-border bg-secondary/30 p-5 sm:grid-cols-2">
                 <div>
-                  <dt className="text-xs font-medium text-muted-foreground">Nama</dt>
+                  <dt className="text-xs font-medium text-muted-foreground">{t('nama')}</dt>
                   <dd className="mt-0.5 text-sm">{name}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-medium text-muted-foreground">Email</dt>
+                  <dt className="text-xs font-medium text-muted-foreground">{t('email')}</dt>
                   <dd className="mt-0.5 text-sm">{email}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-medium text-muted-foreground">Bergabung</dt>
-                  <dd className="mt-0.5 text-sm">Januari 2026</dd>
+                  <dt className="text-xs font-medium text-muted-foreground">{t('bergabung')}</dt>
+                  <dd className="mt-0.5 text-sm">{locale === 'id' ? 'Januari 2026' : 'January 2026'}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-medium text-muted-foreground">Paket</dt>
-                  <dd className="mt-0.5 text-sm">Gratis</dd>
+                  <dt className="text-xs font-medium text-muted-foreground">{t('paket')}</dt>
+                  <dd className="mt-0.5 text-sm">{t('gratis')}</dd>
                 </div>
               </dl>
             </div>
@@ -181,27 +178,25 @@ export default function ProfilPage() {
           {/* Subscription */}
           <TkRevealClient>
           <section id="subscription" className="rule scroll-mt-24 pt-14">
-            <SettingsHeading icon={CreditCard} title="Langganan" desc="Paket dan penggunaan scan bulan ini." />
+            <SettingsHeading icon={CreditCard} title={t('langganan')} desc={t('preferensiDesc').split('.')[0] + '.'} />
             <div className="mt-5 grid gap-8 md:grid-cols-2">
               <div className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-accent/30">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="font-semibold">Paket Gratis</h3>
-                  <Badge variant="outline">Aktif</Badge>
+                  <h3 className="font-semibold">{t('paketGratis')}</h3>
+                  <Badge variant="outline">{t('aktif')}</Badge>
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Paket dasar untuk memulai perawatan tanamanmu.
-                </p>
-                <p className="mt-4 text-sm text-muted-foreground">Perpanjangan otomatis: tidak aktif</p>
+                <p className="mt-1 text-sm text-muted-foreground">{t('paketDesc')}</p>
+                <p className="mt-4 text-sm text-muted-foreground">{t('perpanjangan')}</p>
               </div>
               <div className="rounded-xl border border-border p-5 sage-wash">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">Penggunaan scan</span>
-                  <span className="tnum text-muted-foreground">3/5 bulan ini</span>
+                  <span className="font-medium">{t('penggunaanScan')}</span>
+                  <span className="tnum text-muted-foreground">{t('bulanIni', { count: 3 })}</span>
                 </div>
                 <div
                   className="mt-2 h-1.5 rounded-full bg-white"
                   role="progressbar"
-                  aria-label="3 dari 5 scan terpakai"
+                  aria-label="3/5"
                   aria-valuenow={3}
                   aria-valuemin={0}
                   aria-valuemax={5}
@@ -210,10 +205,10 @@ export default function ProfilPage() {
                 </div>
                 <Button
                   className="btn-cta mt-4 w-full rounded-full"
-                  onClick={() => toast.info('Fitur Premium segera hadir (demo)')}
+                  onClick={() => undefined}
                 >
                   <Sparkles className="h-4 w-4" aria-hidden="true" />
-                  Upgrade ke Premium
+                  {t('upgrade')}
                 </Button>
               </div>
             </div>
@@ -223,7 +218,7 @@ export default function ProfilPage() {
           {/* Preferences */}
           <TkRevealClient>
           <section id="preferences" className="rule scroll-mt-24 pt-14">
-            <SettingsHeading icon={Bell} title="Preferensi" desc="Notifikasi dan tampilan aplikasi." />
+            <SettingsHeading icon={Bell} title={t('preferensi')} desc={t('preferensiDesc')} />
             <div className="mt-5 divide-y divide-border rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
               {notifPrefs.map((p) => (
                 <div key={p.id} className="flex items-center justify-between gap-4 p-5">
@@ -238,22 +233,45 @@ export default function ProfilPage() {
                   />
                 </div>
               ))}
+              {/* Language, switcher fungsional */}
               <div className="flex items-center justify-between gap-4 p-5">
                 <div>
-                  <p className="text-sm font-medium">Bahasa</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">Bahasa tampilan aplikasi.</p>
+                  <p className="text-sm font-medium">{t('bahasa')}</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{t('bahasaDesc')}</p>
                 </div>
-                <Badge variant="outline" className="gap-1.5">
-                  <Languages className="h-3 w-3" aria-hidden="true" />
-                  Indonesia
-                </Badge>
+                <div className="flex gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label={t('bahasa')}>
+                  <button
+                    type="button"
+                    aria-pressed={locale === 'id'}
+                    onClick={() => setLocale('id')}
+                    className={
+                      locale === 'id'
+                        ? 'rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'
+                        : 'rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground'
+                    }
+                  >
+                    Indonesia
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={locale === 'en'}
+                    onClick={() => setLocale('en')}
+                    className={
+                      locale === 'en'
+                        ? 'rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'
+                        : 'rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground'
+                    }
+                  >
+                    English
+                  </button>
+                </div>
               </div>
               <div className="flex items-center justify-between gap-4 p-5">
                 <div>
-                  <p className="text-sm font-medium">Tampilan</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">Mode terang atau gelap.</p>
+                  <p className="text-sm font-medium">{t('tampilan')}</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{t('tampilanDesc')}</p>
                 </div>
-                <div className="flex gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label="Mode tampilan">
+                <div className="flex gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label={t('tampilan')}>
                   <button
                     type="button"
                     aria-pressed={theme === 'terang'}
@@ -264,7 +282,7 @@ export default function ProfilPage() {
                         : 'rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground'
                     }
                   >
-                    Terang
+                    {t('terang')}
                   </button>
                   <button
                     type="button"
@@ -276,7 +294,7 @@ export default function ProfilPage() {
                         : 'rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground'
                     }
                   >
-                    Gelap
+                    {t('gelap')}
                   </button>
                 </div>
               </div>
@@ -290,18 +308,16 @@ export default function ProfilPage() {
             <div className="rounded-xl border-l-2 border-destructive bg-destructive/5 p-5">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <h3 className="font-semibold">Keluar dari Akun</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Anda perlu masuk kembali untuk mengakses tanaman dan riwayat scan Anda.
-                  </p>
+                  <h3 className="font-semibold">{t('keluarAkun')}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{t('keluarDesc')}</p>
                 </div>
                 <Button variant="destructive" className="rounded-full" onClick={() => setLogoutOpen(true)}>
                   <LogOut className="h-4 w-4" aria-hidden="true" />
-                  Keluar
+                  {t('keluar')}
                 </Button>
               </div>
             </div>
-            <p className="mt-6 text-xs text-muted-foreground">TanamanKu v1.0.0 (demo)</p>
+            <p className="mt-6 text-xs text-muted-foreground">{t('versi')}</p>
           </section>
           </TkRevealClient>
         </div>
@@ -311,12 +327,12 @@ export default function ProfilPage() {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Profil</DialogTitle>
-            <DialogDescription>Perbarui informasi akun Anda.</DialogDescription>
+            <DialogTitle>{t('editProfil')}</DialogTitle>
+            <DialogDescription>{t('perbaruiInfo')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="profile-name">Nama</Label>
+              <Label htmlFor="profile-name">{t('nama')}</Label>
               <Input
                 id="profile-name"
                 value={name}
@@ -324,7 +340,7 @@ export default function ProfilPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="profile-email">Email</Label>
+              <Label htmlFor="profile-email">{t('email')}</Label>
               <Input
                 id="profile-email"
                 type="email"
@@ -337,10 +353,9 @@ export default function ProfilPage() {
             <Button
               onClick={() => {
                 setEditOpen(false);
-                toast.success('Profil berhasil diperbarui.');
               }}
             >
-              Simpan
+              {tc('simpan')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -350,24 +365,21 @@ export default function ProfilPage() {
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Keluar dari akun?</DialogTitle>
-            <DialogDescription>
-              Anda perlu masuk kembali untuk mengakses tanaman dan riwayat scan Anda.
-            </DialogDescription>
+            <DialogTitle>{t('keluarJudul')}</DialogTitle>
+            <DialogDescription>{t('keluarDesc')}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setLogoutOpen(false)}>
-              Batal
+              {tc('batal')}
             </Button>
             <Button
               variant="destructive"
               onClick={() => {
                 setLogoutOpen(false);
-                toast.success('Anda telah keluar dari akun.');
                 router.push('/login');
               }}
             >
-              Keluar
+              {t('keluar')}
             </Button>
           </DialogFooter>
         </DialogContent>

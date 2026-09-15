@@ -19,6 +19,8 @@ import {
   Bug,
   CalendarCheck,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useLocale } from '@/components/LocaleProvider';
 import { tanamanList } from './TanamanPage';
 
 /* ---- placeholder data (frontend-only, no backend) ---- */
@@ -28,24 +30,24 @@ type PlantHealth = { level: HealthLevel; lastScan: string };
 const healthById: Record<string, PlantHealth> = {
   monstera: { level: 'sehat', lastScan: '27.08.2026' },
   'lidah-mertua': { level: 'penyakit', lastScan: '25.08.2026' },
-  karet: { level: 'sehat', lastScan: '02.09.2026' },
-  pothos: { level: 'sehat', lastScan: '01.09.2026' },
+  pisang: { level: 'sehat', lastScan: '02.09.2026' },
+  ceri: { level: 'sehat', lastScan: '01.09.2026' },
   calathea: { level: 'sehat', lastScan: '22.08.2026' },
-  tomat: { level: 'penyakit', lastScan: '01.09.2026' },
+  'tomat-ceri': { level: 'penyakit', lastScan: '01.09.2026' },
   cabai: { level: 'sehat', lastScan: '30.08.2026' },
   melati: { level: 'sehat', lastScan: '28.08.2026' },
 };
 
 const recentScans = [
-  { id: 1, plant: 'Tomat Cherry', disease: 'Early Blight (Alternaria solani)', confidence: 94, date: '01.09.2026', level: 'penyakit' as HealthLevel, photo: undefined },
-  { id: 2, plant: 'Karet', disease: 'Sehat, tidak ada gejala', confidence: 88, date: '02.09.2026', level: 'sehat' as HealthLevel, photo: '/figma-assets/leaf-macro.jpg' },
-  { id: 3, plant: 'Cabai Rawit', disease: 'Sehat, tidak ada gejala', confidence: 98, date: '30.08.2026', level: 'sehat' as HealthLevel, photo: '/figma-assets/forum-chili.png' },
-  { id: 4, plant: 'Lidah Mertua', disease: 'Bercak Bakteri (Xanthomonas)', confidence: 91, date: '25.08.2026', level: 'penyakit' as HealthLevel, photo: '/figma-assets/plant-sansevieria.png' },
+  { id: 1, plant: 'Tomat Ceri', disease: 'Early Blight (Alternaria solani)', confidence: 94, date: '01.09.2026', level: 'penyakit' as HealthLevel, photo: undefined },
+  { id: 2, plant: 'Pisang', disease: 'Sehat, tidak ada gejala', confidence: 88, date: '02.09.2026', level: 'sehat' as HealthLevel, photo: '/figma-assets/plant-bananaleaf.jpg' },
+  { id: 3, plant: 'Cabai Rawit', disease: 'Sehat, tidak ada gejala', confidence: 98, date: '30.08.2026', level: 'sehat' as HealthLevel, photo: '/figma-assets/plant-chili.jpg' },
+  { id: 4, plant: 'Lidah Mertua', disease: 'Bercak Bakteri (Xanthomonas)', confidence: 91, date: '25.08.2026', level: 'penyakit' as HealthLevel, photo: '/figma-assets/plant-lidahmertua.jpg' },
   { id: 5, plant: 'Monstera Deliciosa', disease: 'Sehat, tidak ada gejala', confidence: 96, date: '27.08.2026', level: 'sehat' as HealthLevel, photo: '/figma-assets/plant-monstera.png' },
 ];
 
 const wateringToday = [
-  { time: '08:00', plant: 'Tomat Cherry', state: 'completed' as const },
+  { time: '08:00', plant: 'Tomat Ceri', state: 'completed' as const },
   { time: '09:30', plant: 'Calathea', state: 'upcoming' as const },
   { time: '16:00', plant: 'Cabai Rawit', state: 'overdue' as const },
 ];
@@ -57,44 +59,48 @@ const sehat = Object.values(healthById).filter((h) => h.level === 'sehat').lengt
 const penyakit = Object.values(healthById).filter((h) => h.level === 'penyakit').length;
 
 export default function HomePage() {
+  const t = useTranslations("home");
+  const ts = useTranslations("siram");
+  const { locale: lang } = useLocale();
   const heroPlant = tanamanList[0];
   const heroHealth = healthById[heroPlant.id] ?? { level: 'sehat' as HealthLevel, lastScan: '-' };
 
   return (
     <div>
-      {/* ============ HERO BAND — sage wash editorial opening ============ */}
+      {/* ============ HERO BAND, sage wash editorial opening ============ */}
       <header className="sage-wash border-b border-border">
         <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 md:py-20">
-          <p className="overline hero-anim hero-fade">Plant Health Workspace</p>
+          <p className="overline hero-anim hero-fade">{t("workspace")}</p>
           <h1
             className="hero-anim hero-fade mt-3 max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-[-0.03em] md:text-6xl"
             style={{ animationDelay: '0.12s' }}
           >
-            Selamat datang kembali,{' '}
+            {t('welcomePrefix')}
+            <span>, </span>
             <span className="font-playfair">Alex</span>.
           </h1>
           <p
             className="hero-anim hero-fade mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground"
             style={{ animationDelay: '0.26s' }}
           >
-            Pantau kesehatan tanaman Anda dan lakukan pemeriksaan ketika diperlukan.
+            {t("pantau")}
           </p>
 
-          {/* vitals readout — medical-style tabular numbers */}
+          {/* vitals readout, medical-style tabular numbers */}
           <dl
             className="hero-anim hero-fade mt-12 grid grid-cols-3 gap-x-6 gap-y-8 sm:gap-10"
             style={{ animationDelay: '0.4s' }}
           >
             <div>
-              <dt className="overline">Tanaman dipantau</dt>
+              <dt className="overline">{t("tanamanDipantau")}</dt>
               <dd className="tnum mt-2 text-4xl font-extrabold leading-none md:text-5xl">{total}</dd>
             </div>
             <div>
-              <dt className="overline">Sehat</dt>
+              <dt className="overline">{t("sehat")}</dt>
               <dd className="tnum mt-2 text-4xl font-extrabold leading-none text-success md:text-5xl">{sehat}</dd>
             </div>
             <div>
-              <dt className="overline">Terdeteksi penyakit</dt>
+              <dt className="overline">{t("terdeteksiPenyakit")}</dt>
               <dd className="tnum mt-2 text-4xl font-extrabold leading-none text-destructive md:text-5xl">{penyakit}</dd>
             </div>
           </dl>
@@ -103,11 +109,11 @@ export default function HomePage() {
           <div
             className="hero-anim hero-fade mt-8 flex h-1.5 w-full overflow-hidden bg-white"
             role="img"
-            aria-label={`${sehat} sehat, ${penyakit} terdeteksi penyakit`}
+            aria-label={`${sehat} ${t("sehat")}, ${penyakit} ${t("terdeteksiPenyakit")}`}
             style={{ animationDelay: '0.5s' }}
           >
-            <span className="bg-primary/10" style={{ width: `${(sehat / total) * 100}%` }} />
-            <span className="bg-destructive/10" style={{ width: `${(penyakit / total) * 100}%` }} />
+            <span className="bg-[#7ed8a4]" style={{ width: `${(sehat / total) * 100}%` }} />
+            <span className="bg-[#f09a90]" style={{ width: `${(penyakit / total) * 100}%` }} />
           </div>
 
           {/* primary detection CTA */}
@@ -115,7 +121,7 @@ export default function HomePage() {
             <Button asChild size="lg" className="btn-cta rounded-full px-7">
               <Link href="/scan">
                 <ScanLine className="h-5 w-5" aria-hidden="true" />
-                Scan Tanaman
+                {t("scanTanaman")}
               </Link>
             </Button>
             <Button
@@ -125,7 +131,7 @@ export default function HomePage() {
               className="gap-2 rounded-full border border-border bg-card px-7 hover:border-primary/40 hover:bg-accent/60 hover:text-primary"
             >
               <Link href="/siram">
-                Kelola Tanaman
+                {t("kelolaTanaman")}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </Button>
@@ -133,8 +139,8 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ============ FEATURE STRIP — hero plant + quick actions ============ */}
-      <section className="mx-auto w-full max-w-7xl px-4 pt-16 sm:px-6" aria-label="Tanaman unggulan">
+      {/* ============ FEATURE STRIP, hero plant + quick actions ============ */}
+      <section className="mx-auto w-full max-w-7xl px-4 pt-16 sm:px-6" aria-label={t("tanamanUnggulan")}>
         <TkRevealClient>
           <div className="grid overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40 lg:grid-cols-[1fr_1fr]">
             <Link
@@ -158,19 +164,19 @@ export default function HomePage() {
                   <span className="block text-sm italic text-white/80">{heroPlant.species}</span>
                 </span>
                 <span className="flex items-center gap-2 text-sm font-semibold text-white">
-                  Lihat detail
+                  {t("lihatDetail")}
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                 </span>
               </span>
             </Link>
 
             <div className="flex flex-col">
-              {/* Quick actions — detection first */}
+              {/* Quick actions, detection first */}
               <div className="grid flex-1 grid-cols-3 divide-x divide-border">
                 {[
-                  { href: '/scan', icon: Camera, label: 'Scan Baru' },
-                  { href: '/riwayat', icon: Bug, label: 'Diagnosis' },
-                  { href: '/siram', icon: CalendarCheck, label: 'Penyiraman' },
+                  { href: '/scan', icon: Camera, label: t('scanBaru') },
+                  { href: '/riwayat', icon: Bug, label: t('diagnosis') },
+                  { href: '/siram', icon: CalendarCheck, label: t('penyiraman') },
                 ].map((q) => (
                   <Link
                     key={q.label}
@@ -186,7 +192,7 @@ export default function HomePage() {
               {/* Latest health note */}
               <div className="flex items-center justify-between gap-4 border-t border-border px-5 py-4 text-sm text-muted-foreground">
                 <span>
-                  Scan terakhir koleksi: <strong className="font-semibold text-foreground">{heroHealth.lastScan}</strong>
+                  {t("scanTerakhir")} <strong className="font-semibold text-foreground">{heroHealth.lastScan}</strong>
                 </span>
                 <HealthStatus level={heroHealth.level} />
               </div>
@@ -200,18 +206,18 @@ export default function HomePage() {
         {/* --- Recent diagnosis: structured report table + watering task rail --- */}
         <div className="grid gap-12 lg:grid-cols-[1.7fr_1fr]">
           <section aria-labelledby="scan-terakhir">
-            <SectionHeader title="Diagnosis Terakhir" href="/riwayat" />
+            <SectionHeader title={t("diagnosis")} href="/riwayat" />
             <TkRevealClient>
               <div className="overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow className="border-border bg-secondary/50 hover:bg-secondary/50">
-                        <TableHead className="py-4 pl-5 text-xs font-bold uppercase tracking-[0.08em] text-foreground">Tanaman</TableHead>
-                        <TableHead className="py-4 text-xs font-bold uppercase tracking-[0.08em] text-foreground">Diagnosis</TableHead>
-                        <TableHead className="hidden py-4 text-xs font-bold uppercase tracking-[0.08em] text-foreground sm:table-cell">Keyakinan</TableHead>
-                        <TableHead className="hidden py-4 text-xs font-bold uppercase tracking-[0.08em] text-foreground md:table-cell">Tanggal</TableHead>
-                        <TableHead className="py-4 pr-5 text-right text-xs font-bold uppercase tracking-[0.08em] text-foreground">Status</TableHead>
+                        <TableHead className="py-4 pl-5 text-xs font-bold uppercase tracking-[0.08em] text-foreground">{t("tanaman")}</TableHead>
+                        <TableHead className="py-4 text-xs font-bold uppercase tracking-[0.08em] text-foreground">{t("diagnosis")}</TableHead>
+                        <TableHead className="hidden py-4 text-xs font-bold uppercase tracking-[0.08em] text-foreground sm:table-cell">{t("keyakinan")}</TableHead>
+                        <TableHead className="hidden py-4 text-xs font-bold uppercase tracking-[0.08em] text-foreground md:table-cell">{t("tanggal")}</TableHead>
+                        <TableHead className="py-4 pr-5 text-right text-xs font-bold uppercase tracking-[0.08em] text-foreground">{t("status")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -241,7 +247,7 @@ export default function HomePage() {
                   </Table>
                 </div>
                 <p className="border-t border-border bg-secondary/30 px-5 py-3 text-sm text-muted-foreground">
-                  Laporan diagnosis 30 hari terakhir · data demo
+                  {t("laporan30")}
                 </p>
               </div>
             </TkRevealClient>
@@ -254,18 +260,18 @@ export default function HomePage() {
                 <div className="mb-4 flex items-center justify-between gap-4">
                   <h2 id="penyiraman-hari-ini" className="flex items-center gap-2 text-lg font-bold tracking-tight">
                     <Droplets className="h-5 w-5 text-primary" aria-hidden="true" />
-                    Penyiraman Hari Ini
+                    {t("penyiramanHariIni")}
                   </h2>
                   <Link href="/siram" className="shrink-0 text-sm font-medium text-primary hover:underline">
-                    Jadwal
+                    {t("jadwal")}
                   </Link>
                 </div>
                 <ol className="divide-y divide-border rounded-xl border border-border bg-card">
                   {wateringToday.map((w) => {
                     const meta = {
-                      completed: { label: 'Selesai', icon: CircleCheck, cls: 'text-success' },
-                      upcoming: { label: 'Akan datang', icon: Clock, cls: 'text-muted-foreground' },
-                      overdue: { label: 'Terlewat', icon: TriangleAlert, cls: 'text-destructive' },
+                      completed: { label: t('selesai'), icon: CircleCheck, cls: 'text-success' },
+                      upcoming: { label: t('akanDatang'), icon: Clock, cls: 'text-muted-foreground' },
+                      overdue: { label: t('terlewat'), icon: TriangleAlert, cls: 'text-destructive' },
                     }[w.state];
                     return (
                       <li key={w.time + w.plant} className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-secondary/60">
@@ -273,7 +279,7 @@ export default function HomePage() {
                           <span className="tnum w-12 text-sm font-bold">{w.time}</span>
                           <div>
                             <p className="text-sm font-medium">{w.plant}</p>
-                            <p className="text-sm text-muted-foreground">Penyiraman</p>
+                            <p className="text-sm text-muted-foreground">{t("penyiraman")}</p>
                           </div>
                         </div>
                         <span className={'flex items-center gap-2 text-sm font-semibold ' + meta.cls}>
@@ -285,7 +291,7 @@ export default function HomePage() {
                   })}
                 </ol>
                 <Button asChild variant="outline" className="mt-4 w-full rounded-full bg-card hover:bg-accent/60">
-                  <Link href="/siram">Buka jadwal lengkap</Link>
+                  <Link href="/siram">{t("bukaJadwal")}</Link>
                 </Button>
               </div>
             </TkRevealClient>
@@ -296,14 +302,14 @@ export default function HomePage() {
         <section aria-labelledby="tanaman-saya" className="rule pt-14">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="overline">Koleksi</p>
+              <p className="overline">{t("koleksi")}</p>
               <h2 id="tanaman-saya" className="mt-1.5 text-3xl font-extrabold tracking-tight md:text-4xl">
-                Tanaman <span className="font-playfair">Saya</span>
+                {t("tanaman")} <span className="font-playfair">{t("saya")}</span>
               </h2>
             </div>
             <Button asChild variant="outline" size="sm" className="rounded-full bg-card hover:bg-accent/60">
               <Link href="/siram">
-                Kelola semua
+                {t("kelolaSemua")}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </Button>
@@ -311,18 +317,18 @@ export default function HomePage() {
 
           <TkRevealClient>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {tanamanList.slice(0, 8).map((t) => {
-                const h = healthById[t.id] ?? { level: 'sehat' as HealthLevel, lastScan: '-' };
+              {tanamanList.slice(0, 8).map((plant) => {
+                const h = healthById[plant.id] ?? { level: 'sehat' as HealthLevel, lastScan: '-' };
                 return (
                   <Link
-                    key={t.id}
-                    href={`/siram/${t.id}`}
+                    key={plant.id}
+                    href={`/siram/${plant.id}`}
                     className="group block overflow-hidden rounded-xl border border-border bg-card transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring hover:border-primary/40 hover:bg-accent/30"
                   >
-                    {t.photo ? (
+                    {plant.photo ? (
                       <img
-                        src={t.photo}
-                        alt={t.nama}
+                        src={plant.photo}
+                        alt={plant.nama}
                         className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                       />
                     ) : (
@@ -333,18 +339,18 @@ export default function HomePage() {
                     <div className="space-y-2 p-4">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <h3 className="text-lg font-bold leading-tight">{t.nama}</h3>
-                          <p className="text-sm italic text-muted-foreground">{t.species}</p>
+                          <h3 className="text-lg font-bold leading-tight">{plant.nama}</h3>
+                          <p className="text-sm italic text-muted-foreground">{plant.species}</p>
                         </div>
                         <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden="true" />
                       </div>
                       <div className="flex items-center justify-between gap-3">
                         <span className="flex items-center gap-2 text-sm text-foreground">
                           <Droplets className="h-4 w-4" aria-hidden="true" />
-                          {t.nextWater}
+                          {ts(plant.nextWater)}
                         </span>
                       </div>
-                      <p className="text-sm text-foreground/80">Scan terakhir: {h.lastScan}</p>
+                      <p className="text-sm text-foreground/80">{t("scanTerakhir")} {h.lastScan}</p>
                     </div>
                   </Link>
                 );
@@ -355,11 +361,11 @@ export default function HomePage() {
       </div>
 
       <PageCtaBand
-        heading="Ada daun yang mencurigakan hari ini?"
-        accent="mencurigakan"
-        description="Cukup satu foto — AI membaca pola visualnya dan memberi langkah penanganan."
-        primary={{ href: '/scan', label: 'Scan Tanaman' }}
-        secondary={{ href: '/forum', label: 'Tanya Komunitas' }}
+        heading={t("daunMencurigakan")}
+        accent={lang === "id" ? "mencurigakan" : "suspicious"}
+        description={t("cukupSatuFoto")}
+        primary={{ href: '/scan', label: t('scanTanaman') }}
+        secondary={{ href: '/forum', label: t('tanyaKomunitas') }}
       />
     </div>
   );

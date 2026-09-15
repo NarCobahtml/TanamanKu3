@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import SitePage from '@/components/SitePage';
 import RiwayatPage from '@/components/RiwayatPage';
 import Header from '@/components/Header';
@@ -22,19 +23,19 @@ type Scan = {
 
 // Data sama dengan RiwayatPage desktop + 1 dummy perhatian (sesuai Figma)
 const scans: Scan[] = [
-  { id: 1, plant: 'Cabai Rawit', disease: 'Busuk Daun (Phytophthora)', date: '01.09.2026', accuracy: 94, status: 'penyakit', photo: '/figma-assets/forum-chili.png' },
-  { id: 2, plant: 'Tomat Cherry', disease: 'Sehat, tidak ada gejala', date: '30.08.2026', accuracy: 98, status: 'sehat', photo: undefined },
+  { id: 1, plant: 'Cabai Rawit', disease: 'Busuk Daun (Phytophthora)', date: '01.09.2026', accuracy: 94, status: 'penyakit', photo: '/figma-assets/plant-chili.jpg' },
+  { id: 2, plant: 'Tomat Ceri', disease: 'Sehat, tidak ada gejala', date: '30.08.2026', accuracy: 98, status: 'sehat', photo: undefined },
   { id: 3, plant: 'Monstera Deliciosa', disease: 'Sehat, tidak ada gejala', date: '27.08.2026', accuracy: 96, status: 'sehat', photo: '/figma-assets/plant-monstera.png' },
-  { id: 4, plant: 'Lidah Mertua', disease: 'Bercak Bakteri (Xanthomonas)', date: '25.08.2026', accuracy: 91, status: 'penyakit', photo: '/figma-assets/plant-sansevieria.png' },
-  { id: 5, plant: 'Calathea Orbifolia', disease: 'Sehat, tidak ada gejala', date: '22.08.2026', accuracy: 97, status: 'sehat', photo: '/figma-assets/plant-calathea.jpg' },
-  { id: 6, plant: 'Mint', disease: 'Daun menguning — perlu monitoring', date: '20.08.2026', accuracy: 88, status: 'perhatian', photo: undefined },
+  { id: 4, plant: 'Lidah Mertua', disease: 'Bercak Bakteri (Xanthomonas)', date: '25.08.2026', accuracy: 91, status: 'penyakit', photo: '/figma-assets/plant-lidahmertua.jpg' },
+  { id: 5, plant: 'Calathea Orbifolia', disease: 'Sehat, tidak ada gejala', date: '22.08.2026', accuracy: 97, status: 'sehat', photo: '/figma-assets/plant-calathea-figma.jpg' },
+  { id: 6, plant: 'Mint', disease: 'Daun menguning, perlu monitoring', date: '20.08.2026', accuracy: 88, status: 'perhatian', photo: undefined },
 ];
 
-const filters: { id: 'semua' | ScanStatus; name: string }[] = [
-  { id: 'semua', name: 'Semua' },
-  { id: 'sehat', name: 'Sehat' },
-  { id: 'perhatian', name: 'Perhatian' },
-  { id: 'penyakit', name: 'Penyakit' },
+const filters: { id: 'semua' | ScanStatus }[] = [
+  { id: 'semua' },
+  { id: 'sehat' },
+  { id: 'perhatian' },
+  { id: 'penyakit' },
 ];
 
 const statusVisual: Record<ScanStatus, { icon: LucideIcon; iconClass: string; bgClass: string }> = {
@@ -44,21 +45,23 @@ const statusVisual: Record<ScanStatus, { icon: LucideIcon; iconClass: string; bg
 };
 
 export default function Page() {
+  const tr = useTranslations('riwayat');
+  const t = useTranslations('common');
   const [filter, setFilter] = useState<'semua' | ScanStatus>('semua');
   const rows = filter === 'semua' ? scans : scans.filter((s) => s.status === filter);
 
   return (
     <>
-      {/* Desktop — t3 (tidak berubah) */}
+      {/* Desktop, t3 (tidak berubah) */}
       <div className="hidden lg:block">
         <SitePage>
           <RiwayatPage />
         </SitePage>
       </div>
 
-      {/* Mobile — mobile1 Figma */}
+      {/* Mobile, mobile1 Figma */}
       <div className="app-shell pb-[86px] lg:hidden">
-        <Header showBack title="Riwayat Scan" />
+        <Header showBack title={tr("riwayatScan")} />
 
         <main className="app-container">
           {/* Filter chips */}
@@ -76,7 +79,7 @@ export default function Page() {
                       : 'bg-white text-ink border border-ink/15'
                   }`}
                 >
-                  {f.name}
+                  {t(f.id)}
                 </button>
               ))}
             </div>
@@ -85,7 +88,7 @@ export default function Page() {
           {/* Scan list */}
           <div className="px-4 pb-6 space-y-3">
             {rows.length === 0 ? (
-              <p className="text-center text-sm text-ink/70 py-10">Belum ada scan dengan status ini.</p>
+              <p className="text-center text-sm text-ink/70 py-10">{tr("belumAdaStatus")}</p>
             ) : (
               rows.map((s) => {
                 const v = statusVisual[s.status];
@@ -93,7 +96,7 @@ export default function Page() {
                 return (
                   <div key={s.id} className="bg-white rounded-xl p-4 border border-ink/15 flex items-center gap-3">
                     {s.photo ? (
-                      <img src={s.photo} alt={`Foto ${s.plant}`} className="w-14 h-14 rounded-lg object-cover shrink-0" />
+                      <img src={s.photo} alt={s.plant} className="w-14 h-14 rounded-lg object-cover shrink-0" />
                     ) : (
                       <span className="w-14 h-14 rounded-lg bg-background text-ink/70 flex items-center justify-center shrink-0">
                         <ScanLine className="w-6 h-6" aria-hidden="true" />

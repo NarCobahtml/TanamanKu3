@@ -1,15 +1,18 @@
 'use client';
 
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import SitePage from '@/components/SitePage';
 import ForumDetail from '@/components/ForumDetailPage';
-import { forumPosts } from '@/components/ForumPage';
+import { forumPosts, CategoryText } from '@/components/ForumPage';
 import { useState } from 'react';
 import { ArrowLeft, ThumbsUp, MessageCircle, Share2, Camera, Send } from 'lucide-react';
 
 
 
 export default function ForumDetailPage() {
+  const t = useTranslations('forum');
+  const tc = useTranslations('common');
   const { id } = useParams<{ id: string }>();
   const [comment, setComment] = useState('');
 
@@ -18,22 +21,22 @@ export default function ForumDetailPage() {
 
   return (
     <>
-      {/* Desktop — t3 (tidak berubah) */}
+      {/* Desktop, t3 (tidak berubah) */}
       <div className="hidden lg:block">
         <SitePage>
           <ForumDetail id={id} />
         </SitePage>
       </div>
 
-      {/* Mobile — mobile1 Figma */}
+      {/* Mobile, mobile1 Figma */}
       <div className="app-shell pb-24 lg:hidden">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background">
         <div className="app-container h-16 px-4 flex items-center gap-3">
-          <button onClick={() => window.history.back()} aria-label="Kembali" className="p-1 -ml-1">
+          <button onClick={() => window.history.back()} aria-label={tc("kembali")} className="p-1 -ml-1">
             <ArrowLeft className="w-6 h-6 text-ink" />
           </button>
-          <h1 className="text-xl font-bold text-ink">Forum</h1>
+          <h1 className="text-xl font-bold text-ink">{t("forum")}</h1>
         </div>
       </header>
 
@@ -43,13 +46,13 @@ export default function ForumDetailPage() {
           {/* Author */}
           <div className="flex items-start gap-3 mb-4">
             <img
-              src={post.avatar ?? '/figma-assets/avatar.png'}
+              src={post.avatar ?? '/figma-assets/profile-1.jpg'}
               alt={post.author}
               className="w-11 h-11 rounded-full"
             />
             <div className="flex-1">
               <p className="font-bold text-ink">{post.author}</p>
-              <p className="text-xs text-ink/70">{post.time} • <span className="text-[#1B5E20]">{post.category}</span></p>
+              <p className="text-xs text-ink/70">{post.time} • <span className="text-[#1B5E20]"><CategoryText category={post.category} /></span></p>
             </div>
           </div>
 
@@ -80,7 +83,7 @@ export default function ForumDetailPage() {
               <MessageCircle className="w-5 h-5" />
               {post.comments.length}
             </button>
-            <button className="ml-auto" aria-label="Bagikan">
+            <button className="ml-auto" aria-label={t("bagikan")}>
               <Share2 className="w-5 h-5" />
             </button>
           </div>
@@ -88,14 +91,14 @@ export default function ForumDetailPage() {
 
         {/* Comments Section */}
         <div className="p-4">
-          <h3 className="font-bold mb-4 text-ink">Komentar ({post.comments.length})</h3>
+          <h3 className="font-bold mb-4 text-ink">{t("komentarN", { n: post.comments.length })}</h3>
 
           <div className="space-y-5">
             {comments.map((c) => (
               <div key={c.author + c.time}>
                 <div className="flex items-start gap-3">
                   <img
-                    src="/figma-assets/avatar.png"
+                    src="/figma-assets/profile-1.jpg"
                     alt={c.author}
                     className="w-9 h-9 rounded-full"
                   />
@@ -109,7 +112,7 @@ export default function ForumDetailPage() {
                       <button className="flex items-center gap-1 text-xs">
                         <ThumbsUp className="w-3.5 h-3.5" />
                       </button>
-                      <button className="text-xs font-semibold text-[#1B5E20]">Balas</button>
+                      <button className="text-xs font-semibold text-[#1B5E20]">{t("balas")}</button>
                     </div>
                   </div>
                 </div>
@@ -127,12 +130,12 @@ export default function ForumDetailPage() {
               type="text"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Tulis komentar Anda..."
+              placeholder={t("tulisKomentarAnda")}
               className="w-full bg-background pl-11 pr-4 py-3 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#1B5E20]"
             />
             <Camera className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/70" />
           </div>
-          <button className="w-10 h-10 bg-[#1B5E20] rounded-full flex items-center justify-center shrink-0" aria-label="Kirim komentar">
+          <button className="w-10 h-10 bg-[#1B5E20] rounded-full flex items-center justify-center shrink-0" aria-label={t("kirimKomentarAria")}>
             <Send className="w-5 h-5 text-white" />
           </button>
         </div>

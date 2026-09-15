@@ -2,28 +2,20 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { ImagePlus, Loader2, X, Info } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { PageHeader } from '@/components/PageHeader';
-import TkRevealClient from '@/components/landing/tk-reveal-client';
-import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
+import { ArrowLeft, ChevronDown, ImagePlus, Loader2, Send } from 'lucide-react';
 
-const categories = ['Hama & Penyakit', 'Perawatan', 'Nutrisi', 'Tanya Ahli'];
+const categories = [
+  { value: 'Hama & Penyakit', key: 'hama' },
+  { value: 'Perawatan', key: 'perawatan' },
+  { value: 'Nutrisi', key: 'nutrisi' },
+  { value: 'Tanya Ahli', key: 'tanyaAhli', common: true },
+];
 
 export default function CreatePostPage() {
   const router = useRouter();
+  const t = useTranslations('forum');
+  const tc = useTranslations('common');
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState('');
@@ -44,132 +36,122 @@ export default function CreatePostPage() {
     setPublishing(true);
     // ponytail: fake latency, replace with POST /api/forum when backend exists
     setTimeout(() => {
-      toast.success('Postingan berhasil dipublikasikan');
       router.push('/forum');
     }, 800);
   };
 
   return (
-    <div>
-      <PageHeader
-        overline="Komunitas"
-        title="Buat Postingan"
-        accent="Postingan"
-        description="Pertanyaan atau cerita apa pun seputar tanamanmu, semua dijawab di sini."
-      />
+    <form
+      className="mx-auto w-full max-w-xl px-4 py-12 sm:px-6"
+      onSubmit={(e) => {
+        e.preventDefault();
+        publish();
+      }}
+    >
+      {/* header back, seperti mobile */}
+      <div className="mb-6 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          aria-label={tc("kembali")}
+          className="grid size-9 place-items-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-accent/60"
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+        </button>
+        <h1 className="text-lg font-bold tracking-tight">{t("postinganBaru")}</h1>
+      </div>
 
-      <TkRevealClient className="mx-auto w-full max-w-3xl px-4 pt-12 sm:px-6">
-      <form
-        className="space-y-10"
-        onSubmit={(e) => {
-          e.preventDefault();
-          publish();
-        }}
-      >
-        <div className="space-y-6 rounded-xl border border-border bg-card p-6 transition-colors hover:border-primary/40 md:p-8">
-          <div className="space-y-2">
-            <Label htmlFor="title" className="font-semibold">Judul</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Contoh: Daun monstera saya menguning, kenapa ya?"
-              className="text-base"
+      {/* identitas, seperti mobile */}
+      <div className="flex items-center gap-3">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/figma-assets/profile-1.jpg"
+          alt=""
+          className="size-11 rounded-full"
+        />
+        <p className="font-semibold">Alex Saputra</p>
+      </div>
+
+      {/* fields polos, tanpa label, tanpa kartu */}
+      <div className="mt-4 space-y-3">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder={t("judulPlaceholder")}
+          aria-label={t("judul")}
+          className="w-full bg-transparent text-lg font-semibold tracking-tight outline-none placeholder:text-muted-foreground/70 placeholder:font-normal"
+        />
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder={t("isiPlaceholder")}
+          aria-label={t("isi")}
+          rows={6}
+          className="w-full resize-none bg-transparent text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground/70"
+        />
+
+        {photoName && (
+          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <ImagePlus className="size-4 shrink-0" aria-hidden="true" />
+            <span className="truncate">{photoName}</span>
+          </p>
+        )}
+
+        {/* tools row, kategori + kamera, seperti mobile */}
+        <div className="flex items-center gap-3 pt-1">
+          <div className="relative">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              aria-label={t("pilihKategori")}
+              className="h-10 appearance-none rounded-lg border border-border bg-card pl-4 pr-9 text-sm text-foreground outline-none transition-colors hover:border-primary/40 focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">{t("pilihKategori")}</option>
+              {categories.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.common ? tc(c.key) : t(c.key)}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
             />
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="category" className="font-semibold">Kategori</Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger id="category" className="w-full">
-                  <SelectValue placeholder="Pilih kategori" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="font-semibold">Foto</Label>
-              {/* hidden native picker behind a styled button */}
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                className="sr-only"
-                onChange={onPick}
-                aria-label="Pilih foto tanaman"
-              />
-              {photoName ? (
-                <div className="flex items-center gap-3">
-                  <Badge variant="secondary" className="max-w-full">
-                    <span className="truncate">{photoName}</span>
-                  </Badge>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Hapus foto terpilih"
-                    onClick={() => {
-                      setPhotoName(null);
-                      if (fileRef.current) fileRef.current.value = '';
-                    }}
-                  >
-                    <X className="h-4 w-4" aria-hidden="true" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => fileRef.current?.click()}
-                  >
-                    <ImagePlus className="h-4 w-4" aria-hidden="true" />
-                    Unggah Foto
-                  </Button>
-                  <p className="text-xs text-muted-foreground">
-                    Opsional. JPG/PNG maks 5MB.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="content" className="font-semibold">Konten</Label>
-          <Textarea
-            id="content"
-            rows={10}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Ceritakan kondisi tanamanmu…"
-            className="rounded-xl border-border bg-card"
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            aria-label={t("tambahGambar")}
+            className="grid size-10 place-items-center rounded-lg border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:bg-accent/40"
+          >
+            <ImagePlus className="size-5" aria-hidden="true" />
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            onChange={onPick}
+            aria-label={t("pilihFoto")}
           />
-          <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
-            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            Ceritakan kondisi tanamanmu: seberapa sering disiram, lokasi penempatan, gejala yang terlihat.
-          </p>
         </div>
+      </div>
 
-        <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
-          <Button asChild variant="outline" type="button" className="rounded-full bg-card hover:bg-accent/60">
-            <Link href="/forum">Batal</Link>
-          </Button>
-          <Button type="submit" className="btn-cta rounded-full px-6" disabled={!valid || publishing}>
-            {publishing && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-            {publishing ? 'Mempublikasikan…' : 'Publikasikan'}
-          </Button>
-        </div>
-      </form>
-      </TkRevealClient>
-    </div>
+      {/* submit, pill hijau seperti mobile */}
+      <button
+        type="submit"
+        disabled={!valid || publishing}
+        className="btn-cta mt-6 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+      >
+        {publishing ? (
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        ) : (
+          <Send className="size-4" aria-hidden="true" />
+        )}
+        {publishing ? t('mempublikasikan') : tc('posting')}
+      </button>
+    </form>
   );
 }

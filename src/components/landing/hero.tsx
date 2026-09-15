@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 const SPOTLIGHT_R = 260;
 
@@ -85,6 +86,7 @@ function RevealLayer({
 }
 
 export default function Hero() {
+  const t = useTranslations('landing.hero');
   const sectionRef = useRef<HTMLElement>(null);
   const mouse = useRef<Pos>({ x: 0, y: 0 });
   const smooth = useRef<Pos>({ x: 0, y: 0 });
@@ -135,13 +137,13 @@ export default function Hero() {
             className="block font-playfair font-normal text-5xl sm:text-7xl md:text-8xl hero-anim hero-reveal pb-1"
             style={{ letterSpacing: '-0.05em', animationDelay: '0.25s' }}
           >
-            Setiap daun
+            {t("baris1")}
           </span>
           <span
             className="block font-normal text-5xl sm:text-7xl md:text-8xl -mt-1 hero-anim hero-reveal"
             style={{ letterSpacing: '-0.08em', animationDelay: '0.42s' }}
           >
-            menyimpan cerita
+            {t("baris2")}
           </span>
         </h1>
       </div>
@@ -150,8 +152,7 @@ export default function Hero() {
         className="hidden sm:block absolute bottom-14 left-10 md:left-14 max-w-[260px] text-sm text-white/80 leading-relaxed hero-anim hero-fade z-50"
         style={{ animationDelay: '0.7s' }}
       >
-        Bintik kuning, lapisan tepung di helai daun, atau tepi yang menggulung. Gejala penyakit tanaman
-        hampir selalu muncul lebih dulu di tempat yang jarang kita periksa.
+        {t("sub")}
       </p>
 
       <div
@@ -159,15 +160,13 @@ export default function Hero() {
         style={{ animationDelay: '0.85s' }}
       >
         <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-          Cukup satu foto daun. AI TanamanKu membaca pola visualnya, mencocokkan dengan ribuan kasus
-          penyakit, dan memberi langkah penanganan yang jelas. Gerakkan kursor untuk melihat seperti apa
-          AI melihat daun.
+          {t("ctaDesc")}
         </p>
         <Link
           href="/register"
-          className="bg-primary hover:bg-[#123526] text-white text-sm font-medium px-7 py-3 rounded-full transition-all hover:scale-[1.03] active:scale-95 hover:shadow-lg hover:shadow-primary/30"
+          className="bg-[#1B5E3F] hover:bg-[#123526] text-white text-sm font-medium px-7 py-3 rounded-full transition-all hover:scale-[1.03] active:scale-95 hover:shadow-lg hover:shadow-[#1B5E3F]/30"
         >
-          Mulai Sekarang
+          {t("mulai")}
         </Link>
       </div>
     </section>

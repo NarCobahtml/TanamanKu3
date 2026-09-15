@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { FileDown, ScanLine, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,16 +14,15 @@ import { HealthStatus, type HealthLevel } from '@/components/HealthStatus';
 import { EmptyState } from '@/components/EmptyState';
 import { PageCtaBand } from '@/components/PageCtaBand';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
-import { toast } from 'sonner';
 
 type Status = 'sehat' | 'terinfeksi';
 
 const scans = [
-  { id: 1, plant: 'Cabai Rawit', disease: 'Busuk Daun (Phytophthora)', date: '01.09.2026', accuracy: 94, status: 'terinfeksi' as Status, photo: '/figma-assets/forum-chili.png' },
-  { id: 2, plant: 'Tomat Cherry', disease: 'Sehat, tidak ada gejala', date: '30.08.2026', accuracy: 98, status: 'sehat' as Status, photo: undefined },
+  { id: 1, plant: 'Cabai Rawit', disease: 'Busuk Daun (Phytophthora)', date: '01.09.2026', accuracy: 94, status: 'terinfeksi' as Status, photo: '/figma-assets/plant-chili.jpg' },
+  { id: 2, plant: 'Tomat Ceri', disease: 'Sehat, tidak ada gejala', date: '30.08.2026', accuracy: 98, status: 'sehat' as Status, photo: undefined },
   { id: 3, plant: 'Monstera Deliciosa', disease: 'Sehat, tidak ada gejala', date: '27.08.2026', accuracy: 96, status: 'sehat' as Status, photo: '/figma-assets/plant-monstera.png' },
-  { id: 4, plant: 'Lidah Mertua', disease: 'Bercak Bakteri (Xanthomonas)', date: '25.08.2026', accuracy: 91, status: 'terinfeksi' as Status, photo: '/figma-assets/plant-sansevieria.png' },
-  { id: 5, plant: 'Calathea Orbifolia', disease: 'Sehat, tidak ada gejala', date: '22.08.2026', accuracy: 97, status: 'sehat' as Status, photo: '/figma-assets/plant-calathea.jpg' },
+  { id: 4, plant: 'Lidah Mertua', disease: 'Bercak Bakteri (Xanthomonas)', date: '25.08.2026', accuracy: 91, status: 'terinfeksi' as Status, photo: '/figma-assets/plant-lidahmertua.jpg' },
+  { id: 5, plant: 'Calathea Orbifolia', disease: 'Sehat, tidak ada gejala', date: '22.08.2026', accuracy: 97, status: 'sehat' as Status, photo: '/figma-assets/plant-calathea-figma.jpg' },
 ];
 
 const filters = [
@@ -37,6 +37,8 @@ const sehatCount = scans.filter((s) => s.status === 'sehat').length;
 const infectedCount = scans.length - sehatCount;
 
 export default function RiwayatPage() {
+  const tr = useTranslations('riwayat');
+  const t = useTranslations('common');
   const [filter, setFilter] = useState('semua');
   const [loading] = useState(false); // ponytail: flip true to preview skeleton state
 
@@ -45,49 +47,49 @@ export default function RiwayatPage() {
   return (
     <div>
       <PageHeader
-        overline="Diagnosis"
-        title="Riwayat Scan"
-        accent="Scan"
-        description="Semua hasil diagnosis AI pada tanamanmu, terbaru duluan. Angka besar, garis tipis — laporan yang mudah dibaca ulang."
+        overline={tr("overline")}
+        title={tr("riwayatScan")}
+        accent={tr("scanAccent")}
+        description={tr("deskripsi")}
         actions={
           <>
             <Button asChild className="btn-cta">
               <Link href="/scan">
                 <ScanLine className="h-4 w-4" aria-hidden="true" />
-                Scan Baru
+                {tr("scanBaru")}
               </Link>
             </Button>
             <Button
               variant="outline"
               className="border-border bg-card hover:bg-accent/60"
-              onClick={() => toast.info('Riwayat diunduh (demo)')}
+              aria-label={tr("unduhRiwayat")}
             >
               <FileDown className="h-4 w-4" aria-hidden="true" />
-              Unduh
+              {t("unduh")}
             </Button>
           </>
         }
       >
-        {/* Stat readout — tnum medical report style */}
+        {/* Stat readout, tnum medical report style */}
         <div className="flex flex-wrap gap-x-12 gap-y-6">
           <div>
             <p className="tnum text-4xl font-extrabold leading-none">{scans.length}</p>
-            <p className="overline mt-2">Total scan</p>
+            <p className="overline mt-2">{tr("totalScan")}</p>
           </div>
           <div>
             <p className="tnum text-4xl font-extrabold leading-none text-success">{sehatCount}</p>
-            <p className="overline mt-2">Sehat</p>
+            <p className="overline mt-2">{t("sehat")}</p>
           </div>
           <div>
             <p className="tnum text-4xl font-extrabold leading-none text-destructive">{infectedCount}</p>
-            <p className="overline mt-2">Terinfeksi</p>
+            <p className="overline mt-2">{t("terinfeksi")}</p>
           </div>
         </div>
       </PageHeader>
 
       <div className="mx-auto w-full max-w-7xl space-y-16 px-4 pb-4 pt-14 sm:px-6">
         {/* Filter pills */}
-        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter status">
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={tr("filterStatus")}>
           {filters.map((f) => (
             <button
               key={f.id}
@@ -100,7 +102,7 @@ export default function RiwayatPage() {
                   : 'rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-accent/60 hover:text-primary'
               }
             >
-              {f.name}
+              {t(f.id)}
             </button>
           ))}
         </div>
@@ -113,15 +115,15 @@ export default function RiwayatPage() {
           <div className="rounded-xl border border-border">
             <EmptyState
               icon={<SearchX className="h-6 w-6" aria-hidden="true" />}
-              title="Belum ada scan"
+              title={tr("belumAdaScan")}
               message={
                 filter === 'semua'
-                  ? 'Hasil scan AI akan tersimpan otomatis di sini.'
-                  : `Belum ada scan dengan status ${filter}.`
+                  ? tr('hasilOtomatis')
+                  : tr("belumAdaFilter", { status: t(filter) })
               }
               action={
                 <Button asChild size="sm">
-                  <Link href="/scan">Mulai Scan</Link>
+                  <Link href="/scan">{tr("mulaiScan")}</Link>
                 </Button>
               }
             />
@@ -132,11 +134,11 @@ export default function RiwayatPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-border bg-secondary/50 hover:bg-secondary/50">
-                    <TableHead className="pl-4 pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground sm:pl-6">Tanaman</TableHead>
-                    <TableHead className="pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Diagnosis</TableHead>
-                    <TableHead className="hidden pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground md:table-cell">Tanggal</TableHead>
-                    <TableHead className="pt-3.5 pb-3.5 text-right text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Keyakinan</TableHead>
-                    <TableHead className="pr-4 pt-3.5 pb-3.5 text-right text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground sm:pr-6">Status</TableHead>
+                    <TableHead className="pl-4 pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground sm:pl-6">{t("tanaman")}</TableHead>
+                    <TableHead className="pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{t("diagnosis")}</TableHead>
+                    <TableHead className="hidden pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground md:table-cell">{t("tanggal")}</TableHead>
+                    <TableHead className="pt-3.5 pb-3.5 text-right text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{t("keyakinan")}</TableHead>
+                    <TableHead className="pr-4 pt-3.5 pb-3.5 text-right text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground sm:pr-6">{t("status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -147,7 +149,7 @@ export default function RiwayatPage() {
                           {s.photo ? (
                             <img
                               src={s.photo}
-                              alt={`Foto ${s.plant}`}
+                              alt={s.plant}
                               className="h-10 w-10 rounded-lg object-cover"
                             />
                           ) : (
@@ -164,7 +166,7 @@ export default function RiwayatPage() {
                       <TableCell className="pr-4 pt-4 pb-4 text-right sm:pr-6">
                         <HealthStatus
                           level={statusLevel[s.status]}
-                          label={s.status === 'sehat' ? 'Sehat' : 'Terinfeksi'}
+                          label={s.status === 'sehat' ? t('sehat') : t('terinfeksi')}
                         />
                       </TableCell>
                     </TableRow>
@@ -172,7 +174,7 @@ export default function RiwayatPage() {
                 </TableBody>
               </Table>
               <p className="rounded-b-xl border-t border-border bg-secondary/30 px-4 py-3 text-xs text-muted-foreground sm:px-6">
-                Menampilkan {rows.length} dari {scans.length} scan · Data demo
+                {tr("menampilkan", { count: rows.length, total: scans.length })}
               </p>
             </div>
           </TkRevealClient>
@@ -180,11 +182,11 @@ export default function RiwayatPage() {
       </div>
 
       <PageCtaBand
-        heading="Tanaman lain menunggu diperiksa"
+        heading={tr("tanamanMenunggu")}
         accent="diperiksa"
-        description="Satu foto daun cukup untuk diagnosis 30+ jenis penyakit."
-        primary={{ href: '/scan', label: 'Scan Sekarang' }}
-        secondary={{ href: '/siram', label: 'Lihat Tanaman Saya' }}
+        description={tr("satuFotoCukup")}
+        primary={{ href: '/scan', label: tr('scanSekarang') }}
+        secondary={{ href: '/siram', label: t('lihatTanamanSaya') }}
       />
     </div>
   );

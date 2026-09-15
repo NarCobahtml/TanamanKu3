@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Toaster } from "@/components/ui/sonner";
+import { LocaleProvider } from "@/components/LocaleProvider";
 import "./globals.css";
 import "./fonts.css";
 
@@ -13,8 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" className="h-full antialiased">
       <body suppressHydrationWarning className="min-h-full flex flex-col">
-        {children}
-        <Toaster position="top-center" richColors />
+        <LocaleProvider>{children}</LocaleProvider>
       </body>
     </html>
   );

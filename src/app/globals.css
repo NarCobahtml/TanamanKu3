@@ -9,33 +9,39 @@
    No page-wide dark band — green used as blocks, edges, CTAs.
    ============================================================ */
 :root {
-  --background: #fdfffb;
-  --foreground: #123526;
-  --card: #fdfffb;
-  --card-foreground: #123526;
-  --popover: #fdfffb;
-  --popover-foreground: #123526;
-  --primary: #1b5e20;
-  --primary-foreground: #fdfffb;
-  --secondary: #fdfffb;
-  --secondary-foreground: #123526;
-  --muted: #fdfffb;
-  --muted-foreground: #123526;
-  --accent: #fdfffb;
-  --accent-foreground: #1b5e20;
+  --background: #ffffff;
+  --foreground: #171b17;
+  --card: #ffffff;
+  --card-foreground: #171b17;
+  --popover: #ffffff;
+  --popover-foreground: #171b17;
+  --primary: #1b5e3f;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f5f2;
+  --secondary-foreground: #23292a;
+  --muted: #f2f5f2;
+  --muted-foreground: #59625d;
+  --accent: #e7efe9;
+  --accent-foreground: #1b5e3f;
   --destructive: #b3261e;
-  --destructive-foreground: #fdfffb;
-  --success: #1b5e20;
-  --success-foreground: #fdfffb;
+  --destructive-foreground: #ffffff;
+  --success: #1b7a43;
+  --success-foreground: #ffffff;
   --warning: #935f00;
-  --warning-foreground: #fdfffb;
+  --warning-foreground: #ffffff;
   --info: #1d5fbf;
-  --info-foreground: #fdfffb;
-  --border: #123526;
-  --input: #123526;
-  --ring: #1b5e20;
+  --info-foreground: #ffffff;
+  --border: #e5e8e4;
+  --input: #ced4ce;
+  --ring: #1b5e3f;
   --radius: 0.375rem;
+  /* identity block — deep field green for hero/asides */
   --ink: #123526;
+  --ink-soft: #a9c3b2;
+  --brand: #12651f;
+  --brand-dark: #075b17;
+  --mint: #a2efa7;
+  --line: #d3ddd0;
 }
 
 @theme inline {
@@ -65,6 +71,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
 
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
@@ -106,7 +113,7 @@
     background:
       radial-gradient(120% 140% at 85% -20%, rgba(255, 255, 255, 0.07), transparent 55%),
       var(--ink);
-    color: var(--background);
+    color: #f2f7f3;
   }
   /* soft sage wash for section contrast — replaces old page band */
   .sage-wash {
@@ -127,25 +134,7 @@
   }
   /* primary CTA emphasis */
   .btn-cta {
-    box-shadow: 0 1px 2px rgba(27, 94, 32, 0.18);
-  }
-  /* scan viewfinder sweep */
-  .scanline {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--primary), transparent);
-    animation: scanline-sweep 2.4s ease-in-out infinite;
-  }
-  @keyframes scanline-sweep {
-    0%,
-    100% {
-      top: 12%;
-    }
-    50% {
-      top: 88%;
-    }
+    box-shadow: 0 1px 2px rgba(23, 59, 40, 0.18);
   }
   /* horizontal key line between editorial sections */
   .rule {
@@ -213,13 +202,13 @@
   }
   /* landing page light token base */
   .tk-page {
-    background: var(--background);
-    color: var(--ink);
+    background: #ffffff;
+    color: #171b17;
     font-family: "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, sans-serif;
   }
   .tk-page ::selection {
-    background: var(--primary);
-    color: var(--background);
+    background: #1b5e3f;
+    color: #ffffff;
   }
   /* mobile menu items */
   .menu-item {
@@ -240,52 +229,51 @@
 
 /* ===== Mobile app UI (copied from tumbuhkita #1) ===== */
 .app-shell {min-height: 100dvh;
-  background: var(--background);
+  background: #F5F5F0;
 }
 .app-container {width: min(100%, 390px);
   margin-inline: auto;
 }
-.soft-card {border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+.soft-card {border: 1px solid #E8E8E8;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 .auth-page {min-height: 100dvh;
-  background: var(--background);
+  background: #F5F5F0;
 }
 .auth-content {width: min(100%, 342px);
   margin-inline: auto;
 }
 .auth-input {height: 53px;
-  border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  border: 1px solid #E8E8E8;
   border-radius: 12px;
-  color: var(--ink);
-  background: var(--background);
+  color: #1A1A1A;
+  background: #fff;
 }
-.auth-input::placeholder {color: color-mix(in srgb, var(--ink) 60%, transparent);
+.auth-input::placeholder {color: #999999;
 }
 .auth-button {height: 54px;
   border-radius: 12px;
-  background: var(--primary);
+  background: #1B5E20;
   box-shadow: 0 3px 5px rgba(27, 94, 32, 0.2);
 }
-.auth-button:hover {background: var(--primary);
-  filter: brightness(0.9);
+.auth-button:hover {background: #17491A;
 }
 .page-header {height: 64px;
-  background: var(--background);
-  border-bottom: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 15%, transparent);
+  background: #f6fbf3;
+  border-bottom: 1px solid #e0eed4;
+  box-shadow: 0 1px 0 #e0eed4;
 }
 .bottom-nav {height: 80px;
-  background: var(--background);
-  border-top: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  background: #f6fbf3;
+  border-top: 1px solid #c0c9bb;
   border-radius: 12px 12px 0 0;
   box-shadow: 0 -8px 15px rgba(27, 94, 32, 0.08);
 }
 .safe-area-inset-bottom {padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-.nav-link {color: color-mix(in srgb, var(--ink) 70%, transparent);
+.nav-link {color: #414b41;
 }
-.nav-link.active {color: var(--primary);
+.nav-link.active {color: var(--brand);
 }
 .nav-link.active .nav-icon {background: transparent;
   border-radius: 0;
@@ -309,7 +297,7 @@
     hue-rotate(77deg) brightness(83%);
 }
 .result-header {height: 64px;
-  background: var(--background);
+  background: #F5F5F0;
 }
 .result-header .app-container {position: relative;
 }
@@ -342,7 +330,7 @@
 }
 .result-photo {
   height: 306px;
-  background: var(--background);
+  background: #dcefd5;
 }
 .result-page .result-photo {
   width: calc(100% + 32px);
@@ -380,15 +368,15 @@
   font-size: 16px;
   line-height: 24px;
   font-style: italic;
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: #41493e;
 }
 .result-warning {
   display: flex;
   gap: 12px;
   margin-top: 16px;
   padding-bottom: 24px;
-  border-bottom: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  border-bottom: 1px solid rgba(192, 201, 187, 0.3);
+  color: #41493e;
   font-size: 14px;
   line-height: 22.75px;
 }
@@ -413,7 +401,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: color-mix(in srgb, var(--ink) 15%, transparent);
+  background: rgba(192, 201, 187, 0.3);
 }
 .result-block {
   padding: 32px 0 0;
@@ -431,7 +419,7 @@
 }
 .result-copy {
   margin-top: 16px;
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: #41493e;
   font-size: 16px;
   line-height: 26px;
 }
@@ -442,10 +430,10 @@
   margin-top: 16px;
   padding-top: 8px;
   padding-bottom: 24px;
-  border-bottom: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  border-bottom: 1px solid rgba(192, 201, 187, 0.3);
 }
 .result-meta-label {
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: #41493e;
   font-size: 12px;
   line-height: 16px;
   margin-bottom: 3.5px;
@@ -468,13 +456,13 @@
   grid-template-columns: 20px 1fr;
   gap: 16px;
   padding: 21px;
-  border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border: 1px solid rgba(192, 201, 187, 0.1);
   border-radius: 16px;
-  background: var(--background);
+  background: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
 }
 .treatment-number {
-  color: var(--primary);
+  color: #00450d;
   font-size: 14px;
   line-height: 20px;
   font-weight: 700;
@@ -487,15 +475,16 @@
 }
 .treatment-copy {
   margin-top: 4px;
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: #41493e;
   font-size: 16px;
   line-height: 24px;
 }
 .result-products {
+
   margin-top: 32px;
   padding-top: 32px;
   padding-bottom: 0;
-  border-top: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  border-top: 1px solid rgba(192, 201, 187, 0.3);
 }
 .result-products > h3 {
   font-size: 20px;
@@ -508,7 +497,7 @@
   padding: 16px 0;
 }
 .product-row + .product-row {
-  border-top: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  border-top: 1px solid rgba(192, 201, 187, 0.3);
 }
 .product-row img {
   width: 64px;
@@ -523,13 +512,13 @@
 }
 .product-copy {
   margin-top: 2px;
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: #41493e;
   font-size: 14px;
   line-height: 20px;
 }
 .result-actions {
   padding: 40px 0 32px;
-  background: var(--background);
+  background: #fff;
 }
 .result-actions button {
   height: 48px;
@@ -561,7 +550,7 @@
 }
 .watering-detail .siram-section {
   padding: 24px;
-  border-bottom: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  border-bottom: 1px solid #c0c9bb;
 }
 .watering-detail .weather-section {
   padding-top: 24px;
@@ -609,7 +598,7 @@
   font-weight: 600;
 }
 .watering-detail .watering-condition p span:last-child {
-  color: var(--destructive);
+  color: #ba1a1a;
 }
 .watering-slots {
   display: flex;
@@ -625,7 +614,7 @@
   align-items: center;
   gap: 8px;
   padding: 0 10px;
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: #41493e;
   font-size: 12px;
   line-height: 16px;
   font-weight: 500;
@@ -638,14 +627,14 @@
   place-items: center;
 }
 .watering-slot.unfavourable .watering-slot-icon {
-  background: var(--destructive);
+  background: #ffdad6;
 }
 .watering-slot.moderate .watering-slot-icon {
-  background: var(--background);
-  border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  background: #dfe4dc;
+  border: 1px solid #c0c9bb;
 }
 .watering-slot.optimal .watering-slot-icon {
-  background: var(--primary);
+  background: #abf4ac;
 }
 .watering-slot-icon img {
   width: auto;
@@ -659,8 +648,8 @@
   row-gap: 16px;
   justify-items: center;
   padding-top: 16px;
-  border-top: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  border-top: 1px solid #dfe4dc;
+  color: #41493e;
   font-size: 12px;
   line-height: 16px;
 }
@@ -703,9 +692,9 @@
   justify-content: center;
   gap: 8px;
   padding: 17px;
-  border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  border: 1px solid #c0c9bb;
   border-radius: 12px;
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: #181d18;
 }
 .forecast-card p:first-child {
   font-size: 14px;
@@ -722,14 +711,14 @@
   line-height: 28px;
 }
 .create-post-page {
-  background: var(--background);
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  background: #F5F5F0;
+  color: #1A1A1A;
   min-height: 100dvh;
 }
 .create-post-header {
   height: 64px;
-  background: var(--background);
-  border-bottom: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  background: #fff;
+  border-bottom: 1px solid rgba(192, 201, 187, 0.3);
 }
 .create-post-header-inner {
   height: 64px;
@@ -775,7 +764,7 @@
   border: 0;
   outline: 0;
   background: transparent;
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: #181d18;
 }
 .create-post-fields input {
   height: 27px;
@@ -793,7 +782,7 @@
 }
 .create-post-fields input::placeholder,
 .create-post-fields textarea::placeholder {
-  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  color: #c0c9bb;
   opacity: 1;
 }
 .create-post-tools {
@@ -821,10 +810,10 @@
   width: 132px;
   height: 30px;
   padding: 0 30px 0 17px;
-  border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  border: 1px solid #c0c9bb;
   border-radius: 999px;
-  background: var(--background);
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  background: #f1f5ed;
+  color: #41493e;
   font-size: 12px;
   outline: 0;
 }
@@ -832,7 +821,7 @@
   width: 40px;
   height: 40px;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  border: 1px solid #c0c9bb;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -855,8 +844,8 @@
   gap: 8px;
   border: 0;
   border-radius: 999px;
-  background: var(--primary);
-  color: var(--background);
+  background: #1b5e20;
+  color: #fff;
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -4px rgba(0, 0, 0, 0.1);
@@ -864,4 +853,5 @@
   line-height: 20px;
   font-weight: 600;
 }
+
 

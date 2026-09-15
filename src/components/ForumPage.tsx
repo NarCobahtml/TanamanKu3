@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useLocale } from '@/components/LocaleProvider';
 import Link from 'next/link';
 import { Eye, Heart, MessageSquare, Plus, SearchX, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,9 +12,14 @@ import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { PageCtaBand } from '@/components/PageCtaBand';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
-import { toast } from 'sonner';
 
-const categories = ['Semua', 'Hama & Penyakit', 'Perawatan', 'Nutrisi', 'Tanya Ahli'];
+const categories = [
+  { id: 'Semua', key: 'semua', section: 'common' },
+  { id: 'Hama & Penyakit', key: 'hama', section: 'forum' },
+  { id: 'Perawatan', key: 'perawatan', section: 'forum' },
+  { id: 'Nutrisi', key: 'nutrisi', section: 'forum' },
+  { id: 'Tanya Ahli', key: 'tanyaAhli', section: 'common' },
+];
 
 export type ForumPost = {
   id: string;
@@ -36,7 +43,7 @@ export const forumPosts: ForumPost[] = [
     id: 'bercak-kuning-monstera',
     author: 'Budi Santoso',
     initials: 'BS',
-    avatar: '/figma-assets/forum-author.png',
+    avatar: '/figma-assets/profile-2.jpg',
     time: '2 jam yang lalu',
     category: 'Hama & Penyakit',
     title: 'Bercak kuning pada daun Monstera, kenapa ya?',
@@ -48,7 +55,7 @@ export const forumPosts: ForumPost[] = [
       'Sudah coba cek bagian bawah daun untuk hama, tidak ada bintik putih atau telernya. Tanahnya juga terasa selalu lembab, hampir tidak pernah kering.',
       'Apakah ini kelebihan air, kekurangan nutrisi, atau penyakit? Mohon bantuannya dong teman-teman, sayang banget kalau tanamannya makin parah.',
     ],
-    image: '/figma-assets/leaf-macro.jpg',
+    image: '/figma-assets/plant-bananaleaf.jpg',
     likes: 24,
     views: 312,
     comments: [
@@ -73,7 +80,7 @@ export const forumPosts: ForumPost[] = [
     id: 'panen-cabai-rawit-pertama',
     author: 'Ayu Lestari',
     initials: 'AL',
-    avatar: '/figma-assets/avatar.png',
+    avatar: '/figma-assets/profile-1.jpg',
     time: '5 jam yang lalu',
     category: 'Perawatan',
     title: 'Berbagi keberhasilan: Panen Cabai Rawit pertama!',
@@ -85,7 +92,7 @@ export const forumPosts: ForumPost[] = [
       'Untuk media tanam saya pakai campuran tanah, kompos, dan sekam bakar dengan perbandingan 2:1:1. Penyiraman pagi dan sore, tapi tidak sampai genang.',
       'Hasilnya satu tanaman bisa panen 1,2 kg untuk putaran pertama. Selamat mencoba, cabai rawit ternyata cocok banget untuk pemula!',
     ],
-    image: '/figma-assets/forum-chili.png',
+    image: '/figma-assets/plant-chili.jpg',
     likes: 89,
     views: 1024,
     comments: [
@@ -110,7 +117,7 @@ export const forumPosts: ForumPost[] = [
     id: 'jadwal-penyiraman-kaktus-mini',
     author: 'Reza P.',
     initials: 'RP',
-    avatar: '/figma-assets/forum-author-reza.png',
+    avatar: '/figma-assets/profile-3.jpg',
     time: 'Kemarin',
     category: 'Perawatan',
     title: 'Jadwal penyiraman Kaktus Mini di ruangan ber-AC?',
@@ -183,7 +190,7 @@ export const forumPosts: ForumPost[] = [
       'Saya dengar keriting daun bisa karena virus yang dibawa kutu daun atau thrips, dan kalau virus sebaiknya tanamannya langsung dibuang.',
       'Sebelum mengambil keputusan buang, mohon pencerahan dari teman-teman atau pakar. Apakah masih bisa diselamatkan dengan pestisida nabati?',
     ],
-    image: '/figma-assets/leaf2.jpg',
+    image: '/figma-assets/plant-cherryleaf.jpg',
     likes: 7,
     views: 158,
     comments: [
@@ -231,8 +238,24 @@ export const forumPosts: ForumPost[] = [
   },
 ];
 
+const CATEGORY_KEY: Record<string, string> = {
+  'Hama & Penyakit': 'hama',
+  Perawatan: 'perawatan',
+  Nutrisi: 'nutrisi',
+  'Tanya Ahli': 'tanyaAhli',
+};
+
+/** Category text translated; fallback raw string. */
+export function CategoryText({ category }: { category: string }) {
+  const t = useTranslations('forum');
+  const tc = useTranslations('common');
+  const k = CATEGORY_KEY[category];
+  return <>{k ? k === 'tanyaAhli' ? tc(k) : t(k) : category}</>;
+}
+
 export function ExpertBadge() {
-  return <Badge variant="outline" className="border-primary/30 bg-accent text-primary">Ahli Tanaman</Badge>;
+  const t = useTranslations('forum');
+  return <Badge variant="outline" className="border-primary/30 bg-accent text-primary">{t('ahliTanaman')}</Badge>;
 }
 
 const topics = [
@@ -244,6 +267,9 @@ const topics = [
 ];
 
 export default function ForumPage() {
+  const t = useTranslations('forum');
+  const tc = useTranslations('common');
+  const { locale: lang } = useLocale();
   const [category, setCategory] = useState('Semua');
   const [query, setQuery] = useState('');
   const [liked, setLiked] = useState<Record<string, boolean>>({});
@@ -258,7 +284,6 @@ export default function ForumPage() {
   const toggleLike = (id: string) => {
     const next = !liked[id];
     setLiked((m) => ({ ...m, [id]: next }));
-    if (next) toast.success('Kamu menyukai postingan ini');
   };
 
   const likeCount = (p: ForumPost) => p.likes + (liked[p.id] ? 1 : 0);
@@ -266,15 +291,15 @@ export default function ForumPage() {
   return (
     <div>
       <PageHeader
-        overline="Komunitas"
-        title="Forum Komunitas"
-        accent="Komunitas"
-        description="Tanya jawab seputar perawatan tanaman bersama sesama pecinta tanaman."
+        overline={t("komunitas")}
+        title={t("forumKomunitas")}
+        accent={t("komunitas")}
+        description={t("forumSub")}
         actions={
           <Button asChild className="btn-cta rounded-full px-6">
             <Link href="/forum/create">
               <Plus className="h-4 w-4" aria-hidden="true" />
-              Buat Postingan
+              {t("buatPostingan")}
             </Link>
           </Button>
         }
@@ -282,33 +307,33 @@ export default function ForumPage() {
 
       <div className="mx-auto w-full max-w-7xl space-y-12 px-4 pt-12 sm:px-6">
       {/* Category rail */}
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter kategori">
+      <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("filterKategori")}>
         {categories.map((c) => (
           <button
-            key={c}
+            key={c.id}
             type="button"
-            aria-pressed={category === c}
-            onClick={() => setCategory(c)}
+            aria-pressed={category === c.id}
+            onClick={() => setCategory(c.id)}
             className={
-              category === c
+              category === c.id
                 ? 'rounded-full bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground'
                 : 'rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-accent/60 hover:text-primary'
             }
           >
-            {c}
+            {c.section === "common" ? tc(c.key) : t(c.key)}
           </button>
         ))}
       </div>
 
       <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr]">
-        {/* Feed — editorial divider list, not card stack */}
+        {/* Feed, editorial divider list, not card stack */}
         <div className="min-w-0">
           {filtered.length === 0 ? (
             <div className="rounded-xl border border-border">
               <EmptyState
                 icon={<SearchX className="h-6 w-6" aria-hidden="true" />}
-                title="Tidak ada postingan"
-                message="Coba kata kunci atau kategori lain."
+                title={t("tidakAdaPost")}
+                message={t("cobaKataKategori")}
               />
             </div>
           ) : (
@@ -341,15 +366,15 @@ export default function ForumPage() {
                     </p>
 
                     <div className="mt-3.5 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                      <Badge variant="secondary">{post.category}</Badge>
+                      <Badge variant="secondary"><CategoryText category={post.category} /></Badge>
                       <span
                         className="inline-flex items-center gap-1.5"
-                        aria-label={`${post.comments.length} komentar`}
+                        aria-label={t("komentarN", { n: post.comments.length })}
                       >
                         <MessageSquare className="h-4 w-4" aria-hidden="true" />
                         {post.comments.length}
                       </span>
-                      <span className="inline-flex items-center gap-1.5" aria-label={`${post.views} dilihat`}>
+                      <span className="inline-flex items-center gap-1.5" aria-label={t("dilihat", { n: post.views })}>
                         <Eye className="h-4 w-4" aria-hidden="true" />
                         <span className="tnum">{post.views}</span>
                       </span>
@@ -361,7 +386,7 @@ export default function ForumPage() {
                     size="sm"
                     onClick={() => toggleLike(post.id)}
                     aria-pressed={!!liked[post.id]}
-                    aria-label={`Suka postingan: ${post.title}`}
+                    aria-label={t("sukaPost", { title: post.title })}
                     className={
                       liked[post.id]
                         ? 'h-fit gap-1.5 self-start rounded-full text-destructive'
@@ -385,44 +410,43 @@ export default function ForumPage() {
           )}
         </div>
 
-        {/* Sidebar — writer rail on sage wash */}
+        {/* Sidebar, writer rail on sage wash */}
         <aside className="hidden lg:block">
           <div className="sticky top-24 space-y-6">
             <div className="rounded-xl border border-border sage-wash p-6">
               <div className="flex items-center gap-2">
                 <PenLine className="h-4 w-4 text-primary" aria-hidden="true" />
-                <h3 className="font-bold tracking-tight">Panduan Forum</h3>
+                <h3 className="font-bold tracking-tight">{t("panduanForum")}</h3>
               </div>
               <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
-                <li>Gunakan judul yang jelas dan spesifik.</li>
-                <li>Sertakan foto tanaman bila memungkinkan.</li>
-                <li>Saling menghormati, tanpa promosi berlebihan.</li>
+                <li>{t("panduan1")}</li>
+                <li>{t("panduan2")}</li>
+                <li>{t("panduan3")}</li>
               </ol>
               <Button
                 variant="outline"
                 size="sm"
                 className="mt-4 rounded-full bg-card hover:bg-accent/60"
-                onClick={() => toast.info('Panduan dibuka (demo)')}
+                aria-label={t("bacaPanduanKomunitas")}
               >
-                Baca Panduan
+                {t("bacaPanduan")}
               </Button>
             </div>
 
             <div className="overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
-              <h3 className="border-b border-border px-5 py-3.5 text-sm font-bold">Topik Populer</h3>
+              <h3 className="border-b border-border px-5 py-3.5 text-sm font-bold">{t("topikPopuler")}</h3>
               <ul className="divide-y divide-border">
-                {topics.map((t) => (
-                  <li key={t.tag}>
+                {topics.map((topic) => (
+                  <li key={topic.tag}>
                     <button
                       type="button"
                       onClick={() => {
-                        setQuery(t.tag);
-                        toast.info(`Menampilkan topik #${t.tag}`);
+                        setQuery(topic.tag);
                       }}
                       className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors hover:bg-secondary"
                     >
-                      <span className="text-sm font-medium">#{t.tag}</span>
-                      <span className="tnum text-xs text-muted-foreground">{t.count} diskusi</span>
+                      <span className="text-sm font-medium">#{topic.tag}</span>
+                      <span className="tnum text-xs text-muted-foreground">{t("diskusiN", { n: topic.count })}</span>
                     </button>
                   </li>
                 ))}
@@ -434,11 +458,11 @@ export default function ForumPage() {
       </div>
 
       <PageCtaBand
-        heading="Punya cerita tanaman untuk dibagikan?"
-        accent="dibagikan"
-        description="Pengalamanmu bisa jadi jawaban untuk pemilik tanaman lain."
-        primary={{ href: '/forum/create', label: 'Buat Postingan' }}
-        secondary={{ href: '/scan', label: 'Scan Tanaman' }}
+        heading={t("punyaCerita")}
+        accent={lang === "id" ? "dibagikan" : "shared"}
+        description={t("pengalamanJawaban")}
+        primary={{ href: '/forum/create', label: t('buatPostingan') }}
+        secondary={{ href: '/scan', label: tc('scanTanaman') }}
       />
     </div>
   );

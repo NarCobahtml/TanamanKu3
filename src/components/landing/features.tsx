@@ -1,36 +1,25 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { Bug, Droplets, History, MessagesSquare, ScanLine } from 'lucide-react';
 import TkRevealClient from './tk-reveal-client';
 
 const FEATURES = [
-  {
-    icon: Droplets,
-    title: 'Jadwal Penyiraman',
-    desc: 'Pengingat pintar yang menyesuaikan jenis tanaman. Tidak ada lagi tanaman kekeringan atau terlalu basah.',
-  },
-  {
-    icon: MessagesSquare,
-    title: 'Forum Komunitas',
-    desc: 'Tanya pemilik tanaman lain dan ahli terverifikasi. Bagikan pengalaman, dapatkan jawaban.',
-  },
-  {
-    icon: History,
-    title: 'Riwayat Diagnosis',
-    desc: 'Setiap scan tersimpan rapi. Pantau pemulihan tanaman dari minggu ke minggu.',
-  },
-  {
-    icon: Bug,
-    title: 'Identifikasi Hama',
-    desc: 'Bukan hanya penyakit: kutu daun, tungau, dan hama umum lain ikut terdeteksi dari foto yang sama.',
-  },
+  { icon: Droplets, tk: 'sir', key: 'sirJudul', desc: 'sirDesc' },
+  { icon: MessagesSquare, tk: 'forum', key: 'forumJudul', desc: 'forumDesc' },
+  { icon: History, tk: 'riw', key: 'riwJudul', desc: 'riwDesc' },
+  { icon: Bug, tk: 'hama', key: 'hamaJudul', desc: 'hamaDesc' },
 ] as const;
 
 export default function Features() {
+  const t = useTranslations('landing.features');
+  const ti = (k: string) => t(`items.${k}`);
   return (
-    <section id="fitur" className="bg-background py-24 sm:py-32 px-6">
+    <section id="fitur" className="bg-[#FFFFFF] py-24 sm:py-32 px-6">
       <div className="max-w-[1200px] mx-auto">
         <TkRevealClient>
-          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] text-ink max-w-2xl">
-            Apa yang TanamanKu lakukan untuk tanamanmu
+          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] text-[#171B17] max-w-2xl">
+            {t("judul")}
           </h2>
         </TkRevealClient>
 
@@ -43,27 +32,26 @@ export default function Features() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 flex flex-col items-start gap-3">
-                <span className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center backdrop-blur-sm">
+                <span className="w-10 h-10 rounded-full bg-[#1B5E3F]/20 text-[#1B5E3F] flex items-center justify-center backdrop-blur-sm">
                   <ScanLine className="w-5 h-5" />
                 </span>
-                <h3 className="text-xl font-semibold text-white">Scan Penyakit AI</h3>
+                <h3 className="text-xl font-semibold text-white">{t("scanJudul")}</h3>
                 <p className="text-sm text-white/70 leading-relaxed max-w-md">
-                  Deteksi 30+ jenis penyakit daun dalam hitungan detik, lengkap dengan tingkat
-                  keyakinan hasil.
+                  {t("scanDesc")}
                 </p>
               </div>
             </div>
 
             {FEATURES.map((f) => (
               <div
-                key={f.title}
-                className="rounded-md border border-background bg-white p-6 sm:p-8 hover:border-primary/30 transition-colors"
+                key={f.key}
+                className="rounded-md border border-[#E5E8E4] bg-white p-6 sm:p-8 hover:border-[#1B5E3F]/30 transition-colors"
               >
-                <span className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                <span className="w-10 h-10 rounded-full bg-[#E7EFE9] text-[#1B5E3F] flex items-center justify-center">
                   <f.icon className="w-5 h-5" />
                 </span>
-                <h3 className="text-lg font-semibold text-ink mt-5">{f.title}</h3>
-                <p className="text-sm text-ink/70 leading-relaxed mt-2">{f.desc}</p>
+                <h3 className="text-lg font-semibold text-[#171B17] mt-5">{ti(f.key)}</h3>
+                <p className="text-sm text-[#59625D] leading-relaxed mt-2">{ti(f.desc)}</p>
               </div>
             ))}
           </div>

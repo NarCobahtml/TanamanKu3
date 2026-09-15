@@ -1,29 +1,33 @@
+'use client';
+
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import TkRevealClient from './tk-reveal-client';
 
 export default function CtaBand() {
+  const t = useTranslations('landing.cta');
   return (
-    <section className="bg-background py-28 sm:py-36 px-6">
+    <section className="bg-[#FFFFFF] py-28 sm:py-36 px-6">
       <TkRevealClient>
         <div className="max-w-[1200px] mx-auto flex flex-col items-center">
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-medium tracking-[-0.03em] leading-[1.05] text-ink max-w-3xl mx-auto text-center">
-            Siap tahu apa yang terjadi pada tanamanmu?
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-medium tracking-[-0.03em] leading-[1.05] text-[#171B17] max-w-3xl mx-auto text-center">
+            {t('judul')}
           </h2>
-          <p className="mt-6 text-ink/70 text-center max-w-md mx-auto">
-            Daftar gratis dan dapatkan 5 scan pertama tanpa biaya.
+          <p className="mt-6 text-[#59625D] text-center max-w-md mx-auto">
+            {t('sub')}
           </p>
           <div className="mt-10 flex flex-wrap gap-4 justify-center">
             <Link
               href="/register"
-              className="bg-primary hover:bg-[#123526] text-white text-base font-semibold px-8 py-4 rounded-full transition-all hover:scale-[1.03] active:scale-95"
+              className="bg-[#1B5E3F] hover:bg-[#123526] text-white text-base font-semibold px-8 py-4 rounded-full transition-all hover:scale-[1.03] active:scale-95"
             >
-              Mulai Sekarang
+              {t('mulai')}
             </Link>
             <Link
               href="/login"
-              className="border border-background hover:border-primary text-ink text-base font-medium px-8 py-4 rounded-full transition-colors"
+              className="border border-[#CED4CE] hover:border-[#1B5E3F] text-[#171B17] text-base font-medium px-8 py-4 rounded-full transition-colors"
             >
-              Sudah punya akun? Masuk
+              {t('sudah')} {t('masuk')}
             </Link>
           </div>
         </div>

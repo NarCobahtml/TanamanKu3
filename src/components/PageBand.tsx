@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-/** Render title with `accent` phrase in Playfair italic — landing DNA. */
+/** Render title with `accent` phrase in Playfair italic, landing DNA. */
 function TitleAccent({ title, accent }: { title: string; accent?: string }) {
   if (!accent || !title.includes(accent)) return <>{title}</>;
   const i = title.indexOf(accent);
@@ -15,7 +15,7 @@ function TitleAccent({ title, accent }: { title: string; accent?: string }) {
 }
 
 /**
- * Editorial hero band — landing gen-5 DNA. Overline label, big tracking-tight
+ * Editorial hero band, landing gen-5 DNA. Overline label, big tracking-tight
  * title (Playfair italic accent), muted description, actions right; entrance
  * via hero-anim hero-fade. sage-wash default (content pages), ink for
  * contrast (scan result), plain for small detail sub-heroes.
@@ -58,7 +58,7 @@ export function PageBand({
       >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
           <div className="min-w-0 max-w-3xl">
-            {overline && <p className={cn('overline', ink && 'text-primary/10')}>{overline}</p>}
+            {overline && <p className={cn('overline', ink && 'text-[#7ed8a4]')}>{overline}</p>}
             <h1
               className={cn(
                 'hero-anim hero-fade mt-3 text-4xl font-extrabold leading-[1.05] tracking-[-0.03em] md:text-5xl',
@@ -71,7 +71,7 @@ export function PageBand({
               <p
                 className={cn(
                   'hero-anim hero-fade mt-5 max-w-2xl text-base leading-relaxed',
-                  ink ? 'text-ink/15' : 'text-muted-foreground',
+                  ink ? 'text-white/80' : 'text-muted-foreground',
                 )}
                 style={{ animationDelay: '0.15s' }}
               >
