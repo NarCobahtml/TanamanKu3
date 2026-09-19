@@ -16,13 +16,29 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
+      position="bottom-left"
       className="toaster group"
+      toastOptions={{
+        classNames: {
+          toast:
+            "group toast group-[.toaster]:bg-card group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg group-[.toaster]:rounded-xl group-[.toaster]:p-4 group-[.toaster]:gap-3 group-[.toaster]:font-medium",
+          description: "group-[.toast]:text-muted-foreground",
+          actionButton:
+            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+          cancelButton:
+            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+          success: "text-emerald-700 dark:text-emerald-400",
+          error: "text-rose-700 dark:text-rose-400",
+          warning: "text-amber-700 dark:text-amber-400",
+          info: "text-blue-700 dark:text-blue-400",
+        },
+      }}
       icons={{
-        success: <CircleCheckIcon className="size-4" />,
-        info: <InfoIcon className="size-4" />,
-        warning: <TriangleAlertIcon className="size-4" />,
-        error: <OctagonXIcon className="size-4" />,
-        loading: <Loader2Icon className="size-4 animate-spin" />,
+        success: <CircleCheckIcon className="size-5 shrink-0 text-emerald-500" />,
+        info: <InfoIcon className="size-5 shrink-0 text-blue-500" />,
+        warning: <TriangleAlertIcon className="size-5 shrink-0 text-amber-500" />,
+        error: <OctagonXIcon className="size-5 shrink-0 text-rose-500" />,
+        loading: <Loader2Icon className="size-5 shrink-0 animate-spin text-muted-foreground" />,
       }}
       style={
         {

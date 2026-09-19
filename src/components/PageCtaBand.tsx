@@ -27,7 +27,7 @@ export function PageCtaBand({
     : null;
 
   return (
-    <section className="ink-panel mt-20">
+    <section className="ink-panel mt-20 hidden md:block w-full">
       <div className="mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 md:py-28">
         <h2 className="mx-auto max-w-3xl text-3xl font-extrabold leading-[1.08] tracking-[-0.03em] text-white md:text-5xl">
           {parts ? (

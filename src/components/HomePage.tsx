@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useLocale } from '@/components/LocaleProvider';
+import { useAuth } from '@/lib/use-auth';
 import { tanamanList } from './TanamanPage';
 
 /* ---- placeholder data (frontend-only, no backend) ---- */
@@ -62,8 +63,11 @@ export default function HomePage() {
   const t = useTranslations("home");
   const ts = useTranslations("siram");
   const { locale: lang } = useLocale();
+  const { user } = useAuth();
   const heroPlant = tanamanList[0];
   const heroHealth = healthById[heroPlant.id] ?? { level: 'sehat' as HealthLevel, lastScan: '-' };
+
+  const firstName = user?.name ? user.name.trim().split(/\s+/)[0] : 'Pekebun';
 
   return (
     <div>
@@ -77,7 +81,7 @@ export default function HomePage() {
           >
             {t('welcomePrefix')}
             <span>, </span>
-            <span className="font-playfair">Alex</span>.
+            <span className="font-playfair">{firstName}</span>.
           </h1>
           <p
             className="hero-anim hero-fade mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground"
@@ -92,22 +96,22 @@ export default function HomePage() {
             style={{ animationDelay: '0.4s' }}
           >
             <div>
-              <dt className="overline">{t("tanamanDipantau")}</dt>
+              <dt className="overline min-h-[2.5rem] sm:min-h-0">{t("tanamanDipantau")}</dt>
               <dd className="tnum mt-2 text-4xl font-extrabold leading-none md:text-5xl">{total}</dd>
             </div>
             <div>
-              <dt className="overline">{t("sehat")}</dt>
+              <dt className="overline min-h-[2.5rem] sm:min-h-0">{t("sehat")}</dt>
               <dd className="tnum mt-2 text-4xl font-extrabold leading-none text-success md:text-5xl">{sehat}</dd>
             </div>
             <div>
-              <dt className="overline">{t("terdeteksiPenyakit")}</dt>
+              <dt className="overline min-h-[2.5rem] sm:min-h-0">{t("terdeteksiPenyakit")}</dt>
               <dd className="tnum mt-2 text-4xl font-extrabold leading-none text-destructive md:text-5xl">{penyakit}</dd>
             </div>
           </dl>
 
           {/* proportional status bar */}
           <div
-            className="hero-anim hero-fade mt-8 flex h-1.5 w-full overflow-hidden bg-white"
+            className="hero-anim hero-fade mt-8 flex h-1.5 w-full overflow-hidden bg-muted"
             role="img"
             aria-label={`${sehat} ${t("sehat")}, ${penyakit} ${t("terdeteksiPenyakit")}`}
             style={{ animationDelay: '0.5s' }}
@@ -161,7 +165,6 @@ export default function HomePage() {
               <span className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-black/70 to-transparent p-5 pt-12">
                 <span className="min-w-0">
                   <span className="block font-bold text-white">{heroPlant.nama}</span>
-                  <span className="block text-sm italic text-white/80">{heroPlant.species}</span>
                 </span>
                 <span className="flex items-center gap-2 text-sm font-semibold text-white">
                   {t("lihatDetail")}
@@ -204,12 +207,37 @@ export default function HomePage() {
       {/* ============ MAIN CANVAS ============ */}
       <div className="mx-auto w-full max-w-7xl space-y-20 px-4 pb-4 pt-16 sm:px-6">
         {/* --- Recent diagnosis: structured report table + watering task rail --- */}
-        <div className="grid gap-12 lg:grid-cols-[1.7fr_1fr]">
-          <section aria-labelledby="scan-terakhir">
+        <div className="grid min-w-0 gap-12 lg:grid-cols-[1.7fr_1fr]">
+          <section aria-labelledby="scan-terakhir" className="min-w-0">
             <SectionHeader title={t("diagnosis")} href="/riwayat" />
             <TkRevealClient>
               <div className="overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
-                <div className="overflow-x-auto">
+                {/* Mobile scan cards (< sm) */}
+                <div className="divide-y divide-border sm:hidden">
+                  {recentScans.map((s) => (
+                    <div key={s.id} className="flex items-center justify-between gap-3 p-4">
+                      <div className="flex min-w-0 items-center gap-3">
+                        {s.photo ? (
+                          <img src={s.photo} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                        ) : (
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                            <Leaf className="h-4 w-4" aria-hidden="true" />
+                          </span>
+                        )}
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-foreground">{s.plant}</p>
+                          <p className="line-clamp-1 text-xs text-muted-foreground">{s.disease}</p>
+                        </div>
+                      </div>
+                      <div className="shrink-0">
+                        <HealthStatus level={s.level} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Full table (>= sm) */}
+                <div className="hidden overflow-x-auto sm:block">
                   <Table>
                     <TableHeader>
                       <TableRow className="border-border bg-secondary/50 hover:bg-secondary/50">
@@ -254,11 +282,11 @@ export default function HomePage() {
           </section>
 
           {/* Watering: task list on sage wash block */}
-          <section aria-labelledby="penyiraman-hari-ini">
+          <section aria-labelledby="penyiraman-hari-ini" className="min-w-0">
             <TkRevealClient>
-              <div className="sage-wash rounded-xl border border-border p-6">
+              <div className="sage-wash rounded-xl border border-border p-4 sm:p-6">
                 <div className="mb-4 flex items-center justify-between gap-4">
-                  <h2 id="penyiraman-hari-ini" className="flex items-center gap-2 text-lg font-bold tracking-tight">
+                  <h2 id="penyiraman-hari-ini" className="flex items-center gap-2 text-base font-bold tracking-tight sm:text-lg">
                     <Droplets className="h-5 w-5 text-primary" aria-hidden="true" />
                     {t("penyiramanHariIni")}
                   </h2>
@@ -274,15 +302,15 @@ export default function HomePage() {
                       overdue: { label: t('terlewat'), icon: TriangleAlert, cls: 'text-destructive' },
                     }[w.state];
                     return (
-                      <li key={w.time + w.plant} className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-secondary/60">
-                        <div className="flex items-center gap-4">
-                          <span className="tnum w-12 text-sm font-bold">{w.time}</span>
-                          <div>
-                            <p className="text-sm font-medium">{w.plant}</p>
-                            <p className="text-sm text-muted-foreground">{t("penyiraman")}</p>
+                      <li key={w.time + w.plant} className="flex items-center justify-between gap-3 p-3.5 transition-colors hover:bg-secondary/60 sm:px-5 sm:py-4">
+                        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                          <span className="tnum w-11 shrink-0 text-xs font-bold sm:w-12 sm:text-sm">{w.time}</span>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">{w.plant}</p>
+                            <p className="text-xs text-muted-foreground sm:text-sm">{t("penyiraman")}</p>
                           </div>
                         </div>
-                        <span className={'flex items-center gap-2 text-sm font-semibold ' + meta.cls}>
+                        <span className={'flex shrink-0 items-center gap-1.5 text-xs font-semibold sm:text-sm ' + meta.cls}>
                           <meta.icon className="h-4 w-4" aria-hidden="true" />
                           {meta.label}
                         </span>
@@ -340,7 +368,6 @@ export default function HomePage() {
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <h3 className="text-lg font-bold leading-tight">{plant.nama}</h3>
-                          <p className="text-sm italic text-muted-foreground">{plant.species}</p>
                         </div>
                         <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden="true" />
                       </div>

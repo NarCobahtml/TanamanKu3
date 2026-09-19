@@ -34,13 +34,13 @@ const POSTS = [
 export default function Community() {
   const t = useTranslations('landing.community');
   return (
-    <section id="komunitas" className="bg-[#F2F5F2] py-24 sm:py-32 px-6">
+    <section id="komunitas" className="bg-secondary py-24 sm:py-32 px-6">
       <div className="max-w-[1200px] mx-auto">
         <TkRevealClient>
-          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] text-[#171B17] max-w-2xl">
+          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] text-foreground max-w-2xl">
             {t('judul')}
           </h2>
-          <p className="mt-5 text-sm sm:text-base text-[#59625D] leading-relaxed max-w-xl">
+          <p className="mt-5 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl">
             Ribuan pengguna saling membantu mengenali penyakit dan berbagi cara perawatan yang
             terbukti.
           </p>
@@ -51,7 +51,7 @@ export default function Community() {
             {POSTS.map((post) => (
               <div
                 key={post.name}
-                className="rounded-md border border-[#E5E8E4] bg-white p-6 flex flex-col gap-4"
+                className="rounded-md border border-border bg-card p-6 flex flex-col gap-4"
               >
                 <div className="flex items-center gap-3">
                   <img
@@ -60,13 +60,13 @@ export default function Community() {
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div>
-                    <p className="text-sm font-semibold text-[#171B17]">{post.name}</p>
-                    <p className="text-xs text-[#59625D]">{post.role}</p>
+                    <p className="text-sm font-semibold text-card-foreground">{post.name}</p>
+                    <p className="text-xs text-muted-foreground">{post.role}</p>
                   </div>
                 </div>
-                <h3 className="text-base font-semibold text-[#171B17]">{post.title}</h3>
-                <p className="text-sm text-[#59625D] leading-relaxed">{post.body}</p>
-                <div className="mt-auto flex items-center gap-1.5 text-xs text-[#59625D]">
+                <h3 className="text-base font-semibold text-card-foreground">{post.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{post.body}</p>
+                <div className="mt-auto flex items-center gap-1.5 text-xs text-muted-foreground">
                   <MessageCircle className="w-3.5 h-3.5" />
                   {post.replies}
                 </div>

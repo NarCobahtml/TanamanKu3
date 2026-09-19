@@ -26,14 +26,15 @@ enum NotificationType {
 
 
 model User {
-  id        String   @id @db.Uuid // sama dengan auth.users.id, BUKAN cuid()
-  email     String   @unique
-  name      String
-  role      Role     @default(USER)
-  bio       String?
-  photoUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(USER)
+  bio          String?
+  photoUrl     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   plants        Plant[]
   scanRecords   ScanRecord[]
@@ -47,15 +48,18 @@ model User {
 model Plant {
   id           String    @id @default(cuid())
   name         String
-  type         String
+  type         String    @default("hias")
+  kategori     String?   @default("Indoor")
+  status       String?   @default("terjadwal")
+  nextWater    String?   @default("nw.berikutnyaBesok")
   plantingDate DateTime?
   photoUrl     String?
   notes        String?
-  userId       String
+  userId       String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
   wateringSchedule WateringSchedule?
   scans            ScanRecord[]
 

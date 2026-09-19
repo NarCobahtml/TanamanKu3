@@ -14,6 +14,14 @@ export default function TkRevealClient({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    // Immediately mark visible if already within or near viewport
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 100 && rect.bottom > -50) {
+      el.classList.add('is-visible');
+      return;
+    }
+
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -21,7 +29,7 @@ export default function TkRevealClient({
           io.disconnect();
         }
       },
-      { threshold: 0.12 }
+      { threshold: 0.01, rootMargin: '0px 0px 80px 0px' }
     );
     io.observe(el);
     return () => io.disconnect();

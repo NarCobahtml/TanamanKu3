@@ -13,6 +13,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { HealthStatus, type HealthLevel } from '@/components/HealthStatus';
 import { EmptyState } from '@/components/EmptyState';
 import { PageCtaBand } from '@/components/PageCtaBand';
+import { FilterPill } from '@/components/ui/filter-pill';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
 
 type Status = 'sehat' | 'terinfeksi';
@@ -87,23 +88,17 @@ export default function RiwayatPage() {
         </div>
       </PageHeader>
 
-      <div className="mx-auto w-full max-w-7xl space-y-16 px-4 pb-4 pt-14 sm:px-6">
+      <div className="mx-auto w-full max-w-7xl space-y-16 px-4 pb-24 pt-14 sm:px-6">
         {/* Filter pills */}
         <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={tr("filterStatus")}>
           {filters.map((f) => (
-            <button
+            <FilterPill
               key={f.id}
-              type="button"
-              aria-pressed={filter === f.id}
+              active={filter === f.id}
               onClick={() => setFilter(f.id)}
-              className={
-                filter === f.id
-                  ? 'rounded-full bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground'
-                  : 'rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-accent/60 hover:text-primary'
-              }
             >
               {t(f.id)}
-            </button>
+            </FilterPill>
           ))}
         </div>
 

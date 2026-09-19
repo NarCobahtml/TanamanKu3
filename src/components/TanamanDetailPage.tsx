@@ -16,23 +16,8 @@ import { EmptyState } from '@/components/EmptyState';
 import { HealthStatus, type HealthLevel } from '@/components/HealthStatus';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import EditTanamanDialog from '@/components/EditTanamanDialog';
+import HapusTanamanDialog from '@/components/HapusTanamanDialog';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
@@ -60,7 +45,6 @@ export default function TanamanDetailPage({ id }: { id: string }) {
   const [sudahDisiram, setSudahDisiram] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [hapusOpen, setHapusOpen] = useState(false);
-  const [form, setForm] = useState({ nama: '', jenis: '', lokasi: '' });
 
   const t = tanamanList.find((x) => x.id === id);
 
@@ -83,7 +67,6 @@ export default function TanamanDetailPage({ id }: { id: string }) {
     sudahDisiram || t.status === 'terjadwal' ? ts('terjadwal') : t.status === 'hari-ini' ? ts('hariIni') : ts('terlambat');
 
   const infoTanaman: Array<{ label: string; value: string }> = [
-    { label: td('spesies'), value: t.species },
     { label: td('kategori'), value: tc(t.kategori.toLowerCase()) },
     { label: td('lokasiRak'), value: td('rakJendela') },
     { label: td('frekuensiSiram'), value: td('frek2hari') },
@@ -92,11 +75,6 @@ export default function TanamanDetailPage({ id }: { id: string }) {
 
   const tandaiSiram = () => {
     setSudahDisiram(true);
-  };
-
-  const simpanEdit = () => {
-    if (!form.nama.trim()) return;
-    setEditOpen(false);
   };
 
   return (
@@ -119,7 +97,6 @@ export default function TanamanDetailPage({ id }: { id: string }) {
               <h1 className="mt-3 text-4xl font-extrabold leading-[1.05] tracking-[-0.03em] md:text-5xl">
                 <span className="font-playfair">{t.nama.split(' ')[0]}</span> {t.nama.split(' ').slice(1).join(' ')}
               </h1>
-              <p className="mt-2 text-base italic text-muted-foreground">{t.species}</p>
               <p className="mt-4 flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Droplets className="h-4 w-4 text-primary" aria-hidden="true" />
                 {sudahDisiram ? td('sudahDisiram') : ts(t.nextWater)}
@@ -138,10 +115,7 @@ export default function TanamanDetailPage({ id }: { id: string }) {
               <Button
                 variant="outline"
                 className="rounded-full bg-card hover:bg-accent/60"
-                onClick={() => {
-                  setForm({ nama: t.nama, jenis: t.nama.split(' ')[0], lokasi: td('rakJendela') });
-                  setEditOpen(true);
-                }}
+                onClick={() => setEditOpen(true)}
               >
                 <Pencil className="h-4 w-4" aria-hidden="true" />
                 {tc("edit")}
@@ -264,80 +238,18 @@ export default function TanamanDetailPage({ id }: { id: string }) {
         </aside>
       </div>
 
-      {/* Dialog edit */}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{td("editTanaman")}</DialogTitle>
-            <DialogDescription>{td("perbaruiDetail", { nama: t.nama })}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-nama">{ts("namaTanaman")}</Label>
-              <Input
-                id="edit-nama"
-                value={form.nama}
-                onChange={(e) => setForm({ ...form, nama: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-jenis">{ts("jenis")}</Label>
-              <Select value={form.jenis} onValueChange={(v) => setForm({ ...form, jenis: v })}>
-                <SelectTrigger id="edit-jenis" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {['Monstera', 'Sansevieria', 'Ficus', 'Pothos', 'Calathea', 'Tomat', 'Cabai', 'Melati'].map((j) => (
-                    <SelectItem key={j} value={j}>
-                      {j}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-lokasi">{ts("lokasi")}</Label>
-              <Input
-                id="edit-lokasi"
-                value={form.lokasi}
-                onChange={(e) => setForm({ ...form, lokasi: e.target.value })}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditOpen(false)}>
-              {tc("batal")}
-            </Button>
-            <Button onClick={simpanEdit}>{tc("simpan")}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog hapus */}
-      <Dialog open={hapusOpen} onOpenChange={setHapusOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{td("hapusTanaman")}</DialogTitle>
-            <DialogDescription>
-              {td("hapusDetail", { nama: t.nama })}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setHapusOpen(false)}>
-              {tc("batal")}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                setHapusOpen(false);
-                router.push('/siram');
-              }}
-            >
-              {tc("hapus")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Edit and Delete Dialogs */}
+      <EditTanamanDialog
+        plant={t}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
+      <HapusTanamanDialog
+        plant={t}
+        open={hapusOpen}
+        onOpenChange={setHapusOpen}
+        onDeleted={() => router.push('/siram')}
+      />
     </div>
   );
 }

@@ -1,157 +1,271 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { ArrowLeft, ChevronDown, ImagePlus, Loader2, Send } from 'lucide-react';
+import { ArrowLeft, Camera, ChevronDown, Loader2, Send, User, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { ActionButton } from '@/components/ui/action-button';
 
 const categories = [
-  { value: 'Hama & Penyakit', key: 'hama' },
-  { value: 'Perawatan', key: 'perawatan' },
-  { value: 'Nutrisi', key: 'nutrisi' },
-  { value: 'Tanya Ahli', key: 'tanyaAhli', common: true },
+  'Hama & Penyakit',
+  'Perawatan',
+  'Nutrisi',
+  'Tanya Ahli',
 ];
 
 export default function CreatePostPage() {
   const router = useRouter();
-  const t = useTranslations('forum');
-  const tc = useTranslations('common');
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
   const [content, setContent] = useState('');
-  const [photoName, setPhotoName] = useState<string | null>(null);
+  const [category, setCategory] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
 
-  const valid = title.trim() !== '' && category !== '' && content.trim() !== '';
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.category-dropdown-container')) {
+        setShowCategoryDropdown(false);
+      }
+    };
+    window.addEventListener('click', handleOutside);
+    return () => window.removeEventListener('click', handleOutside);
+  }, []);
 
   const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    setPhotoName(file ? file.name : null);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
+  const removePhoto = () => {
+    setPhotoPreview(null);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const valid = title.trim() !== '' && content.trim() !== '';
+
   const publish = () => {
-    if (!valid || publishing) return;
+    if (!valid || publishing) {
+      if (!title.trim()) {
+        toast.error('Silakan isi judul postingan terlebih dahulu');
+        return;
+      }
+      if (!content.trim()) {
+        toast.error('Silakan isi konten postingan terlebih dahulu');
+        return;
+      }
+      return;
+    }
+
     setPublishing(true);
-    // ponytail: fake latency, replace with POST /api/forum when backend exists
+
+    try {
+      // Save new post to localStorage so it appears in forum
+      let currentUserName = 'Alex Saputra';
+      try {
+        const storedUser = localStorage.getItem('tumbuhkita_user');
+        if (storedUser) {
+          const u = JSON.parse(storedUser);
+          if (u?.name) currentUserName = u.name;
+        }
+      } catch {
+        // fallback to default name
+      }
+
+      const initials = currentUserName
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+
+      const newPost = {
+        id: `post-${Date.now()}`,
+        author: currentUserName,
+        initials: initials || 'AS',
+        avatar: '/figma-assets/profile-1.jpg',
+        time: 'Baru saja',
+        category: category || 'Perawatan',
+        title: title.trim(),
+        excerpt: content.trim().slice(0, 120) + (content.length > 120 ? '...' : ''),
+        content: [content.trim()],
+        image: photoPreview || undefined,
+        likes: 0,
+        views: 1,
+        comments: [],
+      };
+
+      const existing = localStorage.getItem('tumbuhkita_custom_posts');
+      const posts = existing ? JSON.parse(existing) : [];
+      posts.unshift(newPost);
+      localStorage.setItem('tumbuhkita_custom_posts', JSON.stringify(posts));
+      toast.success('Postingan berhasil diterbitkan!');
+    } catch (e) {
+      console.error(e);
+    }
+
     setTimeout(() => {
       router.push('/forum');
-    }, 800);
+    }, 500);
   };
 
   return (
-    <form
-      className="mx-auto w-full max-w-xl px-4 py-12 sm:px-6"
-      onSubmit={(e) => {
-        e.preventDefault();
-        publish();
-      }}
-    >
-      {/* header back, seperti mobile */}
-      <div className="mb-6 flex items-center gap-3">
+    <div className="min-h-dvh flex flex-col bg-[#F8FAF8] dark:bg-background text-foreground antialiased">
+      {/* Top Bar Header */}
+      <header className="sticky top-0 z-20 flex h-14 w-full items-center border-b border-[#EEF2EE] dark:border-border/40 bg-card px-4 sm:px-6">
         <button
           type="button"
           onClick={() => router.back()}
-          aria-label={tc("kembali")}
-          className="grid size-9 place-items-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-accent/60"
+          aria-label="Kembali"
+          className="flex size-9 items-center justify-center -ml-1 text-foreground hover:opacity-75 transition-opacity cursor-pointer"
         >
-          <ArrowLeft className="size-4" aria-hidden="true" />
+          <ArrowLeft className="size-6 stroke-[2.2]" aria-hidden="true" />
         </button>
-        <h1 className="text-lg font-bold tracking-tight">{t("postinganBaru")}</h1>
-      </div>
+        <h1 className="ml-3 text-[18px] font-semibold text-foreground tracking-tight">
+          Postingan Baru
+        </h1>
+      </header>
 
-      {/* identitas, seperti mobile */}
-      <div className="flex items-center gap-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/figma-assets/profile-1.jpg"
-          alt=""
-          className="size-11 rounded-full"
-        />
-        <p className="font-semibold">Alex Saputra</p>
-      </div>
-
-      {/* fields polos, tanpa label, tanpa kartu */}
-      <div className="mt-4 space-y-3">
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder={t("judulPlaceholder")}
-          aria-label={t("judul")}
-          className="w-full bg-transparent text-lg font-semibold tracking-tight outline-none placeholder:text-muted-foreground/70 placeholder:font-normal"
-        />
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder={t("isiPlaceholder")}
-          aria-label={t("isi")}
-          rows={6}
-          className="w-full resize-none bg-transparent text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground/70"
-        />
-
-        {photoName && (
-          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <ImagePlus className="size-4 shrink-0" aria-hidden="true" />
-            <span className="truncate">{photoName}</span>
-          </p>
-        )}
-
-        {/* tools row, kategori + kamera, seperti mobile */}
-        <div className="flex items-center gap-3 pt-1">
-          <div className="relative">
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              aria-label={t("pilihKategori")}
-              className="h-10 appearance-none rounded-lg border border-border bg-card pl-4 pr-9 text-sm text-foreground outline-none transition-colors hover:border-primary/40 focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="">{t("pilihKategori")}</option>
-              {categories.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.common ? tc(c.key) : t(c.key)}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
+      {/* Main Content Area */}
+      <main className="flex-1 w-full max-w-xl mx-auto px-4 sm:px-6 pt-5 pb-28 relative">
+        <div className="flex gap-4">
+          {/* Left: Avatar + Vertical Thread Line */}
+          <div className="flex flex-col items-center shrink-0">
+            <div className="size-11 sm:size-12 rounded-full bg-[#E5EBE5] dark:bg-muted/80 flex items-center justify-center text-[#738273] dark:text-muted-foreground">
+              <User className="size-6 stroke-[1.8]" aria-hidden="true" />
+            </div>
+            {/* Thread line extending down */}
+            <div className="w-[1.5px] min-h-[140px] flex-1 bg-[#DEE5DE] dark:bg-border/60 mt-2 mb-2" />
           </div>
 
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            aria-label={t("tambahGambar")}
-            className="grid size-10 place-items-center rounded-lg border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:bg-accent/40"
-          >
-            <ImagePlus className="size-5" aria-hidden="true" />
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            onChange={onPick}
-            aria-label={t("pilihFoto")}
-          />
-        </div>
-      </div>
+          {/* Right: Form inputs and tool controls */}
+          <div className="flex-1 min-w-0 pt-0.5">
+            {/* Judul Postingan... */}
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Judul Postingan..."
+              className="w-full bg-transparent text-[17px] sm:text-[18px] font-semibold tracking-tight text-foreground placeholder:text-[#A0ABA0] dark:placeholder:text-muted-foreground/60 outline-none border-none p-0 focus:ring-0"
+              autoFocus
+            />
 
-      {/* submit, pill hijau seperti mobile */}
-      <button
-        type="submit"
-        disabled={!valid || publishing}
-        className="btn-cta mt-6 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-      >
-        {publishing ? (
-          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-        ) : (
-          <Send className="size-4" aria-hidden="true" />
-        )}
-        {publishing ? t('mempublikasikan') : tc('posting')}
-      </button>
-    </form>
+            {/* Apa yang ingin Anda bagikan hari ini? */}
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Apa yang ingin Anda bagikan hari ini?"
+              rows={5}
+              className="w-full bg-transparent text-[15px] sm:text-[16px] text-foreground placeholder:text-[#A0ABA0] dark:placeholder:text-muted-foreground/60 outline-none border-none p-0 focus:ring-0 resize-none leading-relaxed mt-2.5 min-h-[110px]"
+            />
+
+            {/* Photo preview if chosen */}
+            {photoPreview && (
+              <div className="relative mt-3 inline-block rounded-xl overflow-hidden border border-border/80 shadow-sm max-w-xs">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photoPreview}
+                  alt="Preview foto tanaman"
+                  className="max-h-48 w-auto rounded-xl object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={removePhoto}
+                  aria-label="Hapus foto"
+                  className="absolute top-2 right-2 size-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Tools Row: Category selector pill + Camera icon */}
+            <div className="flex items-center gap-2.5 mt-4 relative">
+              {/* Category selector */}
+              <div className="relative category-dropdown-container">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowCategoryDropdown((prev) => !prev);
+                  }}
+                  className={cn(
+                    "h-9 rounded-full border border-[#D5DDD5] dark:border-border/80 bg-white dark:bg-card px-3.5 flex items-center gap-2 text-xs sm:text-[13px] font-normal transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.03)] cursor-pointer",
+                    category ? "text-foreground font-medium" : "text-[#556355] dark:text-muted-foreground"
+                  )}
+                >
+                  <span>{category || 'Pilih Kategori'}</span>
+                  <ChevronDown className="size-4 text-foreground/60" aria-hidden="true" />
+                </button>
+
+                {showCategoryDropdown && (
+                  <div className="absolute left-0 top-full mt-1.5 z-30 w-48 rounded-xl border border-border bg-card p-1.5 shadow-lg animate-in fade-in-50 zoom-in-95">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          setCategory(cat);
+                          setShowCategoryDropdown(false);
+                        }}
+                        className={cn(
+                          "w-full text-left px-3 py-2 text-xs sm:text-sm rounded-lg transition-colors cursor-pointer",
+                          category === cat
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "hover:bg-accent text-foreground"
+                        )}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Camera Button */}
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                aria-label="Tambah foto"
+                className="size-9 sm:size-10 rounded-xl border border-[#D5DDD5] dark:border-border/80 bg-white dark:bg-card flex items-center justify-center text-[#556355] dark:text-foreground/75 hover:border-foreground/40 hover:text-foreground transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.03)] cursor-pointer"
+              >
+                <Camera className="size-[18px] sm:size-5 stroke-[1.8]" aria-hidden="true" />
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={onPick}
+                aria-label="Pilih foto dari galeri atau kamera"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Floating "Posting" Action Button at bottom right */}
+        <ActionButton
+          type="button"
+          onClick={publish}
+          disabled={!valid || publishing}
+          icon={publishing ? Loader2 : Send}
+          size="lg"
+          className="fixed bottom-6 right-6 z-30 shadow-lg"
+        >
+          {publishing ? 'Memproses...' : 'Posting'}
+        </ActionButton>
+      </main>
+    </div>
   );
 }

@@ -1,13 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogOut, Pencil, Sparkles, UserCog, CreditCard, Bell, BellRing } from 'lucide-react';
+import Link from 'next/link';
+import { LogOut, UserCog, CreditCard, Bell, BellRing, Camera, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useTheme } from 'next-themes';
 import { useLocale as useLocaleSetting } from '@/components/LocaleProvider';
+import { useMounted } from '@/lib/use-mounted';
+import { useAuth } from '@/lib/use-auth';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -18,68 +23,95 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import TkRevealClient from '@/components/landing/tk-reveal-client';
+import { SettingsSwitch } from '@/components/profile/SettingsSwitch';
+import { SettingsHeading } from '@/components/profile/SettingsHeading';
+import { CurrentPlanCard } from '@/components/subscription/CurrentPlanCard';
+import { ScanUsageCard } from '@/components/subscription/ScanUsageCard';
 import { cn } from '@/lib/utils';
-
-/** Manual switch - track w-9 h-5, knob w-4 (rounded-full allowed: switch track). */
-function Switch({
-  checked,
-  onCheckedChange,
-  label,
-}: {
-  checked: boolean;
-  onCheckedChange: (v: boolean) => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={() => onCheckedChange(!checked)}
-      className={
-        checked
-          ? 'relative h-5 w-9 shrink-0 rounded-full bg-primary transition-colors'
-          : 'relative h-5 w-9 shrink-0 rounded-full bg-secondary border border-border transition-colors'
-      }
-    >
-      <span
-        className={
-          checked
-            ? 'absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform translate-x-4'
-            : 'absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform'
-        }
-      />
-    </button>
-  );
-}
-
-/** Settings section heading: icon + title + description row. */
-function SettingsHeading({ icon: Icon, title, desc }: { icon: typeof UserCog; title: string; desc?: string }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="grid size-9 shrink-0 place-items-center bg-accent text-primary">
-        <Icon className="h-4 w-4" aria-hidden="true" />
-      </span>
-      <div>
-        <h2 className="text-lg font-bold tracking-tight">{title}</h2>
-        {desc && <p className="mt-0.5 text-sm text-muted-foreground">{desc}</p>}
-      </div>
-    </div>
-  );
-}
 
 export default function ProfilPage() {
   const t = useTranslations('profil');
   const tc = useTranslations('common');
   const { locale, setLocale } = useLocaleSetting();
   const router = useRouter();
-  const [name, setName] = useState('Alex Saputra');
-  const [email, setEmail] = useState('alex.saputra@email.com');
+  const { user, initials, logout, updateProfile } = useAuth();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [photo, setPhoto] = useState<string>('');
+  const [saving, setSaving] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
-  const [theme, setTheme] = useState<'terang' | 'gelap'>('terang');
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const mounted = useMounted();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email || '');
+      setPhoto(user.photoUrl || '');
+    }
+  }, [user]);
+
+  const displayName = user?.name || name || 'Pengguna TanamanKu';
+  const displayEmail = user?.email || email || 'Belum masuk';
+
+  const joinedDate = useMemo(() => {
+    if (!user?.createdAt) return locale === 'id' ? 'Januari 2026' : 'January 2026';
+    const d = new Date(user.createdAt);
+    return d.toLocaleDateString(locale === 'id' ? 'id-ID' : 'en-US', { month: 'long', year: 'numeric' });
+  }, [user?.createdAt, locale]);
+
+  const onPickPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error('Ukuran foto maksimal 3MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPhoto(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!name.trim() || saving) return;
+    setSaving(true);
+    try {
+      const updated = await updateProfile({
+        name: name.trim(),
+        photoUrl: photo,
+      });
+      if (updated?.photoUrl !== undefined) {
+        setPhoto(updated.photoUrl || '');
+      }
+      toast.success('Profil berhasil diperbarui');
+      setEditOpen(false);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Gagal memperbarui profil';
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await logout();
+      toast.success('Berhasil keluar dari akun');
+    } catch {
+      toast.error('Gagal keluar');
+    } finally {
+      setLoggingOut(false);
+      setLogoutOpen(false);
+    }
+  };
+
+  const currentTheme = mounted ? (theme === 'dark' || resolvedTheme === 'dark' ? 'gelap' : 'terang') : 'terang';
   const [checked, setChecked] = useState<Record<string, boolean>>({
     reminder: true,
     result: true,
@@ -106,10 +138,10 @@ export default function ProfilPage() {
 
   return (
     <div>
-      <div className="mx-auto grid w-full max-w-7xl items-start gap-12 px-4 pt-12 sm:px-6 lg:grid-cols-[220px_1fr]">
-        {/* Settings nav rail, vertical pills, konsisten pill nav */}
-        <nav className="lg:sticky lg:top-24" aria-label={t('akun')}>
-          <ul className="flex gap-1.5 overflow-x-auto lg:flex-col lg:gap-1">
+      <div className="mx-auto grid w-full max-w-7xl items-start gap-6 px-4 pt-6 pb-24 sm:gap-12 sm:px-6 sm:pt-12 sm:pb-16 lg:grid-cols-[220px_1fr]">
+        {/* Settings nav rail (desktop only) */}
+        <nav className="hidden lg:sticky lg:top-24 lg:block" aria-label={t('akun')}>
+          <ul className="flex flex-col gap-1">
             {navItems.map((item) => (
               <li key={item.href} className="shrink-0">
                 <a
@@ -134,99 +166,88 @@ export default function ProfilPage() {
           </ul>
         </nav>
 
-        <div className="space-y-16">
+        <div className="space-y-8 sm:space-y-16">
           {/* Account */}
-          <TkRevealClient>
           <section id="account" className="scroll-mt-24">
-            <SettingsHeading icon={UserCog} title={t('akun')} />
-            <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
-              <div className="flex flex-wrap items-center gap-4 p-5">
-                <Avatar className="h-16 w-16">
-                  <AvatarFallback className="text-xl font-semibold">AS</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold">{name}</p>
-                  <p className="text-sm text-muted-foreground">{email}</p>
+            <SettingsHeading title={t('akun')} />
+            <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40 sm:mt-5">
+              <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                <div className="flex items-center gap-3.5">
+                  <Avatar className="h-14 w-14 sm:h-16 sm:w-16">
+                    {user?.photoUrl ? (
+                      <AvatarImage src={user.photoUrl} alt={displayName} className="object-cover" />
+                    ) : null}
+                    <AvatarFallback className="text-lg font-semibold sm:text-xl">{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-base sm:text-lg">{displayName}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{displayEmail}</p>
+                  </div>
                 </div>
-                <Button variant="outline" size="sm" className="rounded-full" onClick={() => setEditOpen(true)}>
-                  <Pencil className="h-4 w-4" aria-hidden="true" />
+                <Button variant="outline" size="sm" className="h-10 rounded-full w-full sm:w-auto px-5" onClick={() => setEditOpen(true)}>
                   {t('editProfil')}
                 </Button>
               </div>
-              <dl className="grid gap-x-8 gap-y-4 border-t border-border bg-secondary/30 p-5 sm:grid-cols-2">
+              <dl className="grid grid-cols-2 gap-4 border-t border-border bg-secondary/30 p-4 sm:p-5">
                 <div>
                   <dt className="text-xs font-medium text-muted-foreground">{t('nama')}</dt>
-                  <dd className="mt-0.5 text-sm">{name}</dd>
+                  <dd className="mt-0.5 text-sm font-medium">{displayName}</dd>
                 </div>
                 <div>
                   <dt className="text-xs font-medium text-muted-foreground">{t('email')}</dt>
-                  <dd className="mt-0.5 text-sm">{email}</dd>
+                  <dd className="mt-0.5 text-sm font-medium truncate">{displayEmail}</dd>
                 </div>
                 <div>
                   <dt className="text-xs font-medium text-muted-foreground">{t('bergabung')}</dt>
-                  <dd className="mt-0.5 text-sm">{locale === 'id' ? 'Januari 2026' : 'January 2026'}</dd>
+                  <dd className="mt-0.5 text-sm font-medium">{joinedDate}</dd>
                 </div>
                 <div>
                   <dt className="text-xs font-medium text-muted-foreground">{t('paket')}</dt>
-                  <dd className="mt-0.5 text-sm">{t('gratis')}</dd>
+                  <dd className="mt-0.5 text-sm font-medium">{user?.role === 'ADMIN' ? 'Admin' : t('gratis')}</dd>
                 </div>
               </dl>
             </div>
           </section>
-          </TkRevealClient>
 
           {/* Subscription */}
-          <TkRevealClient>
-          <section id="subscription" className="rule scroll-mt-24 pt-14">
-            <SettingsHeading icon={CreditCard} title={t('langganan')} desc={t('preferensiDesc').split('.')[0] + '.'} />
-            <div className="mt-5 grid gap-8 md:grid-cols-2">
-              <div className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-accent/30">
-                <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="font-semibold">{t('paketGratis')}</h3>
-                  <Badge variant="outline">{t('aktif')}</Badge>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">{t('paketDesc')}</p>
-                <p className="mt-4 text-sm text-muted-foreground">{t('perpanjangan')}</p>
-              </div>
-              <div className="rounded-xl border border-border p-5 sage-wash">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">{t('penggunaanScan')}</span>
-                  <span className="tnum text-muted-foreground">{t('bulanIni', { count: 3 })}</span>
-                </div>
-                <div
-                  className="mt-2 h-1.5 rounded-full bg-white"
-                  role="progressbar"
-                  aria-label="3/5"
-                  aria-valuenow={3}
-                  aria-valuemin={0}
-                  aria-valuemax={5}
-                >
-                  <div className="h-full w-[60%] rounded-full bg-primary" />
-                </div>
+          <section id="subscription" className="rule scroll-mt-24 pt-6 sm:pt-14">
+            <SettingsHeading title={t('langganan')} desc={t('preferensiDesc').split('.')[0] + '.'} />
+            <div className="mt-4 grid gap-4 sm:mt-5 sm:gap-8 md:grid-cols-2">
+              <CurrentPlanCard
+                name={t('paketGratis')}
+                badgeLabel={t('aktif')}
+                description={t('paketDesc')}
+                renewalNote={t('perpanjangan')}
+              />
+              <ScanUsageCard
+                title={t('penggunaanScan')}
+                usageText={t('bulanIni', { count: 3 })}
+                current={3}
+                max={5}
+              >
                 <Button
-                  className="btn-cta mt-4 w-full rounded-full"
-                  onClick={() => undefined}
+                  asChild
+                  className="btn-cta mt-4 h-11 w-full rounded-full text-sm font-semibold cursor-pointer"
                 >
-                  <Sparkles className="h-4 w-4" aria-hidden="true" />
-                  {t('upgrade')}
+                  <Link href="/langganan">
+                    {t('upgrade')}
+                  </Link>
                 </Button>
-              </div>
+              </ScanUsageCard>
             </div>
           </section>
-          </TkRevealClient>
 
           {/* Preferences */}
-          <TkRevealClient>
-          <section id="preferences" className="rule scroll-mt-24 pt-14">
-            <SettingsHeading icon={Bell} title={t('preferensi')} desc={t('preferensiDesc')} />
-            <div className="mt-5 divide-y divide-border rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
+          <section id="preferences" className="rule scroll-mt-24 pt-6 sm:pt-14">
+            <SettingsHeading title={t('preferensi')} desc={t('preferensiDesc')} />
+            <div className="mt-4 divide-y divide-border rounded-xl border border-border bg-card transition-colors hover:border-primary/40 sm:mt-5">
               {notifPrefs.map((p) => (
-                <div key={p.id} className="flex items-center justify-between gap-4 p-5">
-                  <div>
+                <div key={p.id} className="flex items-center justify-between gap-3 p-4 sm:p-5">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium">{p.label}</p>
-                    <p className="mt-0.5 text-sm text-muted-foreground">{p.desc}</p>
+                    <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">{p.desc}</p>
                   </div>
-                  <Switch
+                  <SettingsSwitch
                     checked={!!checked[p.id]}
                     onCheckedChange={(v) => togglePref(p.id, v)}
                     label={p.label}
@@ -234,20 +255,20 @@ export default function ProfilPage() {
                 </div>
               ))}
               {/* Language, switcher fungsional */}
-              <div className="flex items-center justify-between gap-4 p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5">
                 <div>
                   <p className="text-sm font-medium">{t('bahasa')}</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{t('bahasaDesc')}</p>
+                  <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">{t('bahasaDesc')}</p>
                 </div>
-                <div className="flex gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label={t('bahasa')}>
+                <div className="flex gap-1 rounded-full border border-border bg-card p-1 self-start sm:self-auto" role="group" aria-label={t('bahasa')}>
                   <button
                     type="button"
                     aria-pressed={locale === 'id'}
                     onClick={() => setLocale('id')}
                     className={
                       locale === 'id'
-                        ? 'rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'
-                        : 'rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground'
+                        ? 'rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground min-h-[36px]'
+                        : 'rounded-full px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground min-h-[36px]'
                     }
                   >
                     Indonesia
@@ -258,40 +279,40 @@ export default function ProfilPage() {
                     onClick={() => setLocale('en')}
                     className={
                       locale === 'en'
-                        ? 'rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'
-                        : 'rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground'
+                        ? 'rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground min-h-[36px]'
+                        : 'rounded-full px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground min-h-[36px]'
                     }
                   >
                     English
                   </button>
                 </div>
               </div>
-              <div className="flex items-center justify-between gap-4 p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5">
                 <div>
                   <p className="text-sm font-medium">{t('tampilan')}</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{t('tampilanDesc')}</p>
+                  <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">{t('tampilanDesc')}</p>
                 </div>
-                <div className="flex gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label={t('tampilan')}>
+                <div className="flex gap-1 rounded-full border border-border bg-card p-1 self-start sm:self-auto" role="group" aria-label={t('tampilan')}>
                   <button
                     type="button"
-                    aria-pressed={theme === 'terang'}
-                    onClick={() => setTheme('terang')}
+                    aria-pressed={currentTheme === 'terang'}
+                    onClick={() => setTheme('light')}
                     className={
-                      theme === 'terang'
-                        ? 'rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'
-                        : 'rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground'
+                      currentTheme === 'terang'
+                        ? 'rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground min-h-[36px]'
+                        : 'rounded-full px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground min-h-[36px]'
                     }
                   >
                     {t('terang')}
                   </button>
                   <button
                     type="button"
-                    aria-pressed={theme === 'gelap'}
-                    onClick={() => setTheme('gelap')}
+                    aria-pressed={currentTheme === 'gelap'}
+                    onClick={() => setTheme('dark')}
                     className={
-                      theme === 'gelap'
-                        ? 'rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'
-                        : 'rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground'
+                      currentTheme === 'gelap'
+                        ? 'rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground min-h-[36px]'
+                        : 'rounded-full px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground min-h-[36px]'
                     }
                   >
                     {t('gelap')}
@@ -300,26 +321,22 @@ export default function ProfilPage() {
               </div>
             </div>
           </section>
-          </TkRevealClient>
 
           {/* Logout */}
-          <TkRevealClient>
-          <section id="keluar" className="rule scroll-mt-24 pt-14">
-            <div className="rounded-xl border-l-2 border-destructive bg-destructive/5 p-5">
-              <div className="flex flex-wrap items-center justify-between gap-4">
+          <section id="keluar" className="rule scroll-mt-24 pt-6 sm:pt-14 pb-8">
+            <div className="rounded-xl border-l-2 border-destructive bg-destructive/5 p-4 sm:p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h3 className="font-semibold">{t('keluarAkun')}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{t('keluarDesc')}</p>
+                  <h3 className="font-semibold text-base">{t('keluarAkun')}</h3>
+                  <p className="mt-1 text-xs sm:text-sm text-muted-foreground">{t('keluarDesc')}</p>
                 </div>
-                <Button variant="destructive" className="rounded-full" onClick={() => setLogoutOpen(true)}>
-                  <LogOut className="h-4 w-4" aria-hidden="true" />
+                <Button variant="destructive" className="h-11 w-full rounded-full sm:w-auto px-6 font-semibold" onClick={() => setLogoutOpen(true)}>
                   {t('keluar')}
                 </Button>
               </div>
             </div>
-            <p className="mt-6 text-xs text-muted-foreground">{t('versi')}</p>
+            <p className="mt-4 text-xs text-muted-foreground sm:mt-6">{t('versi')}</p>
           </section>
-          </TkRevealClient>
         </div>
       </div>
 
@@ -331,12 +348,65 @@ export default function ProfilPage() {
             <DialogDescription>{t('perbaruiInfo')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            {/* Foto Profil */}
+            <div className="flex flex-col items-center justify-center pb-2 pt-1">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="relative group block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer"
+                  aria-label="Ubah foto profil"
+                >
+                  <Avatar className="h-24 w-24 border-2 border-primary/20 shadow-sm transition-opacity group-hover:opacity-90">
+                    {photo ? (
+                      <AvatarImage src={photo} alt={name || 'Avatar'} className="object-cover" />
+                    ) : user?.photoUrl ? (
+                      <AvatarImage src={user.photoUrl} alt={name || 'Avatar'} className="object-cover" />
+                    ) : null}
+                    <AvatarFallback className="text-2xl font-bold bg-accent text-primary">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <span
+                    className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-primary-foreground shadow-md transition-transform group-hover:scale-110 active:scale-95 flex items-center justify-center"
+                    aria-hidden="true"
+                  >
+                    <Camera className="size-4" />
+                  </span>
+                </button>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={onPickPhoto}
+              />
+
+              {(photo || user?.photoUrl) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPhoto('');
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                  className="mt-2 text-xs text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+                >
+                  Hapus foto
+                </button>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="profile-name">{t('nama')}</Label>
               <Input
                 id="profile-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                placeholder="Nama Lengkap"
+                required
               />
             </div>
             <div className="space-y-2">
@@ -345,41 +415,40 @@ export default function ProfilPage() {
                 id="profile-email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                disabled
+                className="bg-muted text-muted-foreground cursor-not-allowed opacity-75"
               />
+              <p className="text-[11px] text-muted-foreground">Email akun terdaftar dan tidak dapat diubah langsung.</p>
             </div>
           </div>
           <DialogFooter>
-            <Button
-              onClick={() => {
-                setEditOpen(false);
-              }}
-            >
-              {tc('simpan')}
+            <Button variant="outline" onClick={() => setEditOpen(false)} disabled={saving}>
+              {tc('batal')}
+            </Button>
+            <Button onClick={handleSaveProfile} disabled={saving || !name.trim()}>
+              {saving ? 'Menyimpan...' : tc('simpan')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Logout confirm dialog */}
+      {/* Logout confirmation dialog */}
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('keluarJudul')}</DialogTitle>
-            <DialogDescription>{t('keluarDesc')}</DialogDescription>
+            <DialogTitle>{t('keluarAkun')}</DialogTitle>
+            <DialogDescription>{t('konfirmasiKeluar')}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLogoutOpen(false)}>
+            <Button variant="outline" onClick={() => setLogoutOpen(false)} disabled={loggingOut}>
               {tc('batal')}
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
-                setLogoutOpen(false);
-                router.push('/login');
-              }}
+              disabled={loggingOut}
+              onClick={handleLogout}
             >
-              {t('keluar')}
+              {loggingOut ? 'Memproses...' : t('keluar')}
             </Button>
           </DialogFooter>
         </DialogContent>
