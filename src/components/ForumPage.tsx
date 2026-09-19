@@ -1,17 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLocale } from '@/components/LocaleProvider';
 import Link from 'next/link';
-import { Eye, Heart, MessageSquare, Plus, SearchX, PenLine } from 'lucide-react';
+import { Heart, MessageSquare, Plus, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/ui/action-button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { PageCtaBand } from '@/components/PageCtaBand';
-import TkRevealClient from '@/components/landing/tk-reveal-client';
+import { FilterPill } from '@/components/ui/filter-pill';
+import { ForumPostCard } from '@/components/forum/ForumPostCard';
+import { cn } from '@/lib/utils';
 
 const categories = [
   { id: 'Semua', key: 'semua', section: 'common' },
@@ -35,7 +38,7 @@ export type ForumPost = {
   image?: string;
   likes: number;
   views: number;
-  comments: { author: string; time: string; text: string }[];
+  comments: { author: string; time: string; text: string; replyTo?: string }[];
 };
 
 export const forumPosts: ForumPost[] = [
@@ -72,6 +75,7 @@ export const forumPosts: ForumPost[] = [
       {
         author: 'Dewi Anggraini',
         time: '30 mnt lalu',
+        replyTo: 'Rina Kartika',
         text: 'Setuju dengan yang atas. Saya pernah alami sama, ganti media tanam pakai perlit + kulit pinus, daun baru muncul sehat semua.',
       },
     ],
@@ -104,6 +108,7 @@ export const forumPosts: ForumPost[] = [
       {
         author: 'Ayu Lestari',
         time: '2 jam lalu',
+        replyTo: 'Hendra Wijaya',
         text: 'Kalau keritingnya ringan setelah pemupukan biasanya masih aman, tinggal siram lebih banyak untuk melarutkan garam pupuk.',
       },
       {
@@ -140,6 +145,7 @@ export const forumPosts: ForumPost[] = [
       {
         author: 'Tania Susanti',
         time: '18 jam lalu',
+        replyTo: 'Dewi Anggraini',
         text: 'Tambahkan: pindahkan beberapa jam ke dekat jendela tiap akhir pekan biar tetap dapat cahaya.',
       },
     ],
@@ -202,6 +208,7 @@ export const forumPosts: ForumPost[] = [
       {
         author: 'Budi Santoso',
         time: '1 hari yang lalu',
+        replyTo: 'Sari Melati',
         text: 'Semprot air sabun cuci piring encer dulu 2-3 hari sekali. Kalau daun baru yang muncul tetap keriting tanpa ada hama, baru curiga virus dan pisahkan tanamannya.',
       },
     ],
@@ -273,8 +280,23 @@ export default function ForumPage() {
   const [category, setCategory] = useState('Semua');
   const [query, setQuery] = useState('');
   const [liked, setLiked] = useState<Record<string, boolean>>({});
+  const [allPosts, setAllPosts] = useState<ForumPost[]>(forumPosts);
 
-  const filtered = forumPosts.filter(
+  useEffect(() => {
+    try {
+      const existing = localStorage.getItem('tumbuhkita_custom_posts');
+      if (existing) {
+        const parsed = JSON.parse(existing);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAllPosts([...parsed, ...forumPosts]);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const filtered = allPosts.filter(
     (p) =>
       (category === 'Semua' || p.category === category) &&
       (query.trim() === '' ||
@@ -296,32 +318,23 @@ export default function ForumPage() {
         accent={t("komunitas")}
         description={t("forumSub")}
         actions={
-          <Button asChild className="btn-cta rounded-full px-6">
-            <Link href="/forum/create">
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              {t("buatPostingan")}
-            </Link>
-          </Button>
+          <ActionButton href="/forum/create">
+            {t("buatPostingan")}
+          </ActionButton>
         }
       />
 
-      <div className="mx-auto w-full max-w-7xl space-y-12 px-4 pt-12 sm:px-6">
+      <div className="mx-auto w-full max-w-7xl space-y-12 px-4 pt-12 pb-24 sm:px-6">
       {/* Category rail */}
       <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("filterKategori")}>
         {categories.map((c) => (
-          <button
+          <FilterPill
             key={c.id}
-            type="button"
-            aria-pressed={category === c.id}
+            active={category === c.id}
             onClick={() => setCategory(c.id)}
-            className={
-              category === c.id
-                ? 'rounded-full bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground'
-                : 'rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-accent/60 hover:text-primary'
-            }
           >
             {c.section === "common" ? tc(c.key) : t(c.key)}
-          </button>
+          </FilterPill>
         ))}
       </div>
 
@@ -337,102 +350,22 @@ export default function ForumPage() {
               />
             </div>
           ) : (
-            <TkRevealClient>
             <div className="divide-y divide-border">
               {filtered.map((post) => (
-                <article key={post.id} className="group flex gap-5 py-7 transition-colors first:pt-0 hover:bg-accent/20">
-                  <Avatar size="lg" className="hidden shrink-0 sm:flex">
-                    <AvatarImage src={post.avatar} alt={post.author} />
-                    <AvatarFallback className="bg-accent text-sm font-semibold text-primary">
-                      {post.initials}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-medium">{post.author}</span>
-                      {post.expert && <ExpertBadge />}
-                      <span className="text-xs text-muted-foreground">{post.time}</span>
-                    </div>
-
-                    <h2 className="mt-1.5 text-lg font-bold leading-snug tracking-tight">
-                      <Link href={`/forum/${post.id}`} className="transition-colors group-hover:text-primary">
-                        {post.title}
-                      </Link>
-                    </h2>
-
-                    <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
-                      {post.excerpt}
-                    </p>
-
-                    <div className="mt-3.5 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                      <Badge variant="secondary"><CategoryText category={post.category} /></Badge>
-                      <span
-                        className="inline-flex items-center gap-1.5"
-                        aria-label={t("komentarN", { n: post.comments.length })}
-                      >
-                        <MessageSquare className="h-4 w-4" aria-hidden="true" />
-                        {post.comments.length}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5" aria-label={t("dilihat", { n: post.views })}>
-                        <Eye className="h-4 w-4" aria-hidden="true" />
-                        <span className="tnum">{post.views}</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleLike(post.id)}
-                    aria-pressed={!!liked[post.id]}
-                    aria-label={t("sukaPost", { title: post.title })}
-                    className={
-                      liked[post.id]
-                        ? 'h-fit gap-1.5 self-start rounded-full text-destructive'
-                        : 'h-fit gap-1.5 self-start rounded-full text-muted-foreground'
-                    }
-                  >
-                    <Heart
-                      className={
-                        liked[post.id]
-                          ? 'h-4 w-4 fill-destructive text-destructive'
-                          : 'h-4 w-4'
-                      }
-                      aria-hidden="true"
-                    />
-                    <span className="tnum">{likeCount(post)}</span>
-                  </Button>
-                </article>
+                <ForumPostCard
+                  key={post.id}
+                  post={post}
+                  isLiked={!!liked[post.id]}
+                  onToggleLike={() => toggleLike(post.id)}
+                />
               ))}
             </div>
-            </TkRevealClient>
           )}
         </div>
 
         {/* Sidebar, writer rail on sage wash */}
         <aside className="hidden lg:block">
           <div className="sticky top-24 space-y-6">
-            <div className="rounded-xl border border-border sage-wash p-6">
-              <div className="flex items-center gap-2">
-                <PenLine className="h-4 w-4 text-primary" aria-hidden="true" />
-                <h3 className="font-bold tracking-tight">{t("panduanForum")}</h3>
-              </div>
-              <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
-                <li>{t("panduan1")}</li>
-                <li>{t("panduan2")}</li>
-                <li>{t("panduan3")}</li>
-              </ol>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-4 rounded-full bg-card hover:bg-accent/60"
-                aria-label={t("bacaPanduanKomunitas")}
-              >
-                {t("bacaPanduan")}
-              </Button>
-            </div>
-
             <div className="overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
               <h3 className="border-b border-border px-5 py-3.5 text-sm font-bold">{t("topikPopuler")}</h3>
               <ul className="divide-y divide-border">

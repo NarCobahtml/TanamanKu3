@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowUpRight, Eye, EyeOff, Loader2, Quote } from "lucide-react";
+import { AlertCircle, ArrowUpRight, Eye, EyeOff, Loader2, Quote } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useTranslations } from "next-intl";
 
@@ -18,16 +18,91 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [pending, setPending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirm: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSocialLogin = (provider: "google" | "facebook") => {
+    setErrorMessage(null);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://chxnfvwdldhpickamcpm.supabase.co";
+    const redirectUrl = `${window.location.origin}/auth/callback`;
+    window.location.href = `${supabaseUrl}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectUrl)}`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!isLogin && !agreed) return;
+    setErrorMessage(null);
+
+    const formEl = e.currentTarget;
+    const rawData = new FormData(formEl);
+    const email = (formData.email || (rawData.get("email") as string) || "").trim();
+    const password = formData.password || (rawData.get("password") as string) || "";
+    const name = (formData.name || (rawData.get("name") as string) || "").trim();
+    const confirm = formData.confirm || (rawData.get("confirm") as string) || "";
+
+    const checkboxEl = document.getElementById("agree");
+    const isAgreeChecked =
+      agreed ||
+      checkboxEl?.getAttribute("data-state") === "checked" ||
+      checkboxEl?.getAttribute("aria-checked") === "true";
+
+    if (!isLogin && !isAgreeChecked) {
+      setErrorMessage("Silakan setujui Ketentuan dan Kebijakan Privasi terlebih dahulu.");
+      return;
+    }
+
+    if (!isLogin && password !== confirm) {
+      setErrorMessage("Password dan konfirmasi password tidak cocok.");
+      return;
+    }
+
     setPending(true);
-    // ponytail: placeholder auth, replace with real API call when backend exists
-    setTimeout(() => {
+
+    try {
+      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
+      const payload = isLogin
+        ? { email, password }
+        : { email, password, name };
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setErrorMessage(data.error?.message || "Terjadi kesalahan saat memproses permintaan.");
+        setPending(false);
+        return;
+      }
+
+      // Store user session info in localStorage for fast UI reflection
+      if (data.data?.user) {
+        localStorage.setItem("tumbuhkita_user", JSON.stringify(data.data.user));
+        window.dispatchEvent(new Event("auth-changed"));
+      }
+
+      router.push("/home");
+      router.refresh();
+    } catch (err) {
+      console.error("Auth request error:", err);
+      setErrorMessage("Tidak dapat terhubung ke server. Silakan coba lagi.");
       setPending(false);
-      router.push('/siram');
-    }, 900);
+    }
   };
 
   return (
@@ -68,11 +143,20 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
             {isLogin ? t("selamatDatang") : t("bergabung")}
           </h1>
 
+          {errorMessage && (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive flex items-center gap-2">
+              <AlertCircle className="size-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <input
                 type="text"
                 name="name"
+                value={formData.name}
+                onChange={handleChange}
                 placeholder={t("namaLengkap")}
                 autoComplete="name"
                 className={inputClass}
@@ -83,6 +167,8 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
             <input
               type="email"
               name="email"
+              value={formData.email}
+              onChange={handleChange}
               placeholder={t("email")}
               autoComplete="email"
               className={inputClass}
@@ -93,6 +179,8 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
+                value={formData.password}
+                onChange={handleChange}
                 placeholder={t("password")}
                 autoComplete={isLogin ? "current-password" : "new-password"}
                 className={`${inputClass} pr-12`}
@@ -129,6 +217,8 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                   <input
                     type={showConfirm ? "text" : "password"}
                     name="confirm"
+                    value={formData.confirm}
+                    onChange={handleChange}
                     placeholder={t("konfirmasiPassword")}
                     autoComplete="new-password"
                     className={`${inputClass} pr-12`}
@@ -209,6 +299,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
           <div className="space-y-3">
             <button
               type="button"
+              onClick={() => handleSocialLogin("google")}
               className="flex h-12 w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-background text-sm font-medium text-foreground transition-colors hover:bg-secondary/60"
             >
               <svg className="size-5" viewBox="0 0 24 24" aria-hidden="true">
@@ -233,6 +324,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
             </button>
             <button
               type="button"
+              onClick={() => handleSocialLogin("facebook")}
               className="flex h-12 w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-background text-sm font-medium text-foreground transition-colors hover:bg-secondary/60"
             >
               <svg

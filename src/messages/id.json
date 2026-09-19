@@ -419,6 +419,7 @@
     "bagikanJawaban": "Bagikan pengalaman atau jawabanmu…",
     "pengalamanMu": "pengalamanmu",
     "balas": "Balas",
+    "membalas": "Membalas",
     "tulisKomentarAnda": "Tulis komentar Anda...",
     "kirimKomentarAria": "Kirim komentar",
     "avatarAnda": "Avatar Anda",
@@ -630,5 +631,16 @@
   },
   "brand": {
     "beranda": "Beranda"
+  },
+  "notFound": {
+    "title": "Halaman tidak ditemukan",
+    "desc": "Halaman yang kamu cari sudah dipindah atau tidak pernah ada.",
+    "backHome": "Ke Beranda"
+  },
+  "error": {
+    "title": "Terjadi kesalahan",
+    "desc": "Maaf, ada yang gagal saat memuat halaman ini.",
+    "retry": "Coba lagi",
+    "home": "Ke Beranda"
   }
 }

@@ -126,9 +126,9 @@ export default function Hero() {
     >
       <div
         className="absolute inset-0 bg-center bg-cover bg-no-repeat hero-zoom"
-        style={{ backgroundImage: "url('/landing-assets/leaf-natural.webp')" }}
+        style={{ backgroundImage: "url('/landing-assets/ai-mesh.webp')" }}
       />
-      <RevealLayer image="/landing-assets/ai-mesh.webp" cursorX={cursorPos.x} cursorY={cursorPos.y} />
+      <RevealLayer image="/landing-assets/leaf-natural.webp" cursorX={cursorPos.x} cursorY={cursorPos.y} />
       <div className="absolute inset-0 z-40 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
 
       <div className="absolute top-[14%] left-0 right-0 z-50 flex flex-col items-center text-center px-5 pointer-events-none">

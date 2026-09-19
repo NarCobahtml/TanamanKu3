@@ -7,25 +7,25 @@ import TkRevealClient from './tk-reveal-client';
 export default function CtaBand() {
   const t = useTranslations('landing.cta');
   return (
-    <section className="bg-[#FFFFFF] py-28 sm:py-36 px-6">
+    <section className="bg-background py-28 sm:py-36 px-6 hidden md:block">
       <TkRevealClient>
         <div className="max-w-[1200px] mx-auto flex flex-col items-center">
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-medium tracking-[-0.03em] leading-[1.05] text-[#171B17] max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-medium tracking-[-0.03em] leading-[1.05] text-foreground max-w-3xl mx-auto text-center">
             {t('judul')}
           </h2>
-          <p className="mt-6 text-[#59625D] text-center max-w-md mx-auto">
+          <p className="mt-6 text-muted-foreground text-center max-w-md mx-auto">
             {t('sub')}
           </p>
           <div className="mt-10 flex flex-wrap gap-4 justify-center">
             <Link
               href="/register"
-              className="bg-[#1B5E3F] hover:bg-[#123526] text-white text-base font-semibold px-8 py-4 rounded-full transition-all hover:scale-[1.03] active:scale-95"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground text-base font-semibold px-8 py-4 rounded-full transition-all hover:scale-[1.03] active:scale-95 shadow-md"
             >
               {t('mulai')}
             </Link>
             <Link
               href="/login"
-              className="border border-[#CED4CE] hover:border-[#1B5E3F] text-[#171B17] text-base font-medium px-8 py-4 rounded-full transition-colors"
+              className="border border-border hover:border-primary text-foreground text-base font-medium px-8 py-4 rounded-full transition-colors"
             >
               {t('sudah')} {t('masuk')}
             </Link>

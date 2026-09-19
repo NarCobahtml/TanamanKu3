@@ -83,7 +83,7 @@ export default function ScanResultPage() {
           </>
         }
       >
-        <div className="flex flex-wrap items-end gap-x-12 gap-y-6">
+        <div className="flex flex-wrap items-baseline gap-x-12 gap-y-6">
           <div>
             <p className="overline text-[#7ed8a4]">{t("keyakinanModel")}</p>
             <p className="tnum mt-2 text-4xl font-extrabold leading-none text-white md:text-5xl">{accuracy}%</p>
@@ -201,7 +201,7 @@ export default function ScanResultPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-8">
         <Button asChild variant="outline" className="rounded-full bg-card hover:bg-accent/60">
-          <Link href="/">{t("kembaliBeranda")}</Link>
+          <Link href="/home">{t("kembaliBeranda")}</Link>
         </Button>
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <FlaskConical className="h-3.5 w-3.5" aria-hidden="true" />

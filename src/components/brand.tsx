@@ -1,8 +1,10 @@
 'use client';
 
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useTheme } from 'next-themes';
+import { useMounted } from '@/lib/use-mounted';
+import { cn } from '@/lib/utils';
 
 const navItems = [
   { name: "Beranda", href: "/home" },
@@ -16,14 +18,19 @@ export function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function Logo({ className, dark = false }: { className?: string; dark?: boolean }) {
+export function Logo({ className, dark }: { className?: string; dark?: boolean }) {
   const t = useTranslations('nav');
+  const { resolvedTheme } = useTheme();
+  const mounted = useMounted();
+
+  const isDark = dark !== undefined ? dark : (mounted && resolvedTheme === 'dark');
+
   return (
-    <Link href="/" className={cn("flex items-center", className)} aria-label={`TanamanKu, ${t('beranda')}`}>
+    <Link href="/home" className={cn("flex items-center", className)} aria-label={`TanamanKu, ${t('beranda')}`}>
       {/* wordmark resmi dari file Figma (leaf hijau + teks) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={dark ? '/figma-assets/logo-fix.svg' : '/figma-assets/logo-fix-ink.svg'}
+        src={isDark ? '/figma-assets/logo-fix.svg' : '/figma-assets/logo-fix-ink.svg'}
         alt="TanamanKu"
         className="h-8 w-auto"
       />

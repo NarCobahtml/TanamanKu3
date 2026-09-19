@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Heart, Share2, ArrowLeft, MessageSquare } from 'lucide-react';
+import { Heart, Share2, ArrowLeft, MessageSquare, Reply, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +20,8 @@ export default function ForumDetailPage({ id }: { id: string }) {
   const [likes, setLikes] = useState(post.likes);
   const [comments, setComments] = useState(post.comments);
   const [draft, setDraft] = useState('');
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   const toggleLike = () => {
     if (liked) {
@@ -34,8 +36,17 @@ export default function ForumDetailPage({ id }: { id: string }) {
   const submitComment = () => {
     const text = draft.trim();
     if (!text) return;
-    setComments((list) => [...list, { author: 'Alex Saputra', time: t('baruSaja'), text }]);
+    setComments((list) => [
+      ...list,
+      {
+        author: 'Alex Saputra',
+        time: t('baruSaja'),
+        text,
+        replyTo: replyingTo || undefined,
+      },
+    ]);
     setDraft('');
+    setReplyingTo(null);
   };
 
   return (
@@ -143,7 +154,7 @@ export default function ForumDetailPage({ id }: { id: string }) {
             <TkRevealClient>
               <ul className="mt-6 divide-y divide-border border-t border-border">
                 {comments.map((c, i) => (
-                  <li key={i} className="flex items-start gap-3 py-5 transition-colors hover:bg-accent/20">
+                  <li key={i} className={cn('flex items-start gap-3 py-5 transition-colors hover:bg-accent/20', c.replyTo && 'ml-8 sm:ml-12 border-l-2 border-primary/30 pl-4 -mb-px')}>
                     <Avatar>
                       <AvatarFallback className="bg-secondary text-xs font-semibold">
                         {c.author
@@ -154,11 +165,28 @@ export default function ForumDetailPage({ id }: { id: string }) {
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
+                      {c.replyTo && (
+                        <p className="mb-0.5 text-xs text-muted-foreground">
+                          {t('membalas')} <span className="font-medium text-primary">@{c.replyTo}</span>
+                        </p>
+                      )}
                       <p className="text-sm">
                         <span className="font-medium">{c.author}</span>{' '}
                         <span className="text-muted-foreground">· {c.time}</span>
                       </p>
                       <p className="mt-1 text-sm leading-6">{c.text}</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReplyingTo(c.author);
+                          commentInputRef.current?.focus();
+                          commentInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }}
+                        className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary transition-colors hover:text-primary/80 hover:underline cursor-pointer"
+                      >
+                        <Reply className="h-3.5 w-3.5" aria-hidden="true" />
+                        {t("balas")}
+                      </button>
                     </div>
                   </li>
                 ))}
@@ -167,19 +195,46 @@ export default function ForumDetailPage({ id }: { id: string }) {
 
             {/* Composer */}
             <div className="mt-8 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40">
+              {replyingTo && (
+                <div className="mb-3 flex items-center justify-between rounded-lg border border-primary/20 bg-accent/60 px-3.5 py-2 text-xs">
+                  <span className="text-foreground">
+                    {t('membalas')} <strong className="font-semibold text-primary">@{replyingTo}</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setReplyingTo(null)}
+                    className="rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                    aria-label="Batalkan balasan"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               <label htmlFor="comment" className="text-sm font-semibold">
-                {t("tulisKomentar")}
+                {replyingTo ? `${t("balas")} @${replyingTo}` : t("tulisKomentar")}
               </label>
               <Textarea
                 id="comment"
+                ref={commentInputRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder={t("bagikanJawaban")}
+                placeholder={replyingTo ? `Tulis balasan untuk @${replyingTo}...` : t("bagikanJawaban")}
                 className="mt-2"
               />
-              <div className="mt-3 flex justify-end">
-                <Button onClick={submitComment} className="btn-cta rounded-full" disabled={draft.trim() === ''}>
-                  {t("kirimKomentar")}
+              <div className="mt-3 flex items-center justify-between">
+                {replyingTo ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setReplyingTo(null)}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Batal Balas
+                  </Button>
+                ) : <span />}
+                <Button onClick={submitComment} className="btn-cta rounded-full cursor-pointer" disabled={draft.trim() === ''}>
+                  {replyingTo ? 'Kirim Balasan' : t("kirimKomentar")}
                 </Button>
               </div>
             </div>

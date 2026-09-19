@@ -48,7 +48,7 @@ export function PageBand({
   const ink = tone === 'ink';
   return (
     <header
-      className={cn('relative', tone === 'sage' && 'sage-wash', ink && 'ink-panel', className)}
+      className={cn('relative w-full border-b border-border', tone === 'sage' && 'sage-wash', ink && 'ink-panel', className)}
     >
       <div
         className={cn(

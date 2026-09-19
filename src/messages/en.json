@@ -419,6 +419,7 @@
     "bagikanJawaban": "Share your experience or answer…",
     "pengalamanMu": "your experience",
     "balas": "Reply",
+    "membalas": "Replying to",
     "tulisKomentarAnda": "Write your comment...",
     "kirimKomentarAria": "Send comment",
     "avatarAnda": "Your avatar",
@@ -630,5 +631,16 @@
   },
   "brand": {
     "beranda": "Home"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "desc": "The page you're looking for was moved or never existed.",
+    "backHome": "Go Home"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "desc": "Sorry, loading this page failed.",
+    "retry": "Try again",
+    "home": "Go Home"
   }
 }

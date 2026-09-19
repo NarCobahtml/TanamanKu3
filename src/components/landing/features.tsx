@@ -15,10 +15,10 @@ export default function Features() {
   const t = useTranslations('landing.features');
   const ti = (k: string) => t(`items.${k}`);
   return (
-    <section id="fitur" className="bg-[#FFFFFF] py-24 sm:py-32 px-6">
+    <section id="fitur" className="bg-background py-24 sm:py-32 px-6">
       <div className="max-w-[1200px] mx-auto">
         <TkRevealClient>
-          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] text-[#171B17] max-w-2xl">
+          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] text-foreground max-w-2xl">
             {t("judul")}
           </h2>
         </TkRevealClient>
@@ -32,7 +32,7 @@ export default function Features() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 flex flex-col items-start gap-3">
-                <span className="w-10 h-10 rounded-full bg-[#1B5E3F]/20 text-[#1B5E3F] flex items-center justify-center backdrop-blur-sm">
+                <span className="w-10 h-10 rounded-full bg-primary/20 text-primary-foreground flex items-center justify-center backdrop-blur-sm">
                   <ScanLine className="w-5 h-5" />
                 </span>
                 <h3 className="text-xl font-semibold text-white">{t("scanJudul")}</h3>
@@ -45,13 +45,13 @@ export default function Features() {
             {FEATURES.map((f) => (
               <div
                 key={f.key}
-                className="rounded-md border border-[#E5E8E4] bg-white p-6 sm:p-8 hover:border-[#1B5E3F]/30 transition-colors"
+                className="rounded-md border border-border bg-card p-6 sm:p-8 hover:border-primary/30 transition-colors"
               >
-                <span className="w-10 h-10 rounded-full bg-[#E7EFE9] text-[#1B5E3F] flex items-center justify-center">
+                <span className="w-10 h-10 rounded-full bg-accent text-primary flex items-center justify-center">
                   <f.icon className="w-5 h-5" />
                 </span>
-                <h3 className="text-lg font-semibold text-[#171B17] mt-5">{ti(f.key)}</h3>
-                <p className="text-sm text-[#59625D] leading-relaxed mt-2">{ti(f.desc)}</p>
+                <h3 className="text-lg font-semibold text-card-foreground mt-5">{ti(f.key)}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mt-2">{ti(f.desc)}</p>
               </div>
             ))}
           </div>
