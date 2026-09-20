@@ -13,7 +13,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { HealthStatus, type HealthLevel } from '@/components/shared/HealthStatus';
+import { HealthStatus } from '@/components/shared/HealthStatus';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import EditTanamanDialog from './EditTanamanDialog';
@@ -23,18 +23,7 @@ import { cn } from '@/lib/utils';
 import TkRevealClient from '@/features/landing/tk-reveal-client';
 import { initialTanamanList as tanamanList } from './tanaman-store';
 import { useLocale } from '@/components/layout/LocaleProvider';
-
-// ponytail: hari & tanggal statis (frontend-only), ganti dengan data backend saat tersedia.
-const HARI = ['sen', 'sel', 'rab', 'kam', 'jum', 'sab', 'min'];
-const HARI_1 = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
-const TODAY_IDX = 2; // Rabu
-const isWaterDay = (i: number) => i % 2 === 0;
-
-const riwayatKesehatan: Array<{ tanggal: string; catatan: string; level: HealthLevel }> = [
-  { tanggal: '02.09.2026', catatan: 'scanRutin', level: 'sehat' },
-  { tanggal: '27.08.2026', catatan: 'tepiKuning', level: 'perhatian' },
-  { tanggal: '20.08.2026', catatan: 'scanPertama', level: 'sehat' },
-];
+import { HARI, HARI_1, TODAY_IDX, isWaterDay, riwayatKesehatan } from './constants';
 
 export default function TanamanDetailPage({ id }: { id: string }) {
   const router = useRouter();

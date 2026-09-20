@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { HealthStatus, type HealthLevel } from '@/components/shared/HealthStatus';
+import { HealthStatus } from '@/components/shared/HealthStatus';
 import { ActionButton } from '@/components/ui/action-button';
 import { PageCtaBand } from '@/components/shared/PageCtaBand';
 import TkRevealClient from '@/features/landing/tk-reveal-client';
@@ -22,12 +22,7 @@ import HapusTanamanDialog from './HapusTanamanDialog';
 import { StatusSiramBadge } from './StatusSiramBadge';
 import { PlantCard, PlantThumb } from './PlantCard';
 import { FilterPill } from '@/components/ui/filter-pill';
-
-const kategoriList: Array<'Semua' | Kategori> = ['Semua', 'Indoor', 'Outdoor', 'Kebun'];
-
-function healthLevel(t: Tanaman): HealthLevel {
-  return t.status === 'terlambat' ? 'perhatian' : 'sehat';
-}
+import { kategoriList, healthLevel } from './constants';
 
 export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
   const ts = useTranslations('siram');

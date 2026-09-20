@@ -5,12 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import {
-  AlertTriangle,
   ArrowLeft,
-  Check,
-  Cloud,
-  CloudRain,
-  CloudSun,
   Droplets,
   Info,
   Pencil,
@@ -18,9 +13,7 @@ import {
   Sun,
   Sunset,
   Trash2,
-  X,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import AppShell from '@/components/layout/AppShell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,34 +22,8 @@ import TkRevealClient from '@/features/landing/tk-reveal-client';
 import { useTanamanList, tanamanStore } from '@/features/plants/tanaman-store';
 import EditTanamanDialog from '@/features/plants/EditTanamanDialog';
 import HapusTanamanDialog from '@/features/plants/HapusTanamanDialog';
-
-/* Data bersama, konten SAMA untuk desktop & mobile (sumber: tumbuhkita #1) */
-const weatherNum = { temp: '27°C', tempRange: '27°C / 26°C', sunset: '17:30', humidity: '53%' };
-
-type SlotStatus = 'optimal' | 'moderate' | 'unfavourable';
-const timeSlots: Array<{ time: string; status: SlotStatus }> = [
-  { time: 'Now', status: 'unfavourable' },
-  { time: '4 PM', status: 'unfavourable' },
-  { time: '5 PM', status: 'unfavourable' },
-  { time: '6 PM', status: 'moderate' },
-  { time: '7 PM', status: 'optimal' },
-];
-
-const forecast: Array<{ day: string; temp: string; icon: LucideIcon }> = [
-  { day: 'sel', temp: '27°C', icon: CloudSun },
-  { day: 'rab', temp: '27°C', icon: CloudSun },
-  { day: 'kam', temp: '27°C', icon: Cloud },
-  { day: 'jum', temp: '27°C', icon: CloudRain },
-  { day: 'sab', temp: '27°C', icon: CloudRain },
-  { day: 'min', temp: '26°C', icon: Cloud },
-  { day: 'sen', temp: '28°C', icon: Sun },
-];
-
-const slotVisual: Record<SlotStatus, { icon: LucideIcon; chip: string; text: string }> = {
-  optimal: { icon: Check, chip: 'border-primary/30 bg-primary/10', text: 'text-primary' },
-  moderate: { icon: AlertTriangle, chip: 'border-ink/15 bg-ink/10', text: 'text-ink/70' },
-  unfavourable: { icon: X, chip: 'border-destructive/30 bg-destructive/10', text: 'text-destructive' },
-};
+import { weatherNum, timeSlots, forecast, slotVisual } from '../constants';
+import type { SlotStatus } from '../types';
 
 export default function SiramDetailView() {
   const { id } = useParams<{ id: string }>();
