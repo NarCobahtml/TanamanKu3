@@ -1,5 +1,5 @@
 import type { HealthLevel } from '@/components/shared/HealthStatus';
-import { initialTanamanList as tanamanList } from '@/features/plants/tanaman-store';
+import { initialTanamanList as tanamanList } from '@/features/plants';
 
 /* ---- placeholder data (frontend-only, no backend) ---- */
 
