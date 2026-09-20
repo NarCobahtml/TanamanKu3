@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { tanamanStore, type Tanaman } from '@/lib/tanaman-store';
+import { tanamanStore, type Tanaman } from './tanaman-store';
 
 export default function HapusTanamanDialog({
   plant,

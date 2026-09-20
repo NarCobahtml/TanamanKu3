@@ -16,19 +16,14 @@ import { PageCtaBand } from '@/components/shared/PageCtaBand';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { useTanamanList, initialTanamanList, type Tanaman, type KategoriTanaman as Kategori, type StatusSiram } from '@/lib/tanaman-store';
-import EditTanamanDialog from '@/components/EditTanamanDialog';
-import HapusTanamanDialog from '@/components/HapusTanamanDialog';
-import { StatusSiramBadge } from '@/components/plants/StatusSiramBadge';
-import { PlantCard, PlantThumb } from '@/components/plants/PlantCard';
+import { useTanamanList, type Tanaman, type KategoriTanaman as Kategori, type StatusSiram } from './tanaman-store';
+import EditTanamanDialog from './EditTanamanDialog';
+import HapusTanamanDialog from './HapusTanamanDialog';
+import { StatusSiramBadge } from './StatusSiramBadge';
+import { PlantCard, PlantThumb } from './PlantCard';
 import { FilterPill } from '@/components/ui/filter-pill';
 
-export type { Tanaman };
-export const tanamanList: Tanaman[] = initialTanamanList;
-
 const kategoriList: Array<'Semua' | Kategori> = ['Semua', 'Indoor', 'Outdoor', 'Kebun'];
-
-export { StatusSiramBadge };
 
 function healthLevel(t: Tanaman): HealthLevel {
   return t.status === 'terlambat' ? 'perhatian' : 'sehat';

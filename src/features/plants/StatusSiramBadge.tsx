@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
-import type { StatusSiram } from '@/lib/tanaman-store';
+import type { StatusSiram } from './types';
 
 const statusSiramBadge: Record<StatusSiram, { label: string; className: string }> = {
   'hari-ini': { label: 'hariIni', className: 'border-warning/30 bg-warning/10 text-warning' },

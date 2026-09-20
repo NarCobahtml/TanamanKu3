@@ -22,7 +22,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { useLocale } from '@/components/layout/LocaleProvider';
 import { useAuth } from '@/lib/use-auth';
-import { tanamanList } from './TanamanPage';
+import { initialTanamanList as tanamanList } from '@/features/plants/tanaman-store';
 
 /* ---- placeholder data (frontend-only, no backend) ---- */
 

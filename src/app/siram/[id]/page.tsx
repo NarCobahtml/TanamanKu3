@@ -26,9 +26,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
-import { useTanamanList, tanamanStore } from '@/lib/tanaman-store';
-import EditTanamanDialog from '@/components/EditTanamanDialog';
-import HapusTanamanDialog from '@/components/HapusTanamanDialog';
+import { useTanamanList, tanamanStore } from '@/features/plants/tanaman-store';
+import EditTanamanDialog from '@/features/plants/EditTanamanDialog';
+import HapusTanamanDialog from '@/features/plants/HapusTanamanDialog';
 
 /* Data bersama, konten SAMA untuk desktop & mobile (sumber: tumbuhkita #1) */
 const weatherNum = { temp: '27°C', tempRange: '27°C / 26°C', sunset: '17:30', humidity: '53%' };

@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Plus } from 'lucide-react';
 import AppShell from '@/components/layout/AppShell';
-import TanamanPage from '@/components/TanamanPage';
-import TambahTanamanDialog from '@/components/TambahTanamanDialog';
+import TanamanPage from '@/features/plants/TanamanPage';
+import TambahTanamanDialog from '@/features/plants/TambahTanamanDialog';
 
 export default function Page() {
   const ts = useTranslations('siram');

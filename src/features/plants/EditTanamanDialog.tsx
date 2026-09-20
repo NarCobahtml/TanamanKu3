@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { tanamanStore, type Tanaman, type KategoriTanaman, type StatusSiram } from '@/lib/tanaman-store';
+import { tanamanStore, type Tanaman, type KategoriTanaman, type StatusSiram } from './tanaman-store';
 
 function EditTanamanForm({
   plant,

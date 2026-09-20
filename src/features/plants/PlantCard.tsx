@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Droplets, Leaf, Pencil, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import type { Tanaman } from '@/lib/tanaman-store';
+import type { Tanaman } from './types';
 import { StatusSiramBadge } from './StatusSiramBadge';
 import { cn } from '@/lib/utils';
 

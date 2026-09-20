@@ -1,21 +1,9 @@
 'use client';
 
 import { useSyncExternalStore, useEffect } from 'react';
+import type { KategoriTanaman, StatusSiram, Tanaman } from './types';
 
-export type KategoriTanaman = 'Indoor' | 'Outdoor' | 'Kebun';
-export type StatusSiram = 'hari-ini' | 'terlambat' | 'terjadwal';
-
-export interface Tanaman {
-  id: string; // pure numeric ID string e.g. "1", "2", "1789701234567"
-  nama: string;
-  jenis?: string;
-  kategori: KategoriTanaman;
-  status: StatusSiram;
-  nextWater: string;
-  photo?: string;
-  notes?: string | null;
-  userId?: string | null;
-}
+export type { KategoriTanaman, StatusSiram, Tanaman };
 
 export const initialTanamanList: Tanaman[] = [
   { id: '1', nama: 'Monstera Deliciosa', jenis: 'hias', kategori: 'Indoor', status: 'hari-ini', nextWater: 'nw.hariIniSore', photo: '/figma-assets/monstera.avif' },

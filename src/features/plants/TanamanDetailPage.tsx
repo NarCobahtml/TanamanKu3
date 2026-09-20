@@ -16,12 +16,12 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { HealthStatus, type HealthLevel } from '@/components/shared/HealthStatus';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import EditTanamanDialog from '@/components/EditTanamanDialog';
-import HapusTanamanDialog from '@/components/HapusTanamanDialog';
+import EditTanamanDialog from './EditTanamanDialog';
+import HapusTanamanDialog from './HapusTanamanDialog';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
-import { tanamanList } from './TanamanPage';
+import { initialTanamanList as tanamanList } from './tanaman-store';
 import { useLocale } from '@/components/layout/LocaleProvider';
 
 // ponytail: hari & tanggal statis (frontend-only), ganti dengan data backend saat tersedia.

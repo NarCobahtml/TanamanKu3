@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
-import { tanamanStore } from '@/lib/tanaman-store';
+import { tanamanStore } from './tanaman-store';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
