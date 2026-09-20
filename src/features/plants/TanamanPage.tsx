@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Droplets, Leaf, Pencil, Plus, Search, SearchX, Trash2 } from 'lucide-react';
+import { ChevronRight, Pencil, Search, SearchX, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Badge } from '@/components/ui/badge';
@@ -15,8 +15,7 @@ import { ActionButton } from '@/components/ui/action-button';
 import { PageCtaBand } from '@/components/shared/PageCtaBand';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
 import { useTranslations } from 'next-intl';
-import { cn } from '@/lib/utils';
-import { useTanamanList, type Tanaman, type KategoriTanaman as Kategori, type StatusSiram } from './tanaman-store';
+import { useTanamanList, type Tanaman, type KategoriTanaman as Kategori } from './tanaman-store';
 import EditTanamanDialog from './EditTanamanDialog';
 import HapusTanamanDialog from './HapusTanamanDialog';
 import { StatusSiramBadge } from './StatusSiramBadge';
