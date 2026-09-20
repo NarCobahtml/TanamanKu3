@@ -14,7 +14,7 @@ import {
 import { Logo, navItems, isActivePath } from './brand';
 import { useTranslations } from 'next-intl';
 import { useLocale } from '@/components/layout/LocaleProvider';
-import { useAuth } from '@/features/auth/use-auth';
+import { useAuth } from '@/lib/use-auth';
 import { cn } from '@/lib/utils';
 
 const notifications = [

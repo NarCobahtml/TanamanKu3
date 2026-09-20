@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { useLocale as useLocaleSetting } from '@/components/layout/LocaleProvider';
 import { useMounted } from '@/lib/use-mounted';
-import { useAuth } from '@/features/auth/use-auth';
+import { useAuth } from '@/lib/use-auth';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

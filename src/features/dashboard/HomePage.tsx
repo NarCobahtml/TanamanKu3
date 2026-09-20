@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { SectionHeader } from '@/components/shared/PageHeader';
 import { HealthStatus, type HealthLevel } from '@/components/shared/HealthStatus';
 import { PageCtaBand } from '@/components/shared/PageCtaBand';
-import TkRevealClient from '@/features/landing/tk-reveal-client';
+import TkRevealClient from '@/components/shared/tk-reveal-client';
 import {
   ScanLine,
   Droplets,
@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useLocale } from '@/components/layout/LocaleProvider';
-import { useAuth } from '@/features/auth/use-auth';
+import { useAuth } from '@/lib/use-auth';
 import { initialTanamanList as tanamanList } from '@/features/plants/tanaman-store';
 
 import { healthById, recentScans, wateringToday, total, sehat, penyakit } from './mock';

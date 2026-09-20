@@ -14,7 +14,7 @@ import { HealthStatus, type HealthLevel } from '@/components/shared/HealthStatus
 import { EmptyState } from '@/components/shared/EmptyState';
 import { PageCtaBand } from '@/components/shared/PageCtaBand';
 import { FilterPill } from '@/components/ui/filter-pill';
-import TkRevealClient from '@/features/landing/tk-reveal-client';
+import TkRevealClient from '@/components/shared/tk-reveal-client';
 
 type Status = 'sehat' | 'terinfeksi';
 

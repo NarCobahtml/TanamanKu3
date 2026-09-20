@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import TkRevealClient from './tk-reveal-client';
+import TkRevealClient from '@/components/shared/tk-reveal-client';
 
 export default function CtaBand() {
   const t = useTranslations('landing.cta');

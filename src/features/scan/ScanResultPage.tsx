@@ -13,7 +13,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { PageHeader, SectionHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
-import TkRevealClient from '@/features/landing/tk-reveal-client';
+import TkRevealClient from '@/components/shared/tk-reveal-client';
 import { getContent } from './scan-content';
 import { useLocale } from '@/components/layout/LocaleProvider';
 import { useScanResult, useScanPhoto } from './use-scan-result';

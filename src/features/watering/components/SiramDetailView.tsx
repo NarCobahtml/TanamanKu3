@@ -18,7 +18,7 @@ import AppShell from '@/components/layout/AppShell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import TkRevealClient from '@/features/landing/tk-reveal-client';
+import TkRevealClient from '@/components/shared/tk-reveal-client';
 import { useTanamanList, tanamanStore } from '@/features/plants/tanaman-store';
 import EditTanamanDialog from '@/features/plants/EditTanamanDialog';
 import HapusTanamanDialog from '@/features/plants/HapusTanamanDialog';

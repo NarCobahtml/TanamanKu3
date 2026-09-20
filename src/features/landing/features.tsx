@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Bug, Droplets, History, MessagesSquare, ScanLine } from 'lucide-react';
-import TkRevealClient from './tk-reveal-client';
+import TkRevealClient from '@/components/shared/tk-reveal-client';
 
 const FEATURES = [
   { icon: Droplets, tk: 'sir', key: 'sirJudul', desc: 'sirDesc' },

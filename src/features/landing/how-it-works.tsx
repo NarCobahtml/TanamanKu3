@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Camera, ClipboardCheck, ScanLine, ScanSearch } from 'lucide-react';
-import TkRevealClient from './tk-reveal-client';
+import TkRevealClient from '@/components/shared/tk-reveal-client';
 
 const STEPS = [
   { icon: Camera, title: 's1', desc: 's1d' },

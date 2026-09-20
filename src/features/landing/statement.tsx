@@ -1,6 +1,6 @@
 'use client';
 
-import TkRevealClient from './tk-reveal-client';
+import TkRevealClient from '@/components/shared/tk-reveal-client';
 import { useTranslations } from 'next-intl';
 
 export default function Statement() {
