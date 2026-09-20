@@ -14,9 +14,9 @@ import { useTranslations } from 'next-intl';
 import { PageHeader, SectionHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
-import { getContent } from '@/lib/scan-content';
+import { getContent } from './scan-content';
 import { useLocale } from '@/components/layout/LocaleProvider';
-import { useScanResult, useScanPhoto } from '@/lib/use-scan-result';
+import { useScanResult, useScanPhoto } from './use-scan-result';
 
 interface ScanData {
   class: string;
