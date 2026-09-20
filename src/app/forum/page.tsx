@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import AppShell from '@/components/AppShell';
+import AppShell from '@/components/layout/AppShell';
 import ForumPage from '@/components/ForumPage';
 
 export default function Page() {

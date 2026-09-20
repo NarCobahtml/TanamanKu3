@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { LocaleProvider } from "@/components/LocaleProvider";
+import { LocaleProvider } from "@/components/layout/LocaleProvider";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import "./globals.css";
 import "./fonts.css";
 

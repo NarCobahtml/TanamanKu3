@@ -1,6 +1,6 @@
 'use client';
 
-import AppShell from '@/components/AppShell';
+import AppShell from '@/components/layout/AppShell';
 import LanggananPage from '@/components/LanggananPage';
 
 export default function Page() {

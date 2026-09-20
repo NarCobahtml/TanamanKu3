@@ -1,9 +1,9 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import AppShell from '@/components/AppShell';
+import AppShell from '@/components/layout/AppShell';
 import ForumDetail from '@/components/ForumDetailPage';
-import NotFoundView from '@/components/NotFoundView';
+import NotFoundView from '@/components/shared/NotFoundView';
 import { forumPosts } from '@/components/ForumPage';
 
 export default function ForumDetailRoute() {

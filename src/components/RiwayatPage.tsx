@@ -9,10 +9,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { PageHeader } from '@/components/PageHeader';
-import { HealthStatus, type HealthLevel } from '@/components/HealthStatus';
-import { EmptyState } from '@/components/EmptyState';
-import { PageCtaBand } from '@/components/PageCtaBand';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { HealthStatus, type HealthLevel } from '@/components/shared/HealthStatus';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { PageCtaBand } from '@/components/shared/PageCtaBand';
 import { FilterPill } from '@/components/ui/filter-pill';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
 

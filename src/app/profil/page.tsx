@@ -1,6 +1,6 @@
 'use client';
 
-import AppShell from '@/components/AppShell';
+import AppShell from '@/components/layout/AppShell';
 import ProfilPage from '@/components/ProfilPage';
 
 export default function Page() {

@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Logo, navItems, isActivePath } from './brand';
 import { useTranslations } from 'next-intl';
-import { useLocale } from '@/components/LocaleProvider';
+import { useLocale } from '@/components/layout/LocaleProvider';
 import { useAuth } from '@/lib/use-auth';
 import { cn } from '@/lib/utils';
 

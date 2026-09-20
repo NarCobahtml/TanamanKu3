@@ -3,7 +3,7 @@
 import { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { PageBand } from '@/components/PageBand';
+import { PageBand } from '@/components/shared/PageBand';
 
 /**
  * Page hero with a bottom rule and larger rhythm, full-width editorial

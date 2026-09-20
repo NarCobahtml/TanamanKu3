@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { EmptyState } from '@/components/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { SearchX } from 'lucide-react';
 
 /** Untuk halaman dinamis client ([id]): tampilkan 404 alih-alih fallback diam. */

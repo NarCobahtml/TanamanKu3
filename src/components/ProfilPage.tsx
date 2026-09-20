@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { LogOut, UserCog, CreditCard, Bell, BellRing, Camera, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
-import { useLocale as useLocaleSetting } from '@/components/LocaleProvider';
+import { useLocale as useLocaleSetting } from '@/components/layout/LocaleProvider';
 import { useMounted } from '@/lib/use-mounted';
 import { useAuth } from '@/lib/use-auth';
 import { toast } from 'sonner';
@@ -25,8 +25,8 @@ import {
 } from '@/components/ui/dialog';
 import { SettingsSwitch } from '@/components/profile/SettingsSwitch';
 import { SettingsHeading } from '@/components/profile/SettingsHeading';
-import { CurrentPlanCard } from '@/components/subscription/CurrentPlanCard';
-import { ScanUsageCard } from '@/components/subscription/ScanUsageCard';
+import { CurrentPlanCard } from '@/components/shared/subscription/CurrentPlanCard';
+import { ScanUsageCard } from '@/components/shared/subscription/ScanUsageCard';
 import { cn } from '@/lib/utils';
 
 export default function ProfilPage() {

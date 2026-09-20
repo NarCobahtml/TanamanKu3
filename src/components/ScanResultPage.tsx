@@ -11,11 +11,11 @@ import {
   FlaskConical,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { PageHeader, SectionHeader } from '@/components/PageHeader';
+import { PageHeader, SectionHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
 import { getContent } from '@/lib/scan-content';
-import { useLocale } from '@/components/LocaleProvider';
+import { useLocale } from '@/components/layout/LocaleProvider';
 import { useScanResult, useScanPhoto } from '@/lib/use-scan-result';
 
 interface ScanData {

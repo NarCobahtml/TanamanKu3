@@ -12,8 +12,8 @@ import {
   ScanLine,
   Trash2,
 } from 'lucide-react';
-import { EmptyState } from '@/components/EmptyState';
-import { HealthStatus, type HealthLevel } from '@/components/HealthStatus';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { HealthStatus, type HealthLevel } from '@/components/shared/HealthStatus';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import EditTanamanDialog from '@/components/EditTanamanDialog';
@@ -22,7 +22,7 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
 import { tanamanList } from './TanamanPage';
-import { useLocale } from '@/components/LocaleProvider';
+import { useLocale } from '@/components/layout/LocaleProvider';
 
 // ponytail: hari & tanggal statis (frontend-only), ganti dengan data backend saat tersedia.
 const HARI = ['sen', 'sel', 'rab', 'kam', 'jum', 'sab', 'min'];

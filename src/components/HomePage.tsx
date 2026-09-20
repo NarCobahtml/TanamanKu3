@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { SectionHeader } from '@/components/PageHeader';
-import { HealthStatus, type HealthLevel } from '@/components/HealthStatus';
-import { PageCtaBand } from '@/components/PageCtaBand';
+import { SectionHeader } from '@/components/shared/PageHeader';
+import { HealthStatus, type HealthLevel } from '@/components/shared/HealthStatus';
+import { PageCtaBand } from '@/components/shared/PageCtaBand';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
 import {
   ScanLine,
@@ -20,7 +20,7 @@ import {
   CalendarCheck,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useLocale } from '@/components/LocaleProvider';
+import { useLocale } from '@/components/layout/LocaleProvider';
 import { useAuth } from '@/lib/use-auth';
 import { tanamanList } from './TanamanPage';
 

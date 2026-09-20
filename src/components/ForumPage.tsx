@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useLocale } from '@/components/LocaleProvider';
+import { useLocale } from '@/components/layout/LocaleProvider';
 import Link from 'next/link';
 import { Heart, MessageSquare, Plus, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/ui/action-button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PageHeader } from '@/components/PageHeader';
-import { EmptyState } from '@/components/EmptyState';
-import { PageCtaBand } from '@/components/PageCtaBand';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { PageCtaBand } from '@/components/shared/PageCtaBand';
 import { FilterPill } from '@/components/ui/filter-pill';
 import { ForumPostCard } from '@/components/forum/ForumPostCard';
 import { cn } from '@/lib/utils';
