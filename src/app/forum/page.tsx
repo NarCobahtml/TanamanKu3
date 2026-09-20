@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import AppShell from '@/components/layout/AppShell';
-import ForumPage from '@/components/ForumPage';
+import ForumPage from '@/features/forum/ForumPage';
 
 export default function Page() {
   const t = useTranslations('forum');

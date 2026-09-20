@@ -7,7 +7,9 @@ import { Heart, Share2, ArrowLeft, MessageSquare, Reply, X } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
-import { forumPosts, ExpertBadge, CategoryText } from '@/components/ForumPage';
+import { forumPosts } from './mock';
+import { CategoryText } from './components/CategoryText';
+import { ExpertBadge } from './components/ExpertBadge';
 import TkRevealClient from '@/components/landing/tk-reveal-client';
 import { cn } from '@/lib/utils';
 

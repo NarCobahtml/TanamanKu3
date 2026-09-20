@@ -2,9 +2,9 @@
 
 import { useParams } from 'next/navigation';
 import AppShell from '@/components/layout/AppShell';
-import ForumDetail from '@/components/ForumDetailPage';
+import ForumDetail from '@/features/forum/ForumDetailPage';
 import NotFoundView from '@/components/shared/NotFoundView';
-import { forumPosts } from '@/components/ForumPage';
+import { forumPosts } from '@/features/forum/mock';
 
 export default function ForumDetailRoute() {
   const { id } = useParams<{ id: string }>();

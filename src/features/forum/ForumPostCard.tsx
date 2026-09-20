@@ -6,8 +6,9 @@ import { useTranslations } from 'next-intl';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { ForumPost } from '@/components/ForumPage';
-import { ExpertBadge, CategoryText } from '@/components/ForumPage';
+import type { ForumPost } from './types';
+import { CategoryText } from './components/CategoryText';
+import { ExpertBadge } from './components/ExpertBadge';
 
 export interface ForumPostCardProps {
   post: ForumPost;
