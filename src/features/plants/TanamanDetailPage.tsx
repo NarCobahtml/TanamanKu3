@@ -20,7 +20,7 @@ import EditTanamanDialog from './EditTanamanDialog';
 import HapusTanamanDialog from './HapusTanamanDialog';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import TkRevealClient from '@/components/landing/tk-reveal-client';
+import TkRevealClient from '@/features/landing/tk-reveal-client';
 import { initialTanamanList as tanamanList } from './tanaman-store';
 import { useLocale } from '@/components/layout/LocaleProvider';
 

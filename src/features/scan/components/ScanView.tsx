@@ -8,7 +8,7 @@ import AppShell from '@/components/layout/AppShell';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import TkReveal from '@/components/landing/tk-reveal-client';
+import TkReveal from '@/features/landing/tk-reveal-client';
 
 const steps = [
   { n: 1, title: 'bukaKamera', desc: 'izinkanKamera' },

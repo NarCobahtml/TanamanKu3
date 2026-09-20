@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HealthStatus, type HealthLevel } from '@/components/shared/HealthStatus';
 import { ActionButton } from '@/components/ui/action-button';
 import { PageCtaBand } from '@/components/shared/PageCtaBand';
-import TkRevealClient from '@/components/landing/tk-reveal-client';
+import TkRevealClient from '@/features/landing/tk-reveal-client';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useTanamanList, type Tanaman, type KategoriTanaman as Kategori, type StatusSiram } from './tanaman-store';

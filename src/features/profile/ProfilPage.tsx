@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { useLocale as useLocaleSetting } from '@/components/layout/LocaleProvider';
 import { useMounted } from '@/lib/use-mounted';
-import { useAuth } from '@/lib/use-auth';
+import { useAuth } from '@/features/auth/use-auth';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,8 +23,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { SettingsSwitch } from '@/components/profile/SettingsSwitch';
-import { SettingsHeading } from '@/components/profile/SettingsHeading';
+import { SettingsSwitch } from './SettingsSwitch';
+import { SettingsHeading } from './SettingsHeading';
 import { CurrentPlanCard } from '@/components/shared/subscription/CurrentPlanCard';
 import { ScanUsageCard } from '@/components/shared/subscription/ScanUsageCard';
 import { cn } from '@/lib/utils';

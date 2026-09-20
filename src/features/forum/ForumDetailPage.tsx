@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { forumPosts } from './mock';
 import { CategoryText } from './components/CategoryText';
 import { ExpertBadge } from './components/ExpertBadge';
-import TkRevealClient from '@/components/landing/tk-reveal-client';
+import TkRevealClient from '@/features/landing/tk-reveal-client';
 import { cn } from '@/lib/utils';
 
 export default function ForumDetailPage({ id }: { id: string }) {

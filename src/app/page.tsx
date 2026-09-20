@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Landing from "@/components/landing";
+import Landing from "@/features/landing";
 
 export const metadata: Metadata = {
   title: "TanamanKu - Platform Kesehatan Tanaman",

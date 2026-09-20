@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { ActionButton } from "@/components/ui/action-button";
 import { CurrentPlanCard } from "@/components/shared/subscription/CurrentPlanCard";
 import { ScanUsageCard } from "@/components/shared/subscription/ScanUsageCard";
-import TkRevealClient from "@/components/landing/tk-reveal-client";
+import TkRevealClient from "@/features/landing/tk-reveal-client";
 import { toast } from "sonner";
 
 declare global {
