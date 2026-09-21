@@ -18,7 +18,7 @@ export function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function Logo({ className, dark }: { className?: string; dark?: boolean }) {
+export function Logo({ className, dark, href = "/" }: { className?: string; dark?: boolean; href?: string }) {
   const t = useTranslations('nav');
   const { resolvedTheme } = useTheme();
   const mounted = useMounted();
@@ -26,7 +26,7 @@ export function Logo({ className, dark }: { className?: string; dark?: boolean }
   const isDark = dark !== undefined ? dark : (mounted && resolvedTheme === 'dark');
 
   return (
-    <Link href="/home" className={cn("flex items-center", className)} aria-label={`TanamanKu, ${t('beranda')}`}>
+    <Link href={href} className={cn("flex items-center", className)} aria-label={`TanamanKu, ${t('beranda')}`}>
       {/* wordmark resmi dari file Figma (leaf hijau + teks) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img

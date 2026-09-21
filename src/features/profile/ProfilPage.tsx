@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LogOut, UserCog, CreditCard, Bell, BellRing } from 'lucide-react';
+import { LogOut, UserCog, CreditCard, Bell, BellRing, Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { useLocale as useLocaleSetting } from '@/components/layout/LocaleProvider';
@@ -178,6 +178,34 @@ export default function ProfilPage() {
             locale={locale}
             setLocale={setLocale}
           />
+
+          {/* PWA Install Card in Profile */}
+          <section className="rule scroll-mt-24 pt-6 sm:pt-10">
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="h-11 w-11 rounded-xl bg-[#123526] p-2 flex items-center justify-center shrink-0 shadow-xs">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/icons/icon-192x192.png" alt="TanamanKu" className="h-full w-full object-contain" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm sm:text-base text-foreground">Pasang Aplikasi TanamanKu (PWA)</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Buka lebih cepat di layar utama tanpa browser dan hemat kuota internet.</p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined' && window.triggerPwaInstall) {
+                    window.triggerPwaInstall();
+                  }
+                }}
+                className="rounded-full bg-[#1B5E20] hover:bg-[#17491a] text-white px-5 text-xs font-semibold shrink-0 cursor-pointer h-10"
+              >
+                <Download className="mr-1.5 h-3.5 w-3.5" />
+                Install di HP
+              </Button>
+            </div>
+          </section>
 
           {/* Logout Section */}
           <section id="keluar" className="rule scroll-mt-24 pt-6 sm:pt-14 pb-8">

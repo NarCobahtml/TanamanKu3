@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLocale } from '@/components/layout/LocaleProvider';
 import Link from 'next/link';
-import { Heart, MessageSquare, Plus, SearchX } from 'lucide-react';
+import { Heart, MessageSquare, Plus, Search, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ActionButton } from '@/components/ui/action-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -48,12 +49,13 @@ export default function ForumPage() {
     }
   }, []);
 
-  const filtered = allPosts.filter(
-    (p) =>
-      (category === 'Semua' || p.category === category) &&
-      (query.trim() === '' ||
-        (p.title + ' ' + p.excerpt).toLowerCase().includes(query.trim().toLowerCase())),
-  );
+  const filtered = allPosts.filter((p) => {
+    const matchCategory = category === 'Semua' || p.category === category;
+    const q = query.trim().toLowerCase();
+    if (!q) return matchCategory;
+    const textToMatch = `${p.title} ${p.excerpt} ${p.author} ${p.category}`.toLowerCase();
+    return matchCategory && textToMatch.includes(q);
+  });
 
   const toggleLike = (id: string) => {
     const next = !liked[id];
@@ -77,17 +79,34 @@ export default function ForumPage() {
       />
 
       <div className="mx-auto w-full max-w-7xl space-y-12 px-4 pt-12 pb-24 sm:px-6">
-      {/* Category rail */}
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("filterKategori")}>
-        {categories.map((c) => (
-          <FilterPill
-            key={c.id}
-            active={category === c.id}
-            onClick={() => setCategory(c.id)}
-          >
-            {c.section === "common" ? tc(c.key) : t(c.key)}
-          </FilterPill>
-        ))}
+      {/* Toolbar: search + filter kategori */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative w-full sm:max-w-xs">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t("cari")}
+              aria-label={t("cariAria")}
+              className="rounded-xl border-border bg-card pl-9"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("filterKategori")}>
+            {categories.map((c) => (
+              <FilterPill
+                key={c.id}
+                active={category === c.id}
+                onClick={() => setCategory(c.id)}
+              >
+                {c.section === "common" ? tc(c.key) : t(c.key)}
+              </FilterPill>
+            ))}
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {t("menampilkan", { count: filtered.length, total: allPosts.length })}
+        </p>
       </div>
 
       <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr]">
@@ -99,6 +118,19 @@ export default function ForumPage() {
                 icon={<SearchX className="h-6 w-6" aria-hidden="true" />}
                 title={t("tidakAdaPost")}
                 message={t("cobaKataKategori")}
+                action={
+                  (query.trim() !== '' || category !== 'Semua') ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setQuery('');
+                        setCategory('Semua');
+                      }}
+                    >
+                      {t("resetPencarian")}
+                    </Button>
+                  ) : undefined
+                }
               />
             </div>
           ) : (

@@ -18,14 +18,18 @@ export default function Footer() {
       <div className="max-w-[1200px] mx-auto">
         <div className="flex flex-col md:flex-row justify-between gap-10">
           <div>
-            <div className="flex items-center">
+            <Link
+              href="/"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="flex items-center"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={isDark ? '/figma-assets/logo-fix.svg' : '/figma-assets/logo-fix-ink.svg'}
                 alt="TanamanKu"
                 className="h-8 w-auto"
               />
-            </div>
+            </Link>
             <p className="text-sm text-muted-foreground max-w-xs mt-4">
               {t("desk")}
             </p>

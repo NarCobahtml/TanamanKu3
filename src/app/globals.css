@@ -2,12 +2,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ============================================================
-   TanamanKu design tokens — gen-5 editorial system
-   Plant-health platform: white canvas, deep green identity,
-   hairline structure, data/report typography.
-   No page-wide dark band — green used as blocks, edges, CTAs.
-   ============================================================ */
 :root {
   --background: #ffffff;
   --foreground: #171b17;
@@ -113,17 +107,29 @@
   --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
 
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-sans:
+    "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Arial, sans-serif;
 }
 
 @layer base {
   * {
     border-color: var(--border);
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
   html {
     scroll-behavior: smooth;
     max-width: 100%;
     overflow-x: clip;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
   }
   body {
     background: var(--background);
@@ -135,6 +141,11 @@
     -webkit-font-smoothing: antialiased;
     max-width: 100%;
     overflow-x: clip;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  body::-webkit-scrollbar {
+    display: none;
   }
   button,
   a {
@@ -147,14 +158,26 @@
 }
 
 @layer utilities {
-  /* deep green identity block (hero aside, footer, feature rails) */
+  /* Hide scrollbar utility */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   .ink-panel {
     background:
-      radial-gradient(120% 140% at 85% -20%, rgba(255, 255, 255, 0.07), transparent 55%),
+      radial-gradient(
+        120% 140% at 85% -20%,
+        rgba(255, 255, 255, 0.07),
+        transparent 55%
+      ),
       var(--ink);
     color: #f2f7f3;
   }
-  /* soft sage wash for section contrast — replaces old page band */
+
   .sage-wash {
     background: var(--secondary);
   }
@@ -175,27 +198,45 @@
   .btn-cta {
     box-shadow: 0 1px 2px rgba(23, 59, 40, 0.18);
   }
-  /* horizontal key line between editorial sections */
+
   .rule {
     border-top: 1px solid var(--border);
   }
-  /* Display accent — Jakarta bold, tegas seperti logo fix (bukan serif italic) */
+
   .font-playfair {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: "Plus Jakarta Sans", sans-serif;
     font-weight: 700;
   }
   /* Landing hero entrance animations */
   @keyframes heroReveal {
-    0% { opacity: 0; transform: translateY(28px); filter: blur(12px); }
-    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+    0% {
+      opacity: 0;
+      transform: translateY(28px);
+      filter: blur(12px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
   }
   @keyframes heroFadeUp {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   @keyframes heroZoom {
-    0% { transform: scale(1.12); }
-    100% { transform: scale(1); }
+    0% {
+      transform: scale(1.12);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
   .hero-anim {
     opacity: 0;
@@ -243,7 +284,8 @@
   .tk-page {
     background: #ffffff;
     color: #171b17;
-    font-family: "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, sans-serif;
+    font-family:
+      "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, sans-serif;
   }
   .tk-page ::selection {
     background: #1b5e3f;
@@ -265,102 +307,128 @@
   }
 }
 
-
-/* ===== Mobile app UI (copied from tumbuhkita #1) ===== */
-.app-shell {min-height: 100dvh;
-  background: #F5F5F0;
+/*Mobile app UI */
+.app-shell {
+  min-height: 100dvh;
+  background: #f5f5f0;
 }
-.app-container {width: min(100%, 390px);
+.app-container {
+  width: min(100%, 390px);
   margin-inline: auto;
 }
-.soft-card {border: 1px solid #E8E8E8;
+.soft-card {
+  border: 1px solid #e8e8e8;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
-.auth-page {min-height: 100dvh;
-  background: #F5F5F0;
+.auth-page {
+  min-height: 100dvh;
+  background: #f5f5f0;
 }
-.auth-content {width: min(100%, 342px);
+.auth-content {
+  width: min(100%, 342px);
   margin-inline: auto;
 }
-.auth-input {height: 53px;
-  border: 1px solid #E8E8E8;
+.auth-input {
+  height: 53px;
+  border: 1px solid #e8e8e8;
   border-radius: 12px;
-  color: #1A1A1A;
+  color: #1a1a1a;
   background: #fff;
 }
-.auth-input::placeholder {color: #999999;
+.auth-input::placeholder {
+  color: #999999;
 }
-.auth-button {height: 54px;
+.auth-button {
+  height: 54px;
   border-radius: 12px;
-  background: #1B5E20;
+  background: #1b5e20;
   box-shadow: 0 3px 5px rgba(27, 94, 32, 0.2);
 }
-.auth-button:hover {background: #17491A;
+.auth-button:hover {
+  background: #17491a;
 }
-.page-header {height: 64px;
+.page-header {
+  height: 64px;
   background: #f6fbf3;
   border-bottom: 1px solid #e0eed4;
   box-shadow: 0 1px 0 #e0eed4;
 }
-.bottom-nav {height: 80px;
+.bottom-nav {
+  height: 80px;
   background: #f6fbf3;
   border-top: 1px solid #c0c9bb;
   border-radius: 12px 12px 0 0;
   box-shadow: 0 -8px 15px rgba(27, 94, 32, 0.08);
 }
-.safe-area-inset-bottom {padding-bottom: env(safe-area-inset-bottom, 0px);
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-.nav-link {color: #414b41;
+.nav-link {
+  color: #414b41;
 }
-.nav-link.active {color: var(--brand);
+.nav-link.active {
+  color: var(--brand);
 }
-.nav-link.active .nav-icon {background: transparent;
+.nav-link.active .nav-icon {
+  background: transparent;
   border-radius: 0;
 }
-.bottom-nav .app-container {justify-content: space-between;
+.bottom-nav .app-container {
+  justify-content: space-between;
   padding: 0 18px;
 }
-.bottom-nav .nav-link {flex: 0 0 auto;
+.bottom-nav .nav-link {
+  flex: 0 0 auto;
   height: auto;
   gap: 4px;
   padding: 4px 16px;
 }
-.bottom-nav .nav-icon {width: 20px;
+.bottom-nav .nav-icon {
+  width: 20px;
   height: 20px;
 }
-.nav-icon img {width: 100%;
+.nav-icon img {
+  width: 100%;
   height: 100%;
   object-fit: contain;
 }
-.nav-link.active .nav-icon img {filter: brightness(0) saturate(100%) invert(29%) sepia(25%) saturate(1250%)
+.nav-link.active .nav-icon img {
+  filter: brightness(0) saturate(100%) invert(29%) sepia(25%) saturate(1250%)
     hue-rotate(77deg) brightness(83%);
 }
-.result-header {height: 64px;
-  background: #F5F5F0;
+.result-header {
+  height: 64px;
+  background: #f5f5f0;
 }
-.result-header .app-container {position: relative;
+.result-header .app-container {
+  position: relative;
 }
-.result-header h1 {position: static;
+.result-header h1 {
+  position: static;
   margin-left: 8px;
   transform: none;
   line-height: 32px;
   white-space: nowrap;
 }
-.result-header-spacer {flex: 1 1 0%;
+.result-header-spacer {
+  flex: 1 1 0%;
   min-width: 88px;
   height: 38px;
 }
-.result-header button {width: 32px;
+.result-header button {
+  width: 32px;
   height: 32px;
   display: grid;
   place-items: center;
 }
 .app-shell,
-  .app-container {max-width: none;
-    width: 100%;
+.app-container {
+  max-width: none;
+  width: 100%;
 }
 .app-shell,
-  .auth-page {box-shadow: 0 0 35px rgba(20, 70, 25, 0.08);
+.auth-page {
+  box-shadow: 0 0 35px rgba(20, 70, 25, 0.08);
 }
 
 /* ===== Mobile app UI (copied from tumbuhkita #2 — scan result, siram, create post) ===== */
@@ -519,7 +587,6 @@
   line-height: 24px;
 }
 .result-products {
-
   margin-top: 32px;
   padding-top: 32px;
   padding-bottom: 0;
@@ -745,8 +812,8 @@
   line-height: 28px;
 }
 .create-post-page {
-  background: #F5F5F0;
-  color: #1A1A1A;
+  background: #f5f5f0;
+  color: #1a1a1a;
   min-height: 100dvh;
 }
 .create-post-header {
@@ -887,5 +954,3 @@
   line-height: 20px;
   font-weight: 600;
 }
-
-

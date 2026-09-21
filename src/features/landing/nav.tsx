@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { useMounted } from '@/lib/use-mounted';
@@ -48,7 +48,11 @@ export default function Nav() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between p-4 sm:p-5">
-      <Link href="/" className="flex items-center">
+      <Link
+        href="/"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="flex items-center"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={isDark ? '/figma-assets/logo-fix.svg' : '/figma-assets/logo-fix-ink.svg'}
@@ -88,14 +92,21 @@ export default function Nav() {
       {open && (
         <div className="fixed inset-0 z-[110] bg-background flex flex-col">
           <div className="flex items-center justify-between p-4 sm:p-5">
-            <div className="flex items-center">
+            <Link
+              href="/"
+              onClick={() => {
+                setOpen(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="flex items-center"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={isDark ? '/figma-assets/logo-fix.svg' : '/figma-assets/logo-fix-ink.svg'}
                 alt="TanamanKu"
                 className="h-9 w-auto"
               />
-            </div>
+            </Link>
             <button
               type="button"
               aria-label={t('tutupMenu')}
@@ -123,13 +134,28 @@ export default function Nav() {
             >
               {t("masuk")}
             </Link>
-            <Link
-              href="/register"
-              onClick={() => setOpen(false)}
-              className="menu-item menu-item-d3 mt-4 bg-primary text-primary-foreground text-lg font-semibold px-8 py-3.5 rounded-full"
-            >
-              {t("daftar")}
-            </Link>
+            <div className="flex flex-col w-full gap-3 mt-4">
+              <Link
+                href="/register"
+                onClick={() => setOpen(false)}
+                className="menu-item menu-item-d3 bg-primary text-primary-foreground text-center text-lg font-semibold px-8 py-3.5 rounded-full"
+              >
+                {t("daftar")}
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  if (typeof window !== 'undefined' && window.triggerPwaInstall) {
+                    window.triggerPwaInstall();
+                  }
+                }}
+                className="menu-item menu-item-d3 flex items-center justify-center gap-2 border border-primary text-primary text-base font-semibold px-6 py-3 rounded-full hover:bg-primary/10 transition-colors cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                Install Aplikasi (PWA)
+              </button>
+            </div>
           </div>
         </div>
       )}

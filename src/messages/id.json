@@ -423,7 +423,11 @@
     "tulisKomentarAnda": "Tulis komentar Anda...",
     "kirimKomentarAria": "Kirim komentar",
     "avatarAnda": "Avatar Anda",
-    "tidakAdaPost": "Tidak ada postingan"
+    "tidakAdaPost": "Tidak ada postingan",
+    "cari": "Cari postingan atau topik…",
+    "cariAria": "Cari postingan forum",
+    "menampilkan": "Menampilkan {count} dari {total} postingan",
+    "resetPencarian": "Reset pencarian"
   },
   "langganan": {
     "paketTagihan": "Paket & Tagihan",
