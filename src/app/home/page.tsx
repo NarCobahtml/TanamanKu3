@@ -1,7 +1,7 @@
 'use client';
 
-import AppShell from '@/components/AppShell';
-import HomePage from '@/components/HomePage';
+import AppShell from '@/components/layout/AppShell';
+import HomePage from '@/features/dashboard/HomePage';
 
 export default function Page() {
   return (

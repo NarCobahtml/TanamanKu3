@@ -1,0 +1,63 @@
+{
+  "name": "TanamanKu - Platform Kesehatan Tanaman & Komunitas",
+  "short_name": "TanamanKu",
+  "description": "Deteksi kesehatan tanaman, pantau kondisi kebun, dan kelola jadwal penyiraman dalam satu platform.",
+  "start_url": "/",
+  "id": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#123526",
+  "lang": "id",
+  "categories": ["lifestyle", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Forum Komunitas",
+      "short_name": "Forum",
+      "description": "Buka diskusi forum pecinta tanaman",
+      "url": "/forum",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Jadwal Siram",
+      "short_name": "Siram",
+      "description": "Pantau jadwal penyiraman tanaman",
+      "url": "/siram",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Scan Tanaman",
+      "short_name": "Scan",
+      "description": "Pindai daun tanaman",
+      "url": "/scan",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

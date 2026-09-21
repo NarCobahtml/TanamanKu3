@@ -423,7 +423,11 @@
     "tulisKomentarAnda": "Write your comment...",
     "kirimKomentarAria": "Send comment",
     "avatarAnda": "Your avatar",
-    "tidakAdaPost": "No posts"
+    "tidakAdaPost": "No posts",
+    "cari": "Search posts or topics…",
+    "cariAria": "Search forum posts",
+    "menampilkan": "Showing {count} of {total} posts",
+    "resetPencarian": "Reset search"
   },
   "langganan": {
     "paketTagihan": "Plan & Billing",

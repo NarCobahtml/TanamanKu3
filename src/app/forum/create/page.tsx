@@ -1,6 +1,6 @@
 'use client';
 
-import CreatePostPage from '@/components/CreatePostPage';
+import CreatePostPage from '@/features/forum/CreatePostPage';
 
 export default function Page() {
   return <CreatePostPage />;
