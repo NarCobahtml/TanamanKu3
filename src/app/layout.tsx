@@ -17,7 +17,11 @@ export const metadata: Metadata = {
     title: "TanamanKu",
   },
   icons: {
-    icon: "/icons/icon-192x192.png",
+    icon: [
+      { url: "/icons/logo only.svg", type: "image/svg+xml" },
+      { url: "/icons/logo-only.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
     apple: "/apple-touch-icon.png",
   },
 };

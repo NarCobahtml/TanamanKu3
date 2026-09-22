@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import AppShell from '@/components/layout/AppShell';
+import { useAuthGuard } from '@/components/shared/AuthGuardModal';
 import ScanMobileView from './ScanMobileView';
 import ScanDesktopView from './ScanDesktopView';
 
@@ -108,6 +109,8 @@ export default function ScanView() {
     };
   }, [startCamera, stopCamera]);
 
+  const { checkAuth, AuthModal } = useAuthGuard();
+
   const capturePhoto = () => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     const video = (isMobile ? videoMobileRef.current : videoDesktopRef.current) ?? videoMobileRef.current ?? videoDesktopRef.current;
@@ -123,6 +126,34 @@ export default function ScanView() {
     void analyze(dataUrl);
   };
 
+  const handleCapture = () => {
+    if (
+      !checkAuth({
+        title: 'Login untuk Scan Tanaman',
+        actionName: 'Scan Diagnosa AI',
+        description:
+          'Fitur diagnosis penyakit tanaman dan penyimpanan riwayat kesehatan membutuhkan akun terdaftar. Silakan masuk atau buat akun baru.',
+      })
+    ) {
+      return;
+    }
+    capturePhoto();
+  };
+
+  const handleOpenGallery = () => {
+    if (
+      !checkAuth({
+        title: 'Login untuk Scan Tanaman',
+        actionName: 'Scan Diagnosa AI',
+        description:
+          'Fitur diagnosis penyakit tanaman dan penyimpanan riwayat kesehatan membutuhkan akun terdaftar. Silakan masuk atau buat akun baru.',
+      })
+    ) {
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
   return (
     <AppShell bare>
       <ScanMobileView
@@ -130,9 +161,9 @@ export default function ScanView() {
         cameraState={cameraState}
         cameraError={cameraError}
         analyzing={analyzing}
-        onCapture={capturePhoto}
+        onCapture={handleCapture}
         onRetryCamera={() => void startCamera()}
-        onOpenGallery={() => fileInputRef.current?.click()}
+        onOpenGallery={handleOpenGallery}
         onBack={() => router.push('/home')}
       />
 
@@ -151,10 +182,11 @@ export default function ScanView() {
         cameraState={cameraState}
         cameraError={cameraError}
         analyzing={analyzing}
-        onCapture={capturePhoto}
+        onCapture={handleCapture}
         onRetryCamera={() => void startCamera()}
-        onOpenGallery={() => fileInputRef.current?.click()}
+        onOpenGallery={handleOpenGallery}
       />
+      {AuthModal}
     </AppShell>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Heart, Share2, ArrowLeft, MessageSquare, Reply, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,10 +12,13 @@ import { forumPosts } from './mock';
 import { CategoryText } from './components/CategoryText';
 import { ExpertBadge } from './components/ExpertBadge';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
+import { useAuthGuard } from '@/components/shared/AuthGuardModal';
 import { cn } from '@/lib/utils';
 
 export default function ForumDetailPage({ id }: { id: string }) {
   const t = useTranslations('forum');
+  const router = useRouter();
+  const { checkAuth, AuthModal } = useAuthGuard();
   const post = forumPosts.find((p) => p.id === id) ?? forumPosts[0];
   const related = forumPosts.filter((p) => p.id !== post.id).slice(0, 3);
 
@@ -26,6 +30,16 @@ export default function ForumDetailPage({ id }: { id: string }) {
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   const toggleLike = () => {
+    if (
+      !checkAuth({
+        title: 'Login untuk Menyukai Diskusi',
+        actionName: 'Menyukai Postingan',
+        description:
+          'Masuk ke akun Anda untuk memberikan dukungan dan menyimpan postingan favorit Anda.',
+      })
+    ) {
+      return;
+    }
     if (liked) {
       setLikes((n) => n - 1);
       setLiked(false);
@@ -36,6 +50,16 @@ export default function ForumDetailPage({ id }: { id: string }) {
   };
 
   const submitComment = () => {
+    if (
+      !checkAuth({
+        title: 'Login untuk Berkomentar',
+        actionName: 'Komentar Forum',
+        description:
+          'Bergabung dalam diskusi dan bagikan pengalaman Anda dengan masuk ke akun terlebih dahulu.',
+      })
+    ) {
+      return;
+    }
     const text = draft.trim();
     if (!text) return;
     setComments((list) => [
@@ -49,6 +73,20 @@ export default function ForumDetailPage({ id }: { id: string }) {
     ]);
     setDraft('');
     setReplyingTo(null);
+  };
+
+  const handleBuatPostingan = () => {
+    if (
+      !checkAuth({
+        title: 'Login untuk Buat Postingan',
+        actionName: 'Buat Postingan',
+        description:
+          'Anda perlu masuk ke akun terlebih dahulu untuk membagikan pertanyaan atau cerita tanaman di forum komunitas.',
+      })
+    ) {
+      return;
+    }
+    router.push('/forum/create');
   };
 
   return (
@@ -274,13 +312,17 @@ export default function ForumDetailPage({ id }: { id: string }) {
               <p className="mt-1.5 text-sm text-white/80">
                 {t("ceritaJawaban")}
               </p>
-              <Button asChild className="mt-4 rounded-full bg-white text-[#123526] hover:bg-primary/10">
-                <Link href="/forum/create">{t("buatPostingan")}</Link>
+              <Button
+                onClick={handleBuatPostingan}
+                className="mt-4 rounded-full bg-white text-[#123526] hover:bg-primary/10 cursor-pointer"
+              >
+                {t("buatPostingan")}
               </Button>
             </div>
           </div>
         </aside>
       </div>
+      {AuthModal}
     </div>
   );
 }
