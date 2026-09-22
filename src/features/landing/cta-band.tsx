@@ -24,10 +24,10 @@ export default function CtaBand() {
               {t('mulai')}
             </Link>
             <Link
-              href="/login"
-              className="w-full sm:w-auto text-center border border-border hover:border-primary text-foreground text-sm sm:text-base font-medium px-8 py-3.5 sm:py-4 rounded-full transition-colors"
+              href="/home"
+              className="w-full sm:w-auto text-center border border-border hover:border-primary text-foreground text-sm sm:text-base font-medium px-8 py-3.5 sm:py-4 rounded-full transition-colors hover:bg-primary/5"
             >
-              {t('sudah')} {t('masuk')}
+              Coba Demo (Mode Tamu)
             </Link>
           </div>
         </div>

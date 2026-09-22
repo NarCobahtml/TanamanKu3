@@ -21,6 +21,7 @@ import HapusTanamanDialog from './HapusTanamanDialog';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
+import { useAuthGuard } from '@/components/shared/AuthGuardModal';
 import { initialTanamanList as tanamanList } from './tanaman-store';
 import { useLocale } from '@/components/layout/LocaleProvider';
 import { HARI, HARI_1, TODAY_IDX, isWaterDay, riwayatKesehatan } from './constants';
@@ -34,6 +35,7 @@ export default function TanamanDetailPage({ id }: { id: string }) {
   const [sudahDisiram, setSudahDisiram] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [hapusOpen, setHapusOpen] = useState(false);
+  const { checkAuth, AuthModal } = useAuthGuard();
 
   const t = tanamanList.find((x) => x.id === id);
 
@@ -63,7 +65,43 @@ export default function TanamanDetailPage({ id }: { id: string }) {
   ];
 
   const tandaiSiram = () => {
+    if (
+      !checkAuth({
+        title: 'Login untuk Tandai Siram',
+        actionName: 'Jadwal Siram',
+        description:
+          'Masuk ke akun Anda untuk mencatat dan memperbarui jadwal penyiraman tanaman Anda.',
+      })
+    ) {
+      return;
+    }
     setSudahDisiram(true);
+  };
+
+  const handleEdit = () => {
+    if (
+      !checkAuth({
+        title: 'Login untuk Mengubah Data Tanaman',
+        actionName: 'Edit Tanaman',
+        description: 'Masuk ke akun Anda untuk menyimpan perubahan data tanaman.',
+      })
+    ) {
+      return;
+    }
+    setEditOpen(true);
+  };
+
+  const handleHapus = () => {
+    if (
+      !checkAuth({
+        title: 'Login untuk Menghapus Tanaman',
+        actionName: 'Hapus Tanaman',
+        description: 'Masuk ke akun Anda untuk mengelola koleksi tanaman Anda.',
+      })
+    ) {
+      return;
+    }
+    setHapusOpen(true);
   };
 
   return (
@@ -104,12 +142,16 @@ export default function TanamanDetailPage({ id }: { id: string }) {
               <Button
                 variant="outline"
                 className="rounded-full bg-card hover:bg-accent/60"
-                onClick={() => setEditOpen(true)}
+                onClick={handleEdit}
               >
                 <Pencil className="h-4 w-4" aria-hidden="true" />
                 {tc("edit")}
               </Button>
-              <Button variant="outline" className="rounded-full bg-card text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => setHapusOpen(true)}>
+              <Button
+                variant="outline"
+                className="rounded-full bg-card text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={handleHapus}
+              >
                 <Trash2 className="h-4 w-4" aria-hidden="true" />
                 {tc("hapus")}
               </Button>
@@ -239,6 +281,7 @@ export default function TanamanDetailPage({ id }: { id: string }) {
         onOpenChange={setHapusOpen}
         onDeleted={() => router.push('/siram')}
       />
+      {AuthModal}
     </div>
   );
 }

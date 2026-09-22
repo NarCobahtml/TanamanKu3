@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   AuthTestimonialPanel,
@@ -15,6 +15,7 @@ import {
 export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
   const t = useTranslations("auth");
+  const tc = useTranslations("common");
   const isLogin = mode === "login";
   const [pending, setPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -125,6 +126,16 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
       {/* Right: form */}
       <div className="flex items-center justify-center bg-card px-6 py-12 sm:px-10 xl:px-20">
         <div className="w-full max-w-md space-y-6">
+          <div>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group cursor-pointer"
+            >
+              <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" aria-hidden="true" />
+              <span>{tc("kembali")}</span>
+            </Link>
+          </div>
+
           <h1 className="text-3xl font-extrabold tracking-tight">
             {isLogin ? t("selamatDatang") : t("bergabung")}
           </h1>

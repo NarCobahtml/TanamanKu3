@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { useLocale } from '@/components/layout/LocaleProvider';
 import Link from 'next/link';
 import { Heart, MessageSquare, Plus, Search, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ActionButton } from '@/components/ui/action-button';
+import { useAuthGuard } from '@/components/shared/AuthGuardModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -26,9 +28,11 @@ const topics = [
   { tag: 'monstera', count: 5 },
 ];
 
-export default function ForumPage() {
+export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void } = {}) {
   const t = useTranslations('forum');
   const tc = useTranslations('common');
+  const router = useRouter();
+  const { checkAuth, AuthModal } = useAuthGuard();
   const { locale: lang } = useLocale();
   const [category, setCategory] = useState('Semua');
   const [query, setQuery] = useState('');
@@ -58,8 +62,36 @@ export default function ForumPage() {
   });
 
   const toggleLike = (id: string) => {
+    if (
+      !checkAuth({
+        title: 'Login untuk Menyukai Diskusi',
+        actionName: 'Menyukai Postingan',
+        description:
+          'Masuk ke akun Anda untuk memberikan dukungan dan menyimpan postingan favorit Anda.',
+      })
+    ) {
+      return;
+    }
     const next = !liked[id];
     setLiked((m) => ({ ...m, [id]: next }));
+  };
+
+  const handleCreatePost = () => {
+    if (onCreatePost) {
+      onCreatePost();
+      return;
+    }
+    if (
+      !checkAuth({
+        title: 'Login untuk Buat Postingan',
+        actionName: 'Buat Postingan',
+        description:
+          'Anda perlu masuk ke akun terlebih dahulu untuk membagikan pertanyaan atau cerita tanaman di forum komunitas.',
+      })
+    ) {
+      return;
+    }
+    router.push('/forum/create');
   };
 
   const likeCount = (p: ForumPost) => p.likes + (liked[p.id] ? 1 : 0);
@@ -72,9 +104,12 @@ export default function ForumPage() {
         accent={t("komunitas")}
         description={t("forumSub")}
         actions={
-          <ActionButton href="/forum/create">
+          <Button
+            onClick={handleCreatePost}
+            className="btn-cta rounded-full cursor-pointer h-10 px-5 text-sm font-semibold"
+          >
             {t("buatPostingan")}
-          </ActionButton>
+          </Button>
         }
       />
 
@@ -181,6 +216,7 @@ export default function ForumPage() {
         primary={{ href: '/forum/create', label: t('buatPostingan') }}
         secondary={{ href: '/scan', label: tc('scanTanaman') }}
       />
+      {AuthModal}
     </div>
   );
 }

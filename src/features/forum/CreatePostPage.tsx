@@ -6,6 +6,7 @@ import { ArrowLeft, Camera, ChevronDown, Loader2, Send, User, X } from 'lucide-r
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { ActionButton } from '@/components/ui/action-button';
+import { useAuthGuard } from '@/components/shared/AuthGuardModal';
 
 const categories = [
   'Hama & Penyakit',
@@ -24,6 +25,16 @@ export default function CreatePostPage() {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const { checkAuth, AuthModal } = useAuthGuard();
+
+  useEffect(() => {
+    checkAuth({
+      title: 'Login untuk Buat Postingan',
+      actionName: 'Buat Postingan',
+      description:
+        'Anda perlu masuk ke akun terlebih dahulu untuk mempublikasikan postingan baru di forum komunitas.',
+    });
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -56,6 +67,17 @@ export default function CreatePostPage() {
   const valid = title.trim() !== '' && content.trim() !== '';
 
   const publish = () => {
+    if (
+      !checkAuth({
+        title: 'Login untuk Buat Postingan',
+        actionName: 'Buat Postingan',
+        description:
+          'Anda perlu masuk ke akun terlebih dahulu untuk mempublikasikan postingan baru di forum komunitas.',
+      })
+    ) {
+      return;
+    }
+
     if (!valid || publishing) {
       if (!title.trim()) {
         toast.error('Silakan isi judul postingan terlebih dahulu');
@@ -266,6 +288,7 @@ export default function CreatePostPage() {
           {publishing ? 'Memproses...' : 'Posting'}
         </ActionButton>
       </main>
+      {AuthModal}
     </div>
   );
 }
