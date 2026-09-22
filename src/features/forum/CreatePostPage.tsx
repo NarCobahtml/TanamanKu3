@@ -7,6 +7,9 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { ActionButton } from '@/components/ui/action-button';
 import { useAuthGuard } from '@/components/shared/AuthGuardModal';
+import { useAuth } from '@/lib/use-auth';
+import { saveNewPost } from './forum-storage';
+import type { ForumPost } from './types';
 
 const categories = [
   'Hama & Penyakit',
@@ -17,6 +20,7 @@ const categories = [
 
 export default function CreatePostPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState('');
@@ -93,16 +97,22 @@ export default function CreatePostPage() {
     setPublishing(true);
 
     try {
-      // Save new post to localStorage so it appears in forum
-      let currentUserName = 'Alex Saputra';
-      try {
-        const storedUser = localStorage.getItem('tumbuhkita_user');
-        if (storedUser) {
-          const u = JSON.parse(storedUser);
-          if (u?.name) currentUserName = u.name;
+      let currentUserName = user?.name || 'Alex Saputra';
+      let currentUserId = user?.id;
+      let currentUserAvatar = user?.photoUrl || '/figma-assets/profile-1.jpg';
+
+      if (!currentUserId) {
+        try {
+          const storedUser = localStorage.getItem('tumbuhkita_user');
+          if (storedUser) {
+            const u = JSON.parse(storedUser);
+            if (u?.name) currentUserName = u.name;
+            if (u?.id) currentUserId = u.id;
+            if (u?.photoUrl) currentUserAvatar = u.photoUrl;
+          }
+        } catch {
+          // fallback
         }
-      } catch {
-        // fallback to default name
       }
 
       const initials = currentUserName
@@ -112,11 +122,12 @@ export default function CreatePostPage() {
         .slice(0, 2)
         .toUpperCase();
 
-      const newPost = {
+      const newPost: ForumPost = {
         id: `post-${Date.now()}`,
+        authorId: currentUserId,
         author: currentUserName,
         initials: initials || 'AS',
-        avatar: '/figma-assets/profile-1.jpg',
+        avatar: currentUserAvatar,
         time: 'Baru saja',
         category: category || 'Perawatan',
         title: title.trim(),
@@ -128,10 +139,7 @@ export default function CreatePostPage() {
         comments: [],
       };
 
-      const existing = localStorage.getItem('tumbuhkita_custom_posts');
-      const posts = existing ? JSON.parse(existing) : [];
-      posts.unshift(newPost);
-      localStorage.setItem('tumbuhkita_custom_posts', JSON.stringify(posts));
+      saveNewPost(newPost);
       toast.success('Postingan berhasil diterbitkan!');
     } catch (e) {
       console.error(e);

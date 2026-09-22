@@ -19,6 +19,9 @@ import { ForumPostCard } from './ForumPostCard';
 import { cn } from '@/lib/utils';
 import { categories, forumPosts } from './mock';
 import type { ForumPost } from './types';
+import { useAuth } from '@/lib/use-auth';
+import { getAllPosts, isPostOwner } from './forum-storage';
+import { HapusPostDialog } from './components/HapusPostDialog';
 
 const topics = [
   { tag: 'bercakdaun', count: 18 },
@@ -32,25 +35,25 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
   const t = useTranslations('forum');
   const tc = useTranslations('common');
   const router = useRouter();
+  const { user } = useAuth();
   const { checkAuth, AuthModal } = useAuthGuard();
   const { locale: lang } = useLocale();
   const [category, setCategory] = useState('Semua');
   const [query, setQuery] = useState('');
   const [liked, setLiked] = useState<Record<string, boolean>>({});
-  const [allPosts, setAllPosts] = useState<ForumPost[]>(forumPosts);
+  const [allPosts, setAllPosts] = useState<ForumPost[]>([]);
+  const [postToDelete, setPostToDelete] = useState<ForumPost | null>(null);
+  const [openHapusDialog, setOpenHapusDialog] = useState(false);
 
   useEffect(() => {
-    try {
-      const existing = localStorage.getItem('tumbuhkita_custom_posts');
-      if (existing) {
-        const parsed = JSON.parse(existing);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setAllPosts([...parsed, ...forumPosts]);
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    const refreshPosts = () => {
+      setAllPosts(getAllPosts());
+    };
+    refreshPosts();
+    window.addEventListener('forum-posts-changed', refreshPosts);
+    return () => {
+      window.removeEventListener('forum-posts-changed', refreshPosts);
+    };
   }, []);
 
   const filtered = allPosts.filter((p) => {
@@ -176,6 +179,11 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
                   post={post}
                   isLiked={!!liked[post.id]}
                   onToggleLike={() => toggleLike(post.id)}
+                  isOwner={isPostOwner(post, user)}
+                  onDelete={() => {
+                    setPostToDelete(post);
+                    setOpenHapusDialog(true);
+                  }}
                 />
               ))}
             </div>
@@ -217,6 +225,14 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
         secondary={{ href: '/scan', label: tc('scanTanaman') }}
       />
       {AuthModal}
+      <HapusPostDialog
+        open={openHapusDialog}
+        onOpenChange={setOpenHapusDialog}
+        post={postToDelete}
+        onDeleted={() => {
+          setPostToDelete(null);
+        }}
+      />
     </div>
   );
 }

@@ -144,11 +144,11 @@ export default function Nav() {
               </Link>
               <button
                 type="button"
-                onClick={async () => {
-                  if (typeof window !== 'undefined' && window.triggerPwaInstall) {
-                    await window.triggerPwaInstall();
-                  }
+                onClick={() => {
                   setOpen(false);
+                  if (typeof window !== 'undefined' && window.triggerPwaInstall) {
+                    window.triggerPwaInstall();
+                  }
                 }}
                 className="menu-item menu-item-d3 flex items-center justify-center gap-2 border border-primary text-primary text-base font-semibold px-6 py-3 rounded-full hover:bg-primary/10 transition-colors cursor-pointer"
               >

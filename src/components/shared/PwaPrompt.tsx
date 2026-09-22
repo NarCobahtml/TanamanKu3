@@ -68,7 +68,24 @@ export default function PwaPrompt() {
     const dismissedAt = localStorage.getItem('tanamanku_pwa_dismissed');
     const wasDismissedRecently = dismissedAt && Date.now() - Number(dismissedAt) < 24 * 60 * 60 * 1000;
 
-    // 4. Tangkap event beforeinstallprompt untuk Android / Chrome / Edge
+    // 4. Periksa apakah prompt sudah tertangkap sebelumnya oleh early script di head
+    if (typeof window !== 'undefined' && window.deferredPwaPrompt) {
+      setDeferredPrompt(window.deferredPwaPrompt);
+      if (!wasDismissedRecently) {
+        setShowPrompt(true);
+      }
+    }
+
+    const handlePromptReady = () => {
+      if (window.deferredPwaPrompt) {
+        setDeferredPrompt(window.deferredPwaPrompt);
+        if (!wasDismissedRecently) {
+          setShowPrompt(true);
+        }
+      }
+    };
+
+    // Tangkap event beforeinstallprompt untuk Android / Chrome / Edge
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       const promptEvent = e as BeforeInstallPromptEvent;
@@ -80,13 +97,16 @@ export default function PwaPrompt() {
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('pwa-prompt-ready', handlePromptReady);
 
-    // Fungsi global agar tombol apapun di website (nav, profil, banner) bisa memicu instalasi
+    // Fungsi global agar tombol apapun di website (nav, profil, banner) langsung memicu download/install prompt
     window.triggerPwaInstall = async () => {
-      if (window.deferredPwaPrompt) {
+      const promptEvent = window.deferredPwaPrompt;
+      if (promptEvent) {
         try {
-          await window.deferredPwaPrompt.prompt();
-          const choiceResult = await window.deferredPwaPrompt.userChoice;
+          // Panggil prompt() SEGERA dalam user gesture tanpa delay agar langsung muncul di layar
+          promptEvent.prompt();
+          const choiceResult = await promptEvent.userChoice;
           if (choiceResult.outcome === 'accepted') {
             setShowPrompt(false);
             window.deferredPwaPrompt = null;
@@ -94,24 +114,28 @@ export default function PwaPrompt() {
           }
         } catch (err) {
           console.error('Error saat memicu prompt PWA:', err);
-          setShowGuideModal(true);
+          toast.error('Gagal memicu pemasangan aplikasi.');
         }
-      } else {
-        // Jika native prompt belum tersedia di mobile browser / iOS, tampilkan panduan modal yang ramah
+      } else if (isIosDevice) {
+        // Hanya di iOS Safari yang butuh petunjuk (karena Apple memblokir trigger otomatis dari kode)
         setShowGuideModal(true);
+      } else {
+        // Di Android/Chrome: jangan munculkan tutorial step by step, langsung beri info status
+        toast.info('Browser sedang menyiapkan aplikasi atau sudah terpasang di perangkat Anda.');
       }
     };
 
-    // Tampilkan banner ajakan instalasi setelah 2.5 detik jika belum di-dismiss (berlaku untuk mobile & desktop)
+    // Tampilkan banner ajakan instalasi setelah 2 detik jika belum di-dismiss
     let fallbackTimer: NodeJS.Timeout | null = null;
     if (!wasDismissedRecently) {
       fallbackTimer = setTimeout(() => {
         setShowPrompt(true);
-      }, 2500);
+      }, 2000);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('pwa-prompt-ready', handlePromptReady);
       if (fallbackTimer) clearTimeout(fallbackTimer);
     };
   }, []);

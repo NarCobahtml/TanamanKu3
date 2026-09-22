@@ -1,28 +1,69 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { prisma } from '@/lib/prisma';
 import { signJwt } from '@/lib/auth';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://chxnfvwdldhpickamcpm.supabase.co';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, name, photoUrl, id } = body;
+    const { access_token } = body;
+
+    if (!access_token || typeof access_token !== 'string') {
+      return NextResponse.json(
+        { success: false, error: { message: 'Token OAuth wajib diisi.' } },
+        { status: 400 }
+      );
+    }
+
+    // Verifikasi token OAuth langsung ke Supabase Auth server-side
+    const { data, error: authError } = await supabase.auth.getUser(access_token);
+
+    if (authError || !data?.user) {
+      console.error('Supabase OAuth token verification failed:', authError);
+      return NextResponse.json(
+        { success: false, error: { message: 'Token OAuth tidak valid atau sudah kedaluwarsa.' } },
+        { status: 401 }
+      );
+    }
+
+    const authUser = data.user;
+    const { id, email, user_metadata } = authUser;
 
     if (!email) {
       return NextResponse.json(
-        { success: false, error: { message: 'Email tidak ditemukan dari akun Google.' } },
+        { success: false, error: { message: 'Email tidak ditemukan dari akun OAuth.' } },
         { status: 400 }
       );
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-    const displayName = name || normalizedEmail.split('@')[0];
+    const rawName =
+      user_metadata?.full_name ||
+      user_metadata?.name ||
+      user_metadata?.custom_claims?.global_name ||
+      '';
+    const displayName = rawName || normalizedEmail.split('@')[0];
+    const photoUrl =
+      user_metadata?.avatar_url ||
+      user_metadata?.picture ||
+      null;
 
     // 1. First check if user exists by email
     let user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
 
-    // 2. If not found by email, check if user exists by ID
+    // 2. If not found by email, check if user exists by Supabase auth ID
     if (!user && id) {
       user = await prisma.user.findUnique({
         where: { id },
@@ -55,7 +96,7 @@ export async function POST(request: Request) {
       const updateData: { photoUrl?: string; name?: string } = {};
       if (!user.photoUrl && photoUrl) updateData.photoUrl = photoUrl;
       if ((!user.name || user.name.includes('@')) && displayName) updateData.name = displayName;
-      
+
       if (Object.keys(updateData).length > 0) {
         user = await prisma.user.update({
           where: { id: user.id },

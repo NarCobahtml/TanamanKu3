@@ -30,41 +30,8 @@ export default function AuthCallbackView() {
 
         const accessToken = params.get("access_token");
 
-        let email = "";
-        let name = "";
-        let photoUrl = "";
-        let userId = "";
-
-        if (accessToken) {
-          try {
-            const payloadBase64 = accessToken.split(".")[1];
-            if (payloadBase64) {
-              const jsonPayload = decodeURIComponent(
-                atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"))
-                  .split("")
-                  .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-                  .join("")
-              );
-              const decoded = JSON.parse(jsonPayload);
-              userId = decoded.sub || "";
-              email = decoded.email || "";
-              name = decoded.user_metadata?.full_name || decoded.user_metadata?.name || decoded.user_metadata?.custom_claims?.global_name || "";
-              photoUrl = decoded.user_metadata?.avatar_url || decoded.user_metadata?.picture || "";
-            }
-          } catch (e) {
-            console.error("Error parsing JWT:", e);
-          }
-        }
-
-        if (!email) {
-          email = params.get("email") || "";
-          name = params.get("name") || "";
-          photoUrl = params.get("photo_url") || params.get("avatar_url") || "";
-          userId = params.get("sub") || params.get("user_id") || "";
-        }
-
-        if (!email) {
-          setError("Tidak dapat mengambil informasi akun dari OAuth. Silakan coba login kembali.");
+        if (!accessToken) {
+          setError("Token autentikasi tidak ditemukan dari OAuth. Silakan coba login kembali.");
           return;
         }
 
@@ -72,10 +39,7 @@ export default function AuthCallbackView() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            id: userId,
-            email,
-            name,
-            photoUrl,
+            access_token: accessToken,
           }),
         });
 
