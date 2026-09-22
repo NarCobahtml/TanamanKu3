@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, MessageSquare } from 'lucide-react';
+import { Heart, MessageSquare, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -14,12 +14,16 @@ export interface ForumPostCardProps {
   post: ForumPost;
   isLiked: boolean;
   onToggleLike: () => void;
+  isOwner?: boolean;
+  onDelete?: () => void;
 }
 
 export function ForumPostCard({
   post,
   isLiked,
   onToggleLike,
+  isOwner,
+  onDelete,
 }: ForumPostCardProps) {
   const t = useTranslations('forum');
   const likeCount = post.likes + (isLiked ? 1 : 0);
@@ -34,10 +38,29 @@ export function ForumPostCard({
       </Avatar>
 
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium">{post.author}</span>
-          {post.expert && <ExpertBadge />}
-          <span className="text-xs text-muted-foreground">{post.time}</span>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium">{post.author}</span>
+            {post.expert && <ExpertBadge />}
+            <span className="text-xs text-muted-foreground">{post.time}</span>
+          </div>
+
+          {isOwner && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete?.();
+              }}
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+              title="Hapus postingan"
+              aria-label="Hapus postingan"
+            >
+              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Hapus</span>
+            </button>
+          )}
         </div>
 
         <h2 className="mt-1.5 text-lg font-bold leading-snug tracking-tight">

@@ -1,16 +1,20 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Heart, Share2, ArrowLeft, MessageSquare, Reply, X } from 'lucide-react';
+import { Heart, Share2, ArrowLeft, MessageSquare, Reply, X, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { forumPosts } from './mock';
+import type { ForumPost } from './types';
 import { CategoryText } from './components/CategoryText';
 import { ExpertBadge } from './components/ExpertBadge';
+import { HapusPostDialog } from './components/HapusPostDialog';
+import { getPostById, isPostOwner } from './forum-storage';
+import { useAuth } from '@/lib/use-auth';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
 import { useAuthGuard } from '@/components/shared/AuthGuardModal';
 import { cn } from '@/lib/utils';
@@ -18,8 +22,16 @@ import { cn } from '@/lib/utils';
 export default function ForumDetailPage({ id }: { id: string }) {
   const t = useTranslations('forum');
   const router = useRouter();
+  const { user } = useAuth();
   const { checkAuth, AuthModal } = useAuthGuard();
-  const post = forumPosts.find((p) => p.id === id) ?? forumPosts[0];
+
+  const [currentPost, setCurrentPost] = useState<ForumPost>(() => {
+    return getPostById(id) ?? forumPosts.find((p) => p.id === id) ?? forumPosts[0];
+  });
+  const [openHapusDialog, setOpenHapusDialog] = useState(false);
+
+  const post = currentPost;
+  const isOwner = isPostOwner(post, user);
   const related = forumPosts.filter((p) => p.id !== post.id).slice(0, 3);
 
   const [liked, setLiked] = useState(false);
@@ -28,6 +40,15 @@ export default function ForumDetailPage({ id }: { id: string }) {
   const [draft, setDraft] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const loaded = getPostById(id) ?? forumPosts.find((p) => p.id === id);
+    if (loaded) {
+      setCurrentPost(loaded);
+      setLikes(loaded.likes);
+      setComments(loaded.comments);
+    }
+  }, [id]);
 
   const toggleLike = () => {
     if (
@@ -135,6 +156,18 @@ export default function ForumDetailPage({ id }: { id: string }) {
                   {post.time} · <CategoryText category={post.category} />
                 </p>
               </div>
+              {isOwner && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setOpenHapusDialog(true)}
+                  className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:border-destructive gap-1.5 cursor-pointer ml-auto sm:ml-2"
+                  title="Hapus postingan saya"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Hapus Postingan</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -182,6 +215,19 @@ export default function ForumDetailPage({ id }: { id: string }) {
                 <Share2 className="h-4 w-4" aria-hidden="true" />
                 {t("bagikan")}
               </Button>
+
+              {isOwner && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setOpenHapusDialog(true)}
+                  className="rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive sm:ml-auto gap-1.5 cursor-pointer"
+                  title="Hapus postingan saya"
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  <span>Hapus Postingan</span>
+                </Button>
+              )}
             </div>
           </TkRevealClient>
 
@@ -323,6 +369,14 @@ export default function ForumDetailPage({ id }: { id: string }) {
         </aside>
       </div>
       {AuthModal}
+      <HapusPostDialog
+        open={openHapusDialog}
+        onOpenChange={setOpenHapusDialog}
+        post={post}
+        onDeleted={() => {
+          router.push('/forum');
+        }}
+      />
     </div>
   );
 }

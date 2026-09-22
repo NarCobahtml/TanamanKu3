@@ -1,5 +1,6 @@
 export type ForumPost = {
   id: string;
+  authorId?: string;
   author: string;
   initials: string;
   avatar?: string;
