@@ -36,6 +36,30 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id" className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.deferredPwaPrompt = null;
+              window.addEventListener('beforeinstallprompt', function(e) {
+                e.preventDefault();
+                window.deferredPwaPrompt = e;
+                window.dispatchEvent(new Event('pwa-prompt-ready'));
+              });
+              if ('serviceWorker' in navigator) {
+                var registerSw = function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
+                };
+                if (document.readyState === 'complete') {
+                  registerSw();
+                } else {
+                  window.addEventListener('load', registerSw);
+                }
+              }
+            `,
+          }}
+        />
+      </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <LocaleProvider>{children}</LocaleProvider>
