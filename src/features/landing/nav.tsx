@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Menu, X, Download } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useTheme } from 'next-themes';
-import { useMounted } from '@/lib/use-mounted';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Menu, X, Download } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
+import { useMounted } from "@/lib/use-mounted";
 
 const NAV_LINKS = [
-  { href: '#fitur', key: 'fitur' },
-  { href: '#cara-kerja', key: 'caraKerja' },
-  { href: '#komunitas', key: 'komunitas' },
+  { href: "#fitur", key: "fitur" },
+  { href: "#cara-kerja", key: "caraKerja" },
+  { href: "#komunitas", key: "komunitas" },
 ] as const;
 
 export default function Nav() {
-  const t = useTranslations('landing.nav');
+  const t = useTranslations("landing.nav");
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState<string>('#fitur');
+  const [active, setActive] = useState<string>("#fitur");
   const { resolvedTheme } = useTheme();
   const mounted = useMounted();
 
-  const isDark = mounted && resolvedTheme === 'dark';
+  const isDark = mounted && resolvedTheme === "dark";
 
   // scroll-spy: highlight mengikuti section yang terlihat
   useEffect(() => {
@@ -35,27 +35,31 @@ export default function Nav() {
       setActive(current);
     };
     onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const pillCls = (href: string) =>
     `px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
       active === href
-        ? 'bg-accent text-primary font-semibold'
-        : 'text-muted-foreground hover:bg-accent hover:text-primary'
+        ? "bg-accent text-primary font-semibold"
+        : "text-muted-foreground hover:bg-accent hover:text-primary"
     }`;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between p-4 sm:p-5">
       <Link
         href="/"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         className="flex items-center"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={isDark ? '/figma-assets/logo-fix.svg' : '/figma-assets/logo-fix-ink.svg'}
+          src={
+            isDark
+              ? "/figma-assets/logo-fix.svg"
+              : "/figma-assets/logo-fix-ink.svg"
+          }
           alt="TanamanKu"
           className="h-9 w-auto"
         />
@@ -82,7 +86,7 @@ export default function Nav() {
 
       <button
         type="button"
-        aria-label={t('bukaMenu')}
+        aria-label={t("bukaMenu")}
         onClick={() => setOpen(true)}
         className="md:hidden text-foreground p-2"
       >
@@ -96,20 +100,24 @@ export default function Nav() {
               href="/"
               onClick={() => {
                 setOpen(false);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.scrollTo({ top: 0, behavior: "smooth" });
               }}
               className="flex items-center"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={isDark ? '/figma-assets/logo-fix.svg' : '/figma-assets/logo-fix-ink.svg'}
+                src={
+                  isDark
+                    ? "/figma-assets/logo-fix.svg"
+                    : "/figma-assets/logo-fix-ink.svg"
+                }
                 alt="TanamanKu"
                 className="h-9 w-auto"
               />
             </Link>
             <button
               type="button"
-              aria-label={t('tutupMenu')}
+              aria-label={t("tutupMenu")}
               onClick={() => setOpen(false)}
               className="text-foreground p-2"
             >
@@ -122,7 +130,7 @@ export default function Nav() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className={`menu-item ${i === 0 ? 'menu-item-d1' : i === 1 ? 'menu-item-d2' : 'menu-item-d3'} text-foreground text-3xl font-medium py-3`}
+                className={`menu-item ${i === 0 ? "menu-item-d1" : i === 1 ? "menu-item-d2" : "menu-item-d3"} text-foreground text-3xl font-medium py-3`}
               >
                 {t(link.key)}
               </Link>
@@ -146,14 +154,17 @@ export default function Nav() {
                 type="button"
                 onClick={() => {
                   setOpen(false);
-                  if (typeof window !== 'undefined' && window.triggerPwaInstall) {
+                  if (
+                    typeof window !== "undefined" &&
+                    window.triggerPwaInstall
+                  ) {
                     window.triggerPwaInstall();
                   }
                 }}
                 className="menu-item menu-item-d3 flex items-center justify-center gap-2 border border-primary text-primary text-base font-semibold px-6 py-3 rounded-full hover:bg-primary/10 transition-colors cursor-pointer"
               >
                 <Download className="w-4 h-4" />
-                Install Aplikasi (PWA)
+                Install Aplikasi
               </button>
             </div>
           </div>

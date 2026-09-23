@@ -132,11 +132,11 @@ export default function Hero() {
         className="absolute inset-0 bg-center bg-cover bg-no-repeat hero-zoom"
         style={{
           backgroundImage:
-            "url('/landing-assets/fresh_broad_leaves_enhanced.webp')",
+            "url('/landing-assets/fresh_broad_leaves_enhanced_upscaled.webp')",
         }}
       />
       <RevealLayer
-        image="/landing-assets/diseased_leaves_enhanced.webp"
+        image="/landing-assets/diseased_leaves_enhanced_upscaled.webp"
         cursorX={cursorPos.x}
         cursorY={cursorPos.y}
       />

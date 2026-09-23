@@ -17,7 +17,7 @@ import { PageCtaBand } from '@/components/shared/PageCtaBand';
 import { FilterPill } from '@/components/ui/filter-pill';
 import { ForumPostCard } from './ForumPostCard';
 import { cn } from '@/lib/utils';
-import { categories, forumPosts } from './mock';
+import { categories } from './mock';
 import type { ForumPost } from './types';
 import { useAuth } from '@/lib/use-auth';
 import { getAllPosts, isPostOwner } from './forum-storage';
