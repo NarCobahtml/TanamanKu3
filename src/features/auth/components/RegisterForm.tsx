@@ -1,9 +1,7 @@
 'use client';
 
-import Link from "next/link";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useTranslations } from "next-intl";
 
 const inputClass =
@@ -15,7 +13,7 @@ export interface RegisterFormProps {
     email: string;
     password: string;
     confirm: string;
-    agreed: boolean;
+    agreed?: boolean;
   }) => void;
   pending: boolean;
 }
@@ -24,7 +22,6 @@ export function RegisterForm({ onSubmit, pending }: RegisterFormProps) {
   const t = useTranslations("auth");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [agreed, setAgreed] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -47,13 +44,7 @@ export function RegisterForm({ onSubmit, pending }: RegisterFormProps) {
     const name = (formData.name || (rawData.get("name") as string) || "").trim();
     const confirm = formData.confirm || (rawData.get("confirm") as string) || "";
 
-    const checkboxEl = document.getElementById("agree");
-    const isAgreeChecked =
-      agreed ||
-      checkboxEl?.getAttribute("data-state") === "checked" ||
-      checkboxEl?.getAttribute("aria-checked") === "true";
-
-    onSubmit({ name, email, password, confirm, agreed: isAgreeChecked });
+    onSubmit({ name, email, password, confirm, agreed: true });
   };
 
   return (
@@ -129,35 +120,6 @@ export function RegisterForm({ onSubmit, pending }: RegisterFormProps) {
           )}
         </button>
       </div>
-
-      <label
-        className="flex items-start gap-2.5 text-sm text-muted-foreground"
-        htmlFor="agree"
-      >
-        <Checkbox
-          id="agree"
-          checked={agreed}
-          onCheckedChange={(v) => setAgreed(v === true)}
-          className="mt-0.5"
-        />
-        <span>
-          {t("setuju")}{" "}
-          <Link
-            href="/terms"
-            className="font-medium text-primary hover:underline"
-          >
-            {t("ketentuan")}
-          </Link>{" "}
-          dan{" "}
-          <Link
-            href="/privacy"
-            className="font-medium text-primary hover:underline"
-          >
-            {t("kebijakanPrivasi")}
-          </Link>
-          .
-        </span>
-      </label>
 
       <button
         type="submit"

@@ -72,14 +72,9 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
     email: string;
     password: string;
     confirm: string;
-    agreed: boolean;
+    agreed?: boolean;
   }) => {
     setErrorMessage(null);
-
-    if (!agreed) {
-      setErrorMessage("Silakan setujui Ketentuan dan Kebijakan Privasi terlebih dahulu.");
-      return;
-    }
 
     if (password !== confirm) {
       setErrorMessage("Password dan konfirmasi password tidak cocok.");

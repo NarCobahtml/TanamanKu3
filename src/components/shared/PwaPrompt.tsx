@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Download, X, Share, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { Download, X, Share } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -11,11 +11,11 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
 
 declare global {
@@ -34,15 +34,21 @@ export default function PwaPrompt() {
 
   useEffect(() => {
     // 1. Daftarkan Service Worker
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
         navigator.serviceWorker
-          .register('/sw.js')
+          .register("/sw.js")
           .then((reg) => {
-            console.log('TanamanKu PWA: Service Worker terdaftar dengan scope:', reg.scope);
+            console.log(
+              "TanamanKu PWA: Service Worker terdaftar dengan scope:",
+              reg.scope,
+            );
           })
           .catch((err) => {
-            console.error('TanamanKu PWA: Pendaftaran Service Worker gagal:', err);
+            console.error(
+              "TanamanKu PWA: Pendaftaran Service Worker gagal:",
+              err,
+            );
           });
       });
     }
@@ -50,9 +56,10 @@ export default function PwaPrompt() {
     // 2. Cek apakah sudah terinstal sebagai standalone PWA
     const checkStandalone = () => {
       const isStandaloneMode =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as unknown as { standalone?: boolean }).standalone === true ||
-        document.referrer.includes('android-app://');
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as unknown as { standalone?: boolean }).standalone ===
+          true ||
+        document.referrer.includes("android-app://");
       setIsStandalone(isStandaloneMode);
       return isStandaloneMode;
     };
@@ -61,15 +68,17 @@ export default function PwaPrompt() {
 
     // 3. Cek apakah perangkat iOS Safari
     const ua = window.navigator.userAgent.toLowerCase();
-    const isIosDevice = /iphone|ipad|ipod/.test(ua) && !(window as unknown as { MSStream?: unknown }).MSStream;
+    const isIosDevice =
+      /iphone|ipad|ipod/.test(ua) &&
+      !(window as unknown as { MSStream?: unknown }).MSStream;
     setIsIos(isIosDevice);
 
     // Cek apakah user pernah menutup banner install dalam 24 jam terakhir
-    const dismissedAt = localStorage.getItem('tanamanku_pwa_dismissed');
-    const wasDismissedRecently = dismissedAt && Date.now() - Number(dismissedAt) < 24 * 60 * 60 * 1000;
+    const dismissedAt = localStorage.getItem("tanamanku_pwa_dismissed");
+    const wasDismissedRecently =
+      dismissedAt && Date.now() - Number(dismissedAt) < 24 * 60 * 60 * 1000;
 
-    // 4. Periksa apakah prompt sudah tertangkap sebelumnya oleh early script di head
-    if (typeof window !== 'undefined' && window.deferredPwaPrompt) {
+    if (typeof window !== "undefined" && window.deferredPwaPrompt) {
       setDeferredPrompt(window.deferredPwaPrompt);
       if (!wasDismissedRecently) {
         setShowPrompt(true);
@@ -85,7 +94,6 @@ export default function PwaPrompt() {
       }
     };
 
-    // Tangkap event beforeinstallprompt untuk Android / Chrome / Edge
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       const promptEvent = e as BeforeInstallPromptEvent;
@@ -96,36 +104,34 @@ export default function PwaPrompt() {
       }
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('pwa-prompt-ready', handlePromptReady);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("pwa-prompt-ready", handlePromptReady);
 
     // Fungsi global agar tombol apapun di website (nav, profil, banner) langsung memicu download/install prompt
     window.triggerPwaInstall = async () => {
       const promptEvent = window.deferredPwaPrompt;
       if (promptEvent) {
         try {
-          // Panggil prompt() SEGERA dalam user gesture tanpa delay agar langsung muncul di layar
           promptEvent.prompt();
           const choiceResult = await promptEvent.userChoice;
-          if (choiceResult.outcome === 'accepted') {
+          if (choiceResult.outcome === "accepted") {
             setShowPrompt(false);
             window.deferredPwaPrompt = null;
-            toast.success('Aplikasi TanamanKu berhasil dipasang!');
+            toast.success("Aplikasi TanamanKu berhasil dipasang!");
           }
         } catch (err) {
-          console.error('Error saat memicu prompt PWA:', err);
-          toast.error('Gagal memicu pemasangan aplikasi.');
+          console.error("Error saat memicu prompt PWA:", err);
+          toast.error("Gagal memicu pemasangan aplikasi.");
         }
       } else if (isIosDevice) {
-        // Hanya di iOS Safari yang butuh petunjuk (karena Apple memblokir trigger otomatis dari kode)
         setShowGuideModal(true);
       } else {
-        // Di Android/Chrome: jangan munculkan tutorial step by step, langsung beri info status
-        toast.info('Browser sedang menyiapkan aplikasi atau sudah terpasang di perangkat Anda.');
+        toast.info(
+          "Browser sedang menyiapkan aplikasi atau sudah terpasang di perangkat Anda.",
+        );
       }
     };
 
-    // Tampilkan banner ajakan instalasi setelah 2 detik jika belum di-dismiss
     let fallbackTimer: NodeJS.Timeout | null = null;
     if (!wasDismissedRecently) {
       fallbackTimer = setTimeout(() => {
@@ -134,8 +140,11 @@ export default function PwaPrompt() {
     }
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('pwa-prompt-ready', handlePromptReady);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener("pwa-prompt-ready", handlePromptReady);
       if (fallbackTimer) clearTimeout(fallbackTimer);
     };
   }, []);
@@ -148,7 +157,7 @@ export default function PwaPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('tanamanku_pwa_dismissed', Date.now().toString());
+    localStorage.setItem("tanamanku_pwa_dismissed", Date.now().toString());
   };
 
   if (isStandalone) {
@@ -172,22 +181,22 @@ export default function PwaPrompt() {
               </div>
 
               <div className="flex-1 min-w-0 pr-6">
-                <div className="flex items-center gap-1.5">
-                  <h4 className="text-sm font-bold text-foreground truncate">Pasang Aplikasi TanamanKu</h4>
-                  <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
-                    <Sparkles className="h-2.5 w-2.5" /> PWA
-                  </span>
-                </div>
+                <h4 className="text-sm font-bold text-foreground truncate">
+                  Pasang Aplikasi TanamanKu
+                </h4>
 
                 <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                  Akses cepat tanpa buka browser, hemat kuota, dan tetap bisa dibuka saat offline.
+                  Akses cepat tanpa buka browser, hemat kuota, dan tetap bisa
+                  dibuka saat offline.
                 </p>
 
                 {isIos ? (
                   <div className="mt-2.5 p-2.5 rounded-lg bg-secondary/80 text-[11px] text-muted-foreground flex items-center gap-2">
                     <Share className="h-4 w-4 shrink-0 text-primary" />
                     <span>
-                      Tekan tombol <strong>Bagikan (Share)</strong> di Safari lalu pilih <strong>&apos;Tambah ke Layar Utama&apos;</strong>
+                      Tekan tombol <strong>Bagikan (Share)</strong> di Safari
+                      lalu pilih{" "}
+                      <strong>&apos;Tambah ke Layar Utama&apos;</strong>
                     </span>
                   </div>
                 ) : (
@@ -224,14 +233,17 @@ export default function PwaPrompt() {
         </div>
       )}
 
-      {/* Dialog Panduan Cara Pasang PWA */}
       <Dialog open={showGuideModal} onOpenChange={setShowGuideModal}>
         <DialogContent className="sm:max-w-md rounded-2xl p-6">
           <DialogHeader className="text-left space-y-2">
             <div className="flex items-center gap-3">
               <div className="h-11 w-11 rounded-xl bg-[#123526] p-2 flex items-center justify-center shrink-0 shadow-xs">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/icons/icon-192x192.png" alt="TanamanKu" className="h-full w-full object-contain" />
+                <img
+                  src="/icons/icon-192x192.png"
+                  alt="TanamanKu"
+                  className="h-full w-full object-contain"
+                />
               </div>
               <div>
                 <DialogTitle className="text-base font-bold text-foreground">
@@ -248,35 +260,74 @@ export default function PwaPrompt() {
             {isIos ? (
               <div className="space-y-3 rounded-xl bg-secondary/50 p-4 border border-border">
                 <div className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">1</span>
-                  <p className="leading-relaxed">Buka situs ini di browser <strong>Safari</strong> pada iPhone/iPad.</p>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                    1
+                  </span>
+                  <p className="leading-relaxed">
+                    Buka situs ini di browser <strong>Safari</strong> pada
+                    iPhone/iPad.
+                  </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">2</span>
-                  <p className="leading-relaxed">Ketuk tombol <strong>Bagikan (Share)</strong> <Share className="inline h-3.5 w-3.5 text-primary mx-0.5" /> (ikon kotak panah ke atas di bawah layar).</p>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                    2
+                  </span>
+                  <p className="leading-relaxed">
+                    Ketuk tombol <strong>Bagikan (Share)</strong>{" "}
+                    <Share className="inline h-3.5 w-3.5 text-primary mx-0.5" />{" "}
+                    (ikon kotak panah ke atas di bawah layar).
+                  </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">3</span>
-                  <p className="leading-relaxed">Gulir ke bawah dan ketuk opsi <strong>&apos;Tambah ke Layar Utama&apos; (Add to Home Screen)</strong>.</p>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                    3
+                  </span>
+                  <p className="leading-relaxed">
+                    Gulir ke bawah dan ketuk opsi{" "}
+                    <strong>
+                      &apos;Tambah ke Layar Utama&apos; (Add to Home Screen)
+                    </strong>
+                    .
+                  </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">4</span>
-                  <p className="leading-relaxed">Ketuk <strong>&apos;Tambah&apos;</strong> di pojok kanan atas. Selesai!</p>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                    4
+                  </span>
+                  <p className="leading-relaxed">
+                    Ketuk <strong>&apos;Tambah&apos;</strong> di pojok kanan
+                    atas. Selesai!
+                  </p>
                 </div>
               </div>
             ) : (
               <div className="space-y-3 rounded-xl bg-secondary/50 p-4 border border-border">
                 <div className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">1</span>
-                  <p className="leading-relaxed">Ketuk ikon menu <strong>titik tiga (⋮)</strong> di pojok kanan atas browser (Chrome / Edge).</p>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                    1
+                  </span>
+                  <p className="leading-relaxed">
+                    Ketuk ikon menu <strong>titik tiga (⋮)</strong> di pojok
+                    kanan atas browser (Chrome / Edge).
+                  </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">2</span>
-                  <p className="leading-relaxed">Pilih menu <strong>&apos;Instal aplikasi&apos;</strong> atau <strong>&apos;Tambahkan ke Layar Utama&apos;</strong>.</p>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                    2
+                  </span>
+                  <p className="leading-relaxed">
+                    Pilih menu <strong>&apos;Instal aplikasi&apos;</strong> atau{" "}
+                    <strong>&apos;Tambahkan ke Layar Utama&apos;</strong>.
+                  </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">3</span>
-                  <p className="leading-relaxed">Ketuk <strong>&apos;Instal&apos;</strong> pada konfirmasi yang muncul. Aplikasi langsung terpasang di HP Anda!</p>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                    3
+                  </span>
+                  <p className="leading-relaxed">
+                    Ketuk <strong>&apos;Instal&apos;</strong> pada konfirmasi
+                    yang muncul. Aplikasi langsung terpasang di HP Anda!
+                  </p>
                 </div>
               </div>
             )}

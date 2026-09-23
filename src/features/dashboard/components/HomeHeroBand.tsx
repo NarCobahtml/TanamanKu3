@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { ScanLine, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { ScanLine, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export interface HomeHeroBandProps {
   firstName: string;
@@ -12,7 +12,12 @@ export interface HomeHeroBandProps {
   penyakit: number;
 }
 
-export function HomeHeroBand({ firstName, total, sehat, penyakit }: HomeHeroBandProps) {
+export function HomeHeroBand({
+  firstName,
+  total,
+  sehat,
+  penyakit,
+}: HomeHeroBandProps) {
   const t = useTranslations("home");
 
   return (
@@ -21,35 +26,44 @@ export function HomeHeroBand({ firstName, total, sehat, penyakit }: HomeHeroBand
         <p className="overline hero-anim hero-fade">{t("workspace")}</p>
         <h1
           className="hero-anim hero-fade mt-3 max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-[-0.03em] md:text-6xl"
-          style={{ animationDelay: '0.12s' }}
+          style={{ animationDelay: "0.12s" }}
         >
-          {t('welcomePrefix')}
+          {t("welcomePrefix")}
           <span>, </span>
           <span className="font-playfair">{firstName}</span>.
         </h1>
         <p
           className="hero-anim hero-fade mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground"
-          style={{ animationDelay: '0.26s' }}
+          style={{ animationDelay: "0.26s" }}
         >
           {t("pantau")}
         </p>
 
-        {/* vitals readout, medical-style tabular numbers */}
         <dl
           className="hero-anim hero-fade mt-12 grid grid-cols-3 gap-x-6 gap-y-8 sm:gap-10"
-          style={{ animationDelay: '0.4s' }}
+          style={{ animationDelay: "0.4s" }}
         >
           <div>
-            <dt className="overline min-h-[2.5rem] sm:min-h-0">{t("tanamanDipantau")}</dt>
-            <dd className="tnum mt-2 text-4xl font-extrabold leading-none md:text-5xl">{total}</dd>
+            <dt className="overline min-h-[2.5rem] sm:min-h-0">
+              {t("tanamanDipantau")}
+            </dt>
+            <dd className="tnum mt-2 text-4xl font-extrabold leading-none md:text-5xl">
+              {total}
+            </dd>
           </div>
           <div>
             <dt className="overline min-h-[2.5rem] sm:min-h-0">{t("sehat")}</dt>
-            <dd className="tnum mt-2 text-4xl font-extrabold leading-none text-success md:text-5xl">{sehat}</dd>
+            <dd className="tnum mt-2 text-4xl font-extrabold leading-none text-success md:text-5xl">
+              {sehat}
+            </dd>
           </div>
           <div>
-            <dt className="overline min-h-[2.5rem] sm:min-h-0">{t("terdeteksiPenyakit")}</dt>
-            <dd className="tnum mt-2 text-4xl font-extrabold leading-none text-destructive md:text-5xl">{penyakit}</dd>
+            <dt className="overline min-h-[2.5rem] sm:min-h-0">
+              {t("terdeteksiPenyakit")}
+            </dt>
+            <dd className="tnum mt-2 text-4xl font-extrabold leading-none text-destructive md:text-5xl">
+              {penyakit}
+            </dd>
           </div>
         </dl>
 
@@ -58,14 +72,23 @@ export function HomeHeroBand({ firstName, total, sehat, penyakit }: HomeHeroBand
           className="hero-anim hero-fade mt-8 flex h-1.5 w-full overflow-hidden bg-muted"
           role="img"
           aria-label={`${sehat} ${t("sehat")}, ${penyakit} ${t("terdeteksiPenyakit")}`}
-          style={{ animationDelay: '0.5s' }}
+          style={{ animationDelay: "0.5s" }}
         >
-          <span className="bg-[#7ed8a4]" style={{ width: `${(sehat / total) * 100}%` }} />
-          <span className="bg-[#f09a90]" style={{ width: `${(penyakit / total) * 100}%` }} />
+          <span
+            className="bg-[#7ed8a4]"
+            style={{ width: `${(sehat / total) * 100}%` }}
+          />
+          <span
+            className="bg-[#f09a90]"
+            style={{ width: `${(penyakit / total) * 100}%` }}
+          />
         </div>
 
-        {/* primary detection CTA */}
-        <div className="hero-anim hero-fade mt-10 flex flex-wrap items-center gap-3" style={{ animationDelay: '0.6s' }}>
+        {/*  CTA */}
+        <div
+          className="hero-anim hero-fade mt-10 flex flex-wrap items-center gap-3"
+          style={{ animationDelay: "0.6s" }}
+        >
           <Button asChild size="lg" className="btn-cta rounded-full px-7">
             <Link href="/scan">
               <ScanLine className="h-5 w-5" aria-hidden="true" />

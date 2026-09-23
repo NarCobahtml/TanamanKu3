@@ -188,7 +188,7 @@ export default function ProfilPage() {
                   <img src="/icons/icon-192x192.png" alt="TanamanKu" className="h-full w-full object-contain" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-foreground">Pasang Aplikasi TanamanKu (PWA)</h3>
+                  <h3 className="font-bold text-sm sm:text-base text-foreground">Pasang Aplikasi TanamanKu</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">Buka lebih cepat di layar utama tanpa browser dan hemat kuota internet.</p>
                 </div>
               </div>
