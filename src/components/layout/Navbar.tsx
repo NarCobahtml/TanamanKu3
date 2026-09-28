@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Bell, ChevronDown, Check } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,10 +17,10 @@ import { useLocale } from "@/components/layout/LocaleProvider";
 import { useAuth } from "@/lib/use-auth";
 import { cn } from "@/lib/utils";
 
-const notifications = [
-  { id: 1, time: "08:12", text: "Cabai Rawit, jadwal penyiraman hari ini." },
-  { id: 2, time: "Kemarin", text: "Scan Tomat Ceri: kondisi daun sehat." },
-  { id: 3, time: "2 hari lalu", text: "Pisang terlewat penyiraman 1 hari." },
+const defaultNotifications = [
+  { id: "1", time: "08:12", text: "Cabai Rawit, jadwal penyiraman hari ini." },
+  { id: "2", time: "Kemarin", text: "Scan Tomat Ceri: kondisi daun sehat." },
+  { id: "3", time: "2 hari lalu", text: "Pisang terlewat penyiraman 1 hari." },
 ];
 
 /** nama i18n untuk nav, fallback ke nama asli bila tidak ada mapping. */
@@ -36,6 +36,22 @@ export default function Navbar() {
   const isAuth = pathname === "/login" || pathname === "/register";
   const isScan = pathname === "/scan";
   const [notifOpen, setNotifOpen] = useState(false);
+  const [liveNotifs, setLiveNotifs] = useState(defaultNotifications);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/notifications')
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.success && Array.isArray(j.data) && j.data.length > 0 && isMounted) {
+          setLiveNotifs(j.data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   const nav = useTranslations("nav");
   const tp = useTranslations("profil");
   const { locale, setLocale } = useLocale();
@@ -173,7 +189,7 @@ export default function Navbar() {
                     {nav("notifikasi")}
                   </div>
                   <ul className="divide-y divide-border">
-                    {notifications.map((n) => (
+                    {liveNotifs.map((n) => (
                       <li key={n.id} className="px-4 py-3">
                         <p className="text-sm leading-snug">{n.text}</p>
                         <p className="mt-1 text-xs text-muted-foreground">

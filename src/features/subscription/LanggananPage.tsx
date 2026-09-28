@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Script from "next/script";
 import { CreditCard, Sparkles, CircleCheck, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -30,6 +30,22 @@ declare global {
 export default function LanggananPage() {
   const t = useTranslations("langganan");
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [scanCount, setScanCount] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/api/scan/history")
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.success && Array.isArray(j.data) && isMounted) {
+          setScanCount(j.data.length);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const plans = [
     {
@@ -137,7 +153,7 @@ export default function LanggananPage() {
         <div className="flex flex-wrap gap-x-12 gap-y-6">
           <div>
             <p className="tnum text-4xl font-extrabold leading-none text-primary">
-              3/5
+              {scanCount}/5
             </p>
             <p className="overline mt-2">{t("scanTerpakai")}</p>
           </div>
@@ -168,8 +184,8 @@ export default function LanggananPage() {
               />
               <ScanUsageCard
                 title={t("penggunaanScan")}
-                usageText="3/5"
-                current={3}
+                usageText={`${scanCount}/5`}
+                current={scanCount}
                 max={5}
                 barHeightClass="h-1.5"
                 className="p-5"

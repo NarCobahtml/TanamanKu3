@@ -215,7 +215,7 @@
     "unfavourable": "Unfavourable",
     "kurangMendukung": "Kurang Mendukung",
     "kondisiSaatIni": "Kondisi saat ini: {status}",
-    "hariIniLokasi": "Kasin, Hari Ini",
+    "hariIniLokasi": "{lokasi}, Hari Ini",
     "aiSaran": "Disarankan menyiram ringan pagi ini dan hindari penyiraman berat sore nanti.",
     "rekomendasiSiram": "Rekomendasi Penyiraman",
     "jadwalSelesai": "Jadwal hari ini sudah ditandai selesai.",

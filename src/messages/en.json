@@ -215,7 +215,7 @@
     "unfavourable": "Unfavourable",
     "kurangMendukung": "Not Ideal",
     "kondisiSaatIni": "Current condition: {status}",
-    "hariIniLokasi": "Kasin, Today",
+    "hariIniLokasi": "{lokasi}, Today",
     "aiSaran": "Light watering this morning is recommended; avoid heavy watering this afternoon.",
     "rekomendasiSiram": "Watering Recommendation",
     "jadwalSelesai": "Today's schedule is marked complete.",

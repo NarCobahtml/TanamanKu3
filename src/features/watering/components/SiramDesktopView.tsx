@@ -17,8 +17,9 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
 import type { Tanaman } from '@/features/plants';
-import { weatherNum, timeSlots, forecast, slotVisual } from '../constants';
+import { weatherNum as defaultWeatherNum, timeSlots as defaultTimeSlots, forecast as defaultForecast, slotVisual } from '../constants';
 import type { SlotStatus } from '../types';
+import type { WeatherData } from '../use-weather';
 
 export interface SiramDesktopViewProps {
   plant: Tanaman;
@@ -28,6 +29,7 @@ export interface SiramDesktopViewProps {
   onToggleNotif: () => void;
   onEdit: () => void;
   onHapus: () => void;
+  weather?: WeatherData;
 }
 
 export default function SiramDesktopView({
@@ -38,9 +40,15 @@ export default function SiramDesktopView({
   onToggleNotif,
   onEdit,
   onHapus,
+  weather,
 }: SiramDesktopViewProps) {
   const t = useTranslations('siram');
   const tc = useTranslations('common');
+
+  const weatherNum = weather?.weatherNum || defaultWeatherNum;
+  const timeSlots = weather?.timeSlots || defaultTimeSlots;
+  const forecast = weather?.forecast || defaultForecast;
+  const locationLabel = weather?.locationName;
 
   return (
     <div className="hidden lg:block">
@@ -69,7 +77,7 @@ export default function SiramDesktopView({
                   </h1>
                   <p className="mt-4 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
                     <Sun className="h-4 w-4 text-primary" aria-hidden="true" />
-                    {weatherNum.temp} · {t("hariIniLokasi")}
+                    {weatherNum.temp} · {t("hariIniLokasi", { lokasi: locationLabel || "Lokasi Anda" })}
                   </p>
                   <div className="mt-5 flex flex-wrap items-center gap-2">
                     <Badge variant="outline" className="bg-card">
@@ -117,7 +125,15 @@ export default function SiramDesktopView({
               {/* Kondisi Cuaca */}
               <TkRevealClient>
                 <div className="overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
-                  <h2 className="border-b border-border px-6 py-4 text-sm font-bold">{t("kondisiCuaca")}</h2>
+                  <h2 className="border-b border-border px-6 py-4 text-sm font-bold flex items-center justify-between">
+                    <span>{t("kondisiCuaca")}</span>
+                    {locationLabel && (
+                      <span className="text-xs font-normal text-muted-foreground flex items-center gap-1.5">
+                        <Sun className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                        {locationLabel}
+                      </span>
+                    )}
+                  </h2>
                   <div className="flex flex-wrap items-end justify-between gap-6 px-6 py-6">
                     <div>
                       <p className="text-5xl font-extrabold tracking-tight">{weatherNum.temp}</p>
@@ -149,9 +165,9 @@ export default function SiramDesktopView({
                       {t("rekomendasiSiram")}
                     </h3>
                     <p className="mt-2 text-sm leading-relaxed text-foreground/80">
-                      {t("aiSummaryText")}{' '}
+                      {weather?.aiSummary || t("aiSummaryText")}{' '}
                       <span className="font-semibold text-foreground">
-                        {t("aiSaran")}
+                        {weather?.aiSaran || t("aiSaran")}
                       </span>
                     </p>
                     <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
