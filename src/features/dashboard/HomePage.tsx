@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useLocale } from '@/components/layout/LocaleProvider';
 import { useAuth } from '@/lib/use-auth';
 import { PageCtaBand } from '@/components/shared/PageCtaBand';
-import { initialTanamanList as tanamanList } from '@/features/plants';
+import { useTanamanList, initialTanamanList } from '@/features/plants';
 import type { HealthLevel } from '@/components/shared/HealthStatus';
 import {
   HomeHeroBand,
@@ -19,7 +19,8 @@ export default function HomePage() {
   const t = useTranslations("home");
   const { locale: lang } = useLocale();
   const { user } = useAuth();
-  const heroPlant = tanamanList[0];
+  const tanamanList = useTanamanList();
+  const heroPlant = tanamanList[0] || initialTanamanList[0];
   const heroHealth = healthById[heroPlant.id] ?? { level: 'sehat' as HealthLevel, lastScan: '-' };
 
   const firstName = user?.name ? user.name.trim().split(/\s+/)[0] : 'Pekebun';

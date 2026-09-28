@@ -19,15 +19,10 @@ import {
   Moon,
   Bell,
   Trash2,
-  Sparkles,
-  ShieldAlert,
   UserCheck,
   UserX,
   Activity,
-  DollarSign,
-  Download,
   Send,
-  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,11 +57,11 @@ export default function AdminDashboard() {
 
   const [moderations, setModerations] =
     useState<ModerationItem[]>(initialModeration);
-  const [modFilter, setModFilter] = useState<
+  const [modFilter] = useState<
     "Semua" | "Perlu Tindakan" | "Diselesaikan" | "Diabaikan"
   >("Semua");
 
-  const [transactions, setTransactions] =
+  const [transactions] =
     useState<TransactionItem[]>(initialTransactions);
   const [trxFilter, setTrxFilter] = useState<"Semua" | "Berhasil" | "Menunggu">(
     "Semua",

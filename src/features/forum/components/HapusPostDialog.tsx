@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { deletePost } from '../forum-storage';
+import { deleteForumPost } from '../forum-storage';
 import type { ForumPost } from '../types';
 import { toast } from 'sonner';
 import { Trash2 } from 'lucide-react';
@@ -30,17 +30,18 @@ export function HapusPostDialog({
 }: HapusPostDialogProps) {
   const [loading, setLoading] = useState(false);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!post || loading) return;
     setLoading(true);
     try {
-      deletePost(post.id);
+      await deleteForumPost(post.id);
       toast.success('Postingan berhasil dihapus dari forum');
       onOpenChange(false);
       onDeleted?.();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Gagal menghapus postingan:', err);
-      toast.error('Gagal menghapus postingan');
+      const msg = err instanceof Error ? err.message : 'Gagal menghapus postingan';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

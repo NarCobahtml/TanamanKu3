@@ -1,49 +1,141 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { FileDown, ScanLine, SearchX } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { ScanLine, SearchX } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { HealthStatus, type HealthLevel } from '@/components/shared/HealthStatus';
-import { EmptyState } from '@/components/shared/EmptyState';
-import { PageCtaBand } from '@/components/shared/PageCtaBand';
-import { FilterPill } from '@/components/ui/filter-pill';
-import TkRevealClient from '@/components/shared/tk-reveal-client';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { PageHeader } from "@/components/shared/PageHeader";
+import {
+  HealthStatus,
+  type HealthLevel,
+} from "@/components/shared/HealthStatus";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { PageCtaBand } from "@/components/shared/PageCtaBand";
+import { FilterPill } from "@/components/ui/filter-pill";
+import TkRevealClient from "@/components/shared/tk-reveal-client";
 
-type Status = 'sehat' | 'terinfeksi';
+type Status = "sehat" | "terinfeksi";
 
-const scans = [
-  { id: 1, plant: 'Cabai Rawit', disease: 'Busuk Daun (Phytophthora)', date: '01.09.2026', accuracy: 94, status: 'terinfeksi' as Status, photo: '/figma-assets/plant-chili.jpg' },
-  { id: 2, plant: 'Tomat Ceri', disease: 'Sehat, tidak ada gejala', date: '30.08.2026', accuracy: 98, status: 'sehat' as Status, photo: undefined },
-  { id: 3, plant: 'Monstera Deliciosa', disease: 'Sehat, tidak ada gejala', date: '27.08.2026', accuracy: 96, status: 'sehat' as Status, photo: '/figma-assets/plant-monstera.png' },
-  { id: 4, plant: 'Lidah Mertua', disease: 'Bercak Bakteri (Xanthomonas)', date: '25.08.2026', accuracy: 91, status: 'terinfeksi' as Status, photo: '/figma-assets/plant-lidahmertua.jpg' },
-  { id: 5, plant: 'Calathea Orbifolia', disease: 'Sehat, tidak ada gejala', date: '22.08.2026', accuracy: 97, status: 'sehat' as Status, photo: '/figma-assets/plant-calathea-figma.jpg' },
+export interface ScanItem {
+  id: string | number;
+  plant: string;
+  disease: string;
+  date: string;
+  accuracy: number;
+  status: Status;
+  photo?: string;
+}
+
+const initialScans: ScanItem[] = [
+  {
+    id: 1,
+    plant: "Cabai Rawit",
+    disease: "Busuk Daun (Phytophthora)",
+    date: "01.09.2026",
+    accuracy: 94,
+    status: "terinfeksi",
+    photo: "/figma-assets/plant-chili.jpg",
+  },
+  {
+    id: 2,
+    plant: "Tomat Ceri",
+    disease: "Sehat, tidak ada gejala",
+    date: "30.08.2026",
+    accuracy: 98,
+    status: "sehat",
+    photo: undefined,
+  },
+  {
+    id: 3,
+    plant: "Monstera Deliciosa",
+    disease: "Sehat, tidak ada gejala",
+    date: "27.08.2026",
+    accuracy: 96,
+    status: "sehat",
+    photo: "/figma-assets/plant-monstera.png",
+  },
+  {
+    id: 4,
+    plant: "Lidah Mertua",
+    disease: "Bercak Bakteri (Xanthomonas)",
+    date: "25.08.2026",
+    accuracy: 91,
+    status: "terinfeksi",
+    photo: "/figma-assets/plant-lidahmertua.jpg",
+  },
+  {
+    id: 5,
+    plant: "Calathea Orbifolia",
+    disease: "Sehat, tidak ada gejala",
+    date: "22.08.2026",
+    accuracy: 97,
+    status: "sehat",
+    photo: "/figma-assets/plant-calathea-figma.jpg",
+  },
 ];
 
 const filters = [
-  { id: 'semua', name: 'Semua' },
-  { id: 'sehat', name: 'Sehat' },
-  { id: 'terinfeksi', name: 'Terinfeksi' },
+  { id: "semua", name: "Semua" },
+  { id: "sehat", name: "Sehat" },
+  { id: "terinfeksi", name: "Terinfeksi" },
 ];
 
-const statusLevel: Record<Status, HealthLevel> = { sehat: 'sehat', terinfeksi: 'penyakit' };
-
-const sehatCount = scans.filter((s) => s.status === 'sehat').length;
-const infectedCount = scans.length - sehatCount;
+const statusLevel: Record<Status, HealthLevel> = {
+  sehat: "sehat",
+  terinfeksi: "penyakit",
+};
 
 export default function RiwayatPage() {
-  const tr = useTranslations('riwayat');
-  const t = useTranslations('common');
-  const [filter, setFilter] = useState('semua');
-  const [loading] = useState(false); // ponytail: flip true to preview skeleton state
+  const tr = useTranslations("riwayat");
+  const t = useTranslations("common");
+  const [filter, setFilter] = useState("semua");
+  const [scansData, setScansData] = useState<ScanItem[]>(initialScans);
+  const [loading, setLoading] = useState(false);
 
-  const rows = filter === 'semua' ? scans : scans.filter((s) => s.status === filter);
+  useEffect(() => {
+    let isMounted = true;
+    async function loadScans() {
+      try {
+        const res = await fetch("/api/scan/history");
+        if (!res.ok) return;
+        const json = await res.json();
+        if (
+          json.success &&
+          Array.isArray(json.data) &&
+          json.data.length > 0 &&
+          isMounted
+        ) {
+          setScansData(json.data);
+        }
+      } catch (err) {
+        console.warn("Gagal memuat riwayat scan dari database:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadScans();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const sehatCount = scansData.filter((s) => s.status === "sehat").length;
+  const infectedCount = scansData.length - sehatCount;
+
+  const rows =
+    filter === "semua"
+      ? scansData
+      : scansData.filter((s) => s.status === filter);
 
   return (
     <div>
@@ -60,29 +152,35 @@ export default function RiwayatPage() {
                 {tr("scanBaru")}
               </Link>
             </Button>
-            <Button
+            {/* <Button
               variant="outline"
               className="border-border bg-card hover:bg-accent/60"
               aria-label={tr("unduhRiwayat")}
             >
               <FileDown className="h-4 w-4" aria-hidden="true" />
               {t("unduh")}
-            </Button>
+            </Button> */}
           </>
         }
       >
         {/* Stat readout, tnum medical report style */}
         <div className="flex flex-wrap gap-x-12 gap-y-6">
           <div>
-            <p className="tnum text-4xl font-extrabold leading-none">{scans.length}</p>
+            <p className="tnum text-4xl font-extrabold leading-none">
+              {scansData.length}
+            </p>
             <p className="overline mt-2">{tr("totalScan")}</p>
           </div>
           <div>
-            <p className="tnum text-4xl font-extrabold leading-none text-success">{sehatCount}</p>
+            <p className="tnum text-4xl font-extrabold leading-none text-success">
+              {sehatCount}
+            </p>
             <p className="overline mt-2">{t("sehat")}</p>
           </div>
           <div>
-            <p className="tnum text-4xl font-extrabold leading-none text-destructive">{infectedCount}</p>
+            <p className="tnum text-4xl font-extrabold leading-none text-destructive">
+              {infectedCount}
+            </p>
             <p className="overline mt-2">{t("terinfeksi")}</p>
           </div>
         </div>
@@ -90,7 +188,11 @@ export default function RiwayatPage() {
 
       <div className="mx-auto w-full max-w-7xl space-y-16 px-4 pb-24 pt-14 sm:px-6">
         {/* Filter pills */}
-        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={tr("filterStatus")}>
+        <div
+          className="flex flex-wrap items-center gap-1.5"
+          role="group"
+          aria-label={tr("filterStatus")}
+        >
           {filters.map((f) => (
             <FilterPill
               key={f.id}
@@ -104,7 +206,9 @@ export default function RiwayatPage() {
 
         {loading ? (
           <div className="space-y-3">
-            {[0, 1, 2].map((i) => <Skeleton key={i} className="h-16 w-full" />)}
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-16 w-full" />
+            ))}
           </div>
         ) : rows.length === 0 ? (
           <div className="rounded-xl border border-border">
@@ -112,8 +216,8 @@ export default function RiwayatPage() {
               icon={<SearchX className="h-6 w-6" aria-hidden="true" />}
               title={tr("belumAdaScan")}
               message={
-                filter === 'semua'
-                  ? tr('hasilOtomatis')
+                filter === "semua"
+                  ? tr("hasilOtomatis")
                   : tr("belumAdaFilter", { status: t(filter) })
               }
               action={
@@ -129,16 +233,29 @@ export default function RiwayatPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-border bg-secondary/50 hover:bg-secondary/50">
-                    <TableHead className="pl-4 pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground sm:pl-6">{t("tanaman")}</TableHead>
-                    <TableHead className="pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{t("diagnosis")}</TableHead>
-                    <TableHead className="hidden pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground md:table-cell">{t("tanggal")}</TableHead>
-                    <TableHead className="pt-3.5 pb-3.5 text-right text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{t("keyakinan")}</TableHead>
-                    <TableHead className="pr-4 pt-3.5 pb-3.5 text-right text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground sm:pr-6">{t("status")}</TableHead>
+                    <TableHead className="pl-4 pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground sm:pl-6">
+                      {t("tanaman")}
+                    </TableHead>
+                    <TableHead className="pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
+                      {t("diagnosis")}
+                    </TableHead>
+                    <TableHead className="hidden pt-3.5 pb-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground md:table-cell">
+                      {t("tanggal")}
+                    </TableHead>
+                    <TableHead className="pt-3.5 pb-3.5 text-right text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
+                      {t("keyakinan")}
+                    </TableHead>
+                    <TableHead className="pr-4 pt-3.5 pb-3.5 text-right text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground sm:pr-6">
+                      {t("status")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {rows.map((s) => (
-                    <TableRow key={s.id} className="border-border transition-colors hover:bg-secondary">
+                    <TableRow
+                      key={s.id}
+                      className="border-border transition-colors hover:bg-secondary"
+                    >
                       <TableCell className="py-4 pl-4 sm:pl-6">
                         <span className="flex items-center gap-3">
                           {s.photo ? (
@@ -149,19 +266,30 @@ export default function RiwayatPage() {
                             />
                           ) : (
                             <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
-                              <ScanLine className="h-4 w-4" aria-hidden="true" />
+                              <ScanLine
+                                className="h-4 w-4"
+                                aria-hidden="true"
+                              />
                             </span>
                           )}
                           <span className="font-medium">{s.plant}</span>
                         </span>
                       </TableCell>
-                      <TableCell className="max-w-[220px] whitespace-normal text-muted-foreground">{s.disease}</TableCell>
-                      <TableCell className="tnum hidden whitespace-nowrap text-muted-foreground md:table-cell">{s.date}</TableCell>
-                      <TableCell className="tnum text-right font-semibold">{s.accuracy}%</TableCell>
+                      <TableCell className="max-w-[220px] whitespace-normal text-muted-foreground">
+                        {s.disease}
+                      </TableCell>
+                      <TableCell className="tnum hidden whitespace-nowrap text-muted-foreground md:table-cell">
+                        {s.date}
+                      </TableCell>
+                      <TableCell className="tnum text-right font-semibold">
+                        {s.accuracy}%
+                      </TableCell>
                       <TableCell className="pr-4 pt-4 pb-4 text-right sm:pr-6">
                         <HealthStatus
                           level={statusLevel[s.status]}
-                          label={s.status === 'sehat' ? t('sehat') : t('terinfeksi')}
+                          label={
+                            s.status === "sehat" ? t("sehat") : t("terinfeksi")
+                          }
                         />
                       </TableCell>
                     </TableRow>
@@ -169,7 +297,7 @@ export default function RiwayatPage() {
                 </TableBody>
               </Table>
               <p className="rounded-b-xl border-t border-border bg-secondary/30 px-4 py-3 text-xs text-muted-foreground sm:px-6">
-                {tr("menampilkan", { count: rows.length, total: scans.length })}
+                {tr("menampilkan", { count: rows.length, total: scansData.length })}
               </p>
             </div>
           </TkRevealClient>
@@ -180,8 +308,8 @@ export default function RiwayatPage() {
         heading={tr("tanamanMenunggu")}
         accent="diperiksa"
         description={tr("satuFotoCukup")}
-        primary={{ href: '/scan', label: tr('scanSekarang') }}
-        secondary={{ href: '/siram', label: t('lihatTanamanSaya') }}
+        primary={{ href: "/scan", label: tr("scanSekarang") }}
+        secondary={{ href: "/siram", label: t("lihatTanamanSaya") }}
       />
     </div>
   );

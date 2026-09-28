@@ -4,7 +4,6 @@ import { useState } from "react";
 import Script from "next/script";
 import { CreditCard, Sparkles, CircleCheck, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ActionButton } from "@/components/ui/action-button";
 import { CurrentPlanCard } from "@/components/shared/subscription/CurrentPlanCard";
@@ -105,7 +104,7 @@ export default function LanggananPage() {
           },
         });
       } else if (data.data?.redirectUrl) {
-        window.location.href = data.data.redirectUrl;
+        window.location.assign(data.data.redirectUrl);
       }
     } catch (err: unknown) {
       console.error("Subscribe error:", err);

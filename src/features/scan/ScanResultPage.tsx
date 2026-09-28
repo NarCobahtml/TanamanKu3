@@ -11,6 +11,7 @@ import {
   FlaskConical,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { PageHeader, SectionHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
@@ -26,11 +27,35 @@ interface ScanData {
 export default function ScanResultPage() {
   const t = useTranslations('scanResult');
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const data = useScanResult<ScanData>();
   const photo = useScanPhoto();
 
-  const handleSave = () => {
-    setSaved(true);
+  const handleSave = async () => {
+    if (!data || saving || saved) return;
+    setSaving(true);
+    try {
+      const res = await fetch('/api/scan/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          class: data.class,
+          confidence: data.confidence,
+          photo: photo || undefined,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || 'Gagal menyimpan riwayat');
+      }
+      setSaved(true);
+      toast.success(result.message || 'Hasil scan berhasil disimpan ke riwayat!');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan';
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const content = data ? getContent(data.class) : null;
@@ -76,9 +101,9 @@ export default function ScanResultPage() {
                 {t("scanUlang")}
               </Link>
             </Button>
-            <Button onClick={handleSave} disabled={saved} className="btn-cta rounded-full bg-white px-6 text-[#123526] hover:bg-primary/10">
+            <Button onClick={handleSave} disabled={saved || saving} className="btn-cta rounded-full bg-white px-6 text-[#123526] hover:bg-primary/10">
               <BookmarkPlus className="h-4 w-4" aria-hidden="true" />
-              {saved ? t('tersimpan') : t('simpanRiwayat')}
+              {saving ? 'Menyimpan...' : saved ? t('tersimpan') : t('simpanRiwayat')}
             </Button>
           </>
         }

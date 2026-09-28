@@ -1,34 +1,24 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { verifyJwt } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'node:crypto';
 
-async function getCurrentUserId(request: Request): Promise<string | null> {
+async function getCurrentUserId(): Promise<string | null> {
   try {
-    let token: string | undefined;
-    const cookieStore = await cookies();
-    token = cookieStore.get('auth_token')?.value;
-    if (!token) {
-      const authHeader = request.headers.get('Authorization');
-      if (authHeader?.startsWith('Bearer ')) {
-        token = authHeader.substring(7);
-      }
-    }
-    if (!token) return null;
-    const payload = verifyJwt(token);
-    return payload?.id || null;
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.id || null;
   } catch {
     return null;
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const userId = await getCurrentUserId(request);
+    const userId = await getCurrentUserId();
 
     const plants = await prisma.plant.findMany({
-      where: userId ? { OR: [{ userId }, { userId: null }] } : undefined,
+      where: userId ? { OR: [{ userId }, { userId: null }] } : { userId: null },
       orderBy: { createdAt: 'desc' },
       include: {
         wateringSchedule: true,
@@ -73,7 +63,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const userId = await getCurrentUserId(request);
+    const userId = await getCurrentUserId();
 
     // Use pure numeric ID (either passed in or generated from Date.now())
     const plantId = customId && /^\d+$/.test(customId) ? customId : Date.now().toString();

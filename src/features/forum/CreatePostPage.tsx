@@ -1,55 +1,55 @@
-'use client';
+"use client";
 
-import { useRef, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Camera, ChevronDown, Loader2, Send, User, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-import { ActionButton } from '@/components/ui/action-button';
-import { useAuthGuard } from '@/components/shared/AuthGuardModal';
-import { useAuth } from '@/lib/use-auth';
-import { saveNewPost } from './forum-storage';
-import type { ForumPost } from './types';
+import { useRef, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Camera,
+  ChevronDown,
+  Loader2,
+  Send,
+  User,
+  X,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { ActionButton } from "@/components/ui/action-button";
+import { useAuthGuard } from "@/components/shared/AuthGuardModal";
+import { createForumPost } from "./forum-storage";
 
-const categories = [
-  'Hama & Penyakit',
-  'Perawatan',
-  'Nutrisi',
-  'Tanya Ahli',
-];
+const categories = ["Hama & Penyakit", "Perawatan", "Nutrisi", "Tanya Ahli"];
 
 export default function CreatePostPage() {
   const router = useRouter();
-  const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [category, setCategory] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [category, setCategory] = useState("");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   const { checkAuth, AuthModal } = useAuthGuard();
 
-  useEffect(() => {
-    checkAuth({
-      title: 'Login untuk Buat Postingan',
-      actionName: 'Buat Postingan',
-      description:
-        'Anda perlu masuk ke akun terlebih dahulu untuk mempublikasikan postingan baru di forum komunitas.',
-    });
-  }, []);
+  // useEffect(() => {
+  //   checkAuth({
+  //     title: "Login untuk Buat Postingan",
+  //     actionName: "Buat Postingan",
+  //     description:
+  //       "Anda perlu masuk ke akun terlebih dahulu untuk mempublikasikan postingan baru di forum komunitas.",
+  //   });
+  // }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest('.category-dropdown-container')) {
+      if (!target.closest(".category-dropdown-container")) {
         setShowCategoryDropdown(false);
       }
     };
-    window.addEventListener('click', handleOutside);
-    return () => window.removeEventListener('click', handleOutside);
+    window.addEventListener("click", handleOutside);
+    return () => window.removeEventListener("click", handleOutside);
   }, []);
 
   const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,12 +65,12 @@ export default function CreatePostPage() {
 
   const removePhoto = () => {
     setPhotoPreview(null);
-    if (fileRef.current) fileRef.current.value = '';
+    if (fileRef.current) fileRef.current.value = "";
   };
 
-  const valid = title.trim() !== '' && content.trim() !== '';
+  const valid = title.trim() !== "" && content.trim() !== "";
 
-  const publish = () => {
+  const publish = async () => {
     if (
       !checkAuth({
         title: 'Login untuk Buat Postingan',
@@ -84,11 +84,11 @@ export default function CreatePostPage() {
 
     if (!valid || publishing) {
       if (!title.trim()) {
-        toast.error('Silakan isi judul postingan terlebih dahulu');
+        toast.error("Silakan isi judul postingan terlebih dahulu");
         return;
       }
       if (!content.trim()) {
-        toast.error('Silakan isi konten postingan terlebih dahulu');
+        toast.error("Silakan isi konten postingan terlebih dahulu");
         return;
       }
       return;
@@ -97,57 +97,21 @@ export default function CreatePostPage() {
     setPublishing(true);
 
     try {
-      let currentUserName = user?.name || 'Alex Saputra';
-      let currentUserId = user?.id;
-      let currentUserAvatar = user?.photoUrl || '/figma-assets/profile-1.jpg';
-
-      if (!currentUserId) {
-        try {
-          const storedUser = localStorage.getItem('tumbuhkita_user');
-          if (storedUser) {
-            const u = JSON.parse(storedUser);
-            if (u?.name) currentUserName = u.name;
-            if (u?.id) currentUserId = u.id;
-            if (u?.photoUrl) currentUserAvatar = u.photoUrl;
-          }
-        } catch {
-          // fallback
-        }
-      }
-
-      const initials = currentUserName
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase();
-
-      const newPost: ForumPost = {
-        id: `post-${Date.now()}`,
-        authorId: currentUserId,
-        author: currentUserName,
-        initials: initials || 'AS',
-        avatar: currentUserAvatar,
-        time: 'Baru saja',
-        category: category || 'Perawatan',
+      await createForumPost({
         title: title.trim(),
-        excerpt: content.trim().slice(0, 120) + (content.length > 120 ? '...' : ''),
-        content: [content.trim()],
+        content: content.trim(),
+        category: category || "Perawatan",
         image: photoPreview || undefined,
-        likes: 0,
-        views: 1,
-        comments: [],
-      };
+      });
 
-      saveNewPost(newPost);
-      toast.success('Postingan berhasil diterbitkan!');
-    } catch (e) {
+      toast.success("Postingan berhasil diterbitkan!");
+      router.push("/forum");
+    } catch (e: unknown) {
       console.error(e);
+      const msg = e instanceof Error ? e.message : "Gagal menerbitkan postingan";
+      toast.error(msg);
+      setPublishing(false);
     }
-
-    setTimeout(() => {
-      router.push('/forum');
-    }, 500);
   };
 
   return (
@@ -232,11 +196,16 @@ export default function CreatePostPage() {
                   }}
                   className={cn(
                     "h-9 rounded-full border border-[#D5DDD5] dark:border-border/80 bg-white dark:bg-card px-3.5 flex items-center gap-2 text-xs sm:text-[13px] font-normal transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.03)] cursor-pointer",
-                    category ? "text-foreground font-medium" : "text-[#556355] dark:text-muted-foreground"
+                    category
+                      ? "text-foreground font-medium"
+                      : "text-[#556355] dark:text-muted-foreground",
                   )}
                 >
-                  <span>{category || 'Pilih Kategori'}</span>
-                  <ChevronDown className="size-4 text-foreground/60" aria-hidden="true" />
+                  <span>{category || "Pilih Kategori"}</span>
+                  <ChevronDown
+                    className="size-4 text-foreground/60"
+                    aria-hidden="true"
+                  />
                 </button>
 
                 {showCategoryDropdown && (
@@ -253,7 +222,7 @@ export default function CreatePostPage() {
                           "w-full text-left px-3 py-2 text-xs sm:text-sm rounded-lg transition-colors cursor-pointer",
                           category === cat
                             ? "bg-primary/10 text-primary font-medium"
-                            : "hover:bg-accent text-foreground"
+                            : "hover:bg-accent text-foreground",
                         )}
                       >
                         {cat}
@@ -270,7 +239,10 @@ export default function CreatePostPage() {
                 aria-label="Tambah foto"
                 className="size-9 sm:size-10 rounded-xl border border-[#D5DDD5] dark:border-border/80 bg-white dark:bg-card flex items-center justify-center text-[#556355] dark:text-foreground/75 hover:border-foreground/40 hover:text-foreground transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.03)] cursor-pointer"
               >
-                <Camera className="size-[18px] sm:size-5 stroke-[1.8]" aria-hidden="true" />
+                <Camera
+                  className="size-[18px] sm:size-5 stroke-[1.8]"
+                  aria-hidden="true"
+                />
               </button>
               <input
                 ref={fileRef}
@@ -293,7 +265,7 @@ export default function CreatePostPage() {
           size="lg"
           className="fixed bottom-6 right-6 z-30 shadow-lg"
         >
-          {publishing ? 'Memproses...' : 'Posting'}
+          {publishing ? "Memproses..." : "Posting"}
         </ActionButton>
       </main>
       {AuthModal}

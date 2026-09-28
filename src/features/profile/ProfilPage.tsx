@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LogOut, UserCog, CreditCard, Bell, BellRing, Download } from 'lucide-react';
@@ -36,22 +36,22 @@ export default function ProfilPage() {
   const mounted = useMounted();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (user) {
-      setName(user.name || '');
-      setEmail(user.email || '');
-      setPhoto(user.photoUrl || '');
-    }
-  }, [user]);
+  const handleOpenEdit = () => {
+    setName(user?.name || '');
+    setEmail(user?.email || '');
+    setPhoto(user?.photoUrl || '');
+    setEditOpen(true);
+  };
 
   const displayName = user?.name || name || 'Pengguna TanamanKu';
   const displayEmail = user?.email || email || 'Belum masuk';
 
+  const userCreatedAt = user?.createdAt;
   const joinedDate = useMemo(() => {
-    if (!user?.createdAt) return locale === 'id' ? 'Januari 2026' : 'January 2026';
-    const d = new Date(user.createdAt);
+    if (!userCreatedAt) return locale === 'id' ? 'Januari 2026' : 'January 2026';
+    const d = new Date(userCreatedAt);
     return d.toLocaleDateString(locale === 'id' ? 'id-ID' : 'en-US', { month: 'long', year: 'numeric' });
-  }, [user?.createdAt, locale]);
+  }, [userCreatedAt, locale]);
 
   const onPickPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -138,7 +138,7 @@ export default function ProfilPage() {
             displayEmail={displayEmail}
             joinedDate={joinedDate}
             initials={initials}
-            onEdit={() => setEditOpen(true)}
+            onEdit={handleOpenEdit}
           />
 
           {/* Subscription */}
