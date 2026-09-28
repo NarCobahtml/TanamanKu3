@@ -2,9 +2,12 @@
 
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import { cn } from '@/lib/utils';
 import type { Tanaman } from '@/features/plants';
-import { weatherNum, timeSlots, forecast, slotVisual } from '../constants';
+import { weatherNum as defaultWeatherNum, timeSlots as defaultTimeSlots, forecast as defaultForecast, slotVisual } from '../constants';
+import type { WeatherData } from '../use-weather';
 
 export interface SiramMobileViewProps {
   plant: Tanaman;
@@ -15,6 +18,7 @@ export interface SiramMobileViewProps {
   onEdit: () => void;
   onHapus: () => void;
   onBack: () => void;
+  weather?: WeatherData;
 }
 
 export default function SiramMobileView({
@@ -26,9 +30,15 @@ export default function SiramMobileView({
   onEdit,
   onHapus,
   onBack,
+  weather,
 }: SiramMobileViewProps) {
   const t = useTranslations('siram');
   const tc = useTranslations('common');
+
+  const weatherNum = weather?.weatherNum || defaultWeatherNum;
+  const timeSlots = weather?.timeSlots || defaultTimeSlots;
+  const forecast = weather?.forecast || defaultForecast;
+  const locationLabel = weather?.locationName;
 
   return (
     <div className="app-shell watering-detail pb-36 lg:hidden bg-background text-foreground">
@@ -64,23 +74,38 @@ export default function SiramMobileView({
       <main className="app-container watering-main px-4 py-4 space-y-4">
         {/* Weather Card */}
         <div className="siram-section weather-section rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground mb-2">{t("hariIniLokasi")}</p>
+          <p className="text-sm text-muted-foreground mb-2">
+            {weather?.loading ? (
+              <Skeleton width={140} height={16} />
+            ) : (
+              t("hariIniLokasi", { lokasi: locationLabel || "Lokasi Anda" })
+            )}
+          </p>
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="text-5xl font-bold">{weatherNum.temp}</p>
-              <p className="text-muted-foreground text-sm">{weatherNum.tempRange}</p>
+              {weather?.loading ? (
+                <div className="space-y-1">
+                  <Skeleton width={100} height={42} />
+                  <Skeleton width={80} height={14} />
+                </div>
+              ) : (
+                <>
+                  <p className="text-5xl font-bold">{weatherNum.temp}</p>
+                  <p className="text-muted-foreground text-sm">{weatherNum.tempRange}</p>
+                </>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img className="w-5 h-5" src="/figma-assets/icons-siram/siram-1.svg" alt="" />
-              <span>{t("sunset")} {weatherNum.sunset}</span>
+              <span>{t("sunset")} {weather?.loading ? <Skeleton width={40} /> : weatherNum.sunset}</span>
             </div>
             <div className="flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img className="w-5 h-5" src="/figma-assets/icons-siram/siram-6.svg" alt="" />
-              <span>{weatherNum.humidity}</span>
+              <span>{weather?.loading ? <Skeleton width={35} /> : weatherNum.humidity}</span>
             </div>
           </div>
         </div>
@@ -92,12 +117,18 @@ export default function SiramMobileView({
             <img className="w-5 h-5" src="/figma-assets/icons-siram/siram-9.svg" alt="" />
             <h2 className="font-bold text-primary">{t("aiSummary")}</h2>
           </div>
-          <p className="text-sm text-foreground/80 mb-4 leading-relaxed">
-            {t('aiSummaryText')}{' '}
-            <span className="text-primary font-semibold">
-              {t("aiSaran")}
-            </span>
-          </p>
+          {weather?.loading ? (
+            <div className="space-y-2 mb-4">
+              <Skeleton count={2} height={16} />
+            </div>
+          ) : (
+            <p className="text-sm text-foreground/80 mb-4 leading-relaxed">
+              {weather?.aiSummary || t('aiSummaryText')}{' '}
+              <span className="text-primary font-semibold">
+                {weather?.aiSaran || t("aiSaran")}
+              </span>
+            </p>
+          )}
           <div className="flex items-center justify-between pt-4 border-t border-border">
             <span className="text-sm text-muted-foreground">{t("notifikasiHarian")}</span>
             <button

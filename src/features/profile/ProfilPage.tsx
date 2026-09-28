@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LogOut, UserCog, CreditCard, Bell, BellRing, Download } from 'lucide-react';
@@ -32,6 +32,22 @@ export default function ProfilPage() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [scanCount, setScanCount] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/scan/history')
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.success && Array.isArray(j.data) && isMounted) {
+          setScanCount(j.data.length);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   const { theme, setTheme, resolvedTheme } = useTheme();
   const mounted = useMounted();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -153,8 +169,8 @@ export default function ProfilPage() {
               />
               <ScanUsageCard
                 title={t('penggunaanScan')}
-                usageText={t('bulanIni', { count: 3 })}
-                current={3}
+                usageText={t('bulanIni', { count: scanCount })}
+                current={scanCount}
                 max={5}
               >
                 <Button

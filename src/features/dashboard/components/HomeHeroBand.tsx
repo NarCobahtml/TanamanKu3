@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ScanLine, ArrowRight } from "lucide-react";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 import { Button } from "@/components/ui/button";
 
 export interface HomeHeroBandProps {
@@ -10,6 +12,7 @@ export interface HomeHeroBandProps {
   total: number;
   sehat: number;
   penyakit: number;
+  loading?: boolean;
 }
 
 export function HomeHeroBand({
@@ -17,6 +20,7 @@ export function HomeHeroBand({
   total,
   sehat,
   penyakit,
+  loading = false,
 }: HomeHeroBandProps) {
   const t = useTranslations("home");
 
@@ -48,13 +52,13 @@ export function HomeHeroBand({
               {t("tanamanDipantau")}
             </dt>
             <dd className="tnum mt-2 text-4xl font-extrabold leading-none md:text-5xl">
-              {total}
+              {loading ? <Skeleton width={60} height={42} /> : total}
             </dd>
           </div>
           <div>
             <dt className="overline min-h-[2.5rem] sm:min-h-0">{t("sehat")}</dt>
             <dd className="tnum mt-2 text-4xl font-extrabold leading-none text-success md:text-5xl">
-              {sehat}
+              {loading ? <Skeleton width={60} height={42} /> : sehat}
             </dd>
           </div>
           <div>
@@ -62,27 +66,33 @@ export function HomeHeroBand({
               {t("terdeteksiPenyakit")}
             </dt>
             <dd className="tnum mt-2 text-4xl font-extrabold leading-none text-destructive md:text-5xl">
-              {penyakit}
+              {loading ? <Skeleton width={60} height={42} /> : penyakit}
             </dd>
           </div>
         </dl>
 
         {/* proportional status bar */}
-        <div
-          className="hero-anim hero-fade mt-8 flex h-1.5 w-full overflow-hidden bg-muted"
-          role="img"
-          aria-label={`${sehat} ${t("sehat")}, ${penyakit} ${t("terdeteksiPenyakit")}`}
-          style={{ animationDelay: "0.5s" }}
-        >
-          <span
-            className="bg-[#7ed8a4]"
-            style={{ width: `${(sehat / total) * 100}%` }}
-          />
-          <span
-            className="bg-[#f09a90]"
-            style={{ width: `${(penyakit / total) * 100}%` }}
-          />
-        </div>
+        {loading ? (
+          <div className="mt-8">
+            <Skeleton height={6} className="w-full" />
+          </div>
+        ) : (
+          <div
+            className="hero-anim hero-fade mt-8 flex h-1.5 w-full overflow-hidden bg-muted"
+            role="img"
+            aria-label={`${sehat} ${t("sehat")}, ${penyakit} ${t("terdeteksiPenyakit")}`}
+            style={{ animationDelay: "0.5s" }}
+          >
+            <span
+              className="bg-[#7ed8a4]"
+              style={{ width: `${total > 0 ? (sehat / total) * 100 : 0}%` }}
+            />
+            <span
+              className="bg-[#f09a90]"
+              style={{ width: `${total > 0 ? (penyakit / total) * 100 : 0}%` }}
+            />
+          </div>
+        )}
 
         {/*  CTA */}
         <div

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
@@ -28,12 +28,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  adminStats,
+  adminStats as defaultStats,
   forumCategoryStats,
   initialUsers,
   initialModeration,
   initialTransactions,
   platformActivityLogs,
+  type AdminStat,
   type UserItem,
   type ModerationItem,
   type TransactionItem,
@@ -45,7 +46,8 @@ export default function AdminDashboard() {
     "overview" | "users" | "moderation" | "billing" | "settings"
   >("overview");
 
-  // Interactive local states
+  // Interactive local & live database states
+  const [stats, setStats] = useState<AdminStat[]>(defaultStats);
   const [users, setUsers] = useState<UserItem[]>(initialUsers);
   const [userSearch, setUserSearch] = useState("");
   const [userPlanFilter, setUserPlanFilter] = useState<
@@ -54,9 +56,32 @@ export default function AdminDashboard() {
   const [userStatusFilter, setUserStatusFilter] = useState<
     "Semua" | "Aktif" | "Ditangguhkan"
   >("Semua");
+  const [moderations, setModerations] = useState<ModerationItem[]>(initialModeration);
 
-  const [moderations, setModerations] =
-    useState<ModerationItem[]>(initialModeration);
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/admin/stats')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data && isMounted) {
+          if (json.data.stats && Array.isArray(json.data.stats)) {
+            setStats(json.data.stats);
+          }
+          if (json.data.users && Array.isArray(json.data.users) && json.data.users.length > 0) {
+            setUsers(json.data.users);
+          }
+          if (json.data.moderations && Array.isArray(json.data.moderations) && json.data.moderations.length > 0) {
+            setModerations(json.data.moderations);
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to fetch admin stats:', err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   const [modFilter] = useState<
     "Semua" | "Perlu Tindakan" | "Diselesaikan" | "Diabaikan"
   >("Semua");
@@ -382,7 +407,7 @@ export default function AdminDashboard() {
 
               {/* 4 Stat Cards */}
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {adminStats.map((stat, i) => (
+                {stats.map((stat, i) => (
                   <div
                     key={stat.title}
                     className="rounded-2xl border border-border bg-card p-5 shadow-xs transition-all hover:border-primary/40"
