@@ -11,6 +11,7 @@ import {
   LoginForm,
   RegisterForm,
 } from "./components";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
@@ -20,11 +21,24 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [pending, setPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSocialLogin = (provider: "google" | "facebook") => {
+  const handleSocialLogin = async (provider: "google" | "facebook") => {
     setErrorMessage(null);
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://chxnfvwdldhpickamcpm.supabase.co";
-    const redirectUrl = `${window.location.origin}/auth/callback`;
-    window.location.href = `${supabaseUrl}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectUrl)}`;
+    try {
+      const supabase = createClient();
+      const redirectUrl = `${window.location.origin}/auth/callback`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: redirectUrl,
+        },
+      });
+      if (error) {
+        setErrorMessage(error.message);
+      }
+    } catch (err) {
+      console.error("Social login error:", err);
+      setErrorMessage("Gagal menghubungkan ke layanan login.");
+    }
   };
 
   const handleLogin = async ({ email, password }: { email: string; password: string }) => {
@@ -75,6 +89,11 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
     agreed?: boolean;
   }) => {
     setErrorMessage(null);
+
+    if (agreed === false) {
+      setErrorMessage("Silakan setujui syarat dan ketentuan untuk mendaftar.");
+      return;
+    }
 
     if (password !== confirm) {
       setErrorMessage("Password dan konfirmasi password tidak cocok.");

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { registerUser } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
@@ -32,38 +34,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const { user, token } = await registerUser({ email, password, name });
+    const normalizedEmail = email.trim().toLowerCase();
 
-    const response = NextResponse.json(
-      {
-        success: true,
-        data: {
-          user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            createdAt: user.createdAt,
-          },
-          token,
-        },
-      },
-      { status: 201 }
-    );
-
-    // Set HTTP-only cookie for session
-    response.cookies.set('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+    // Check if user already exists in Prisma
+    const existingPrisma = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
     });
-
-    return response;
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    if (message === 'EMAIL_ALREADY_EXISTS') {
+    if (existingPrisma) {
       return NextResponse.json(
         {
           success: false,
@@ -76,6 +53,70 @@ export async function POST(request: Request) {
       );
     }
 
+    // 1. Create user in Supabase Auth with bcrypt hash and confirmed email
+    const admin = createAdminClient();
+    const { data: createData, error: createError } = await admin.auth.admin.createUser({
+      email: normalizedEmail,
+      password,
+      email_confirm: true,
+      user_metadata: { name: name.trim() },
+    });
+
+    if (createError) {
+      if (createError.message.includes('already registered') || createError.status === 422) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'EMAIL_ALREADY_EXISTS',
+              message: 'Email sudah terdaftar. Silakan masuk atau gunakan email lain.',
+            },
+          },
+          { status: 409 }
+        );
+      }
+      throw createError;
+    }
+
+    const authUser = createData.user;
+
+    // 2. Create public.User profile row in Prisma
+    const user = await prisma.user.create({
+      data: {
+        id: authUser.id,
+        email: normalizedEmail,
+        name: name.trim(),
+        passwordHash: '',
+        role: 'USER',
+      },
+    });
+
+    // 3. Establish official Supabase session cookies via signInWithPassword
+    const supabase = await createClient();
+    const { data: sessionData } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            createdAt: user.createdAt,
+          },
+          session: {
+            access_token: sessionData?.session?.access_token,
+          },
+        },
+      },
+      { status: 201 }
+    );
+  } catch (error: unknown) {
     console.error('Registration error:', error);
     return NextResponse.json(
       {

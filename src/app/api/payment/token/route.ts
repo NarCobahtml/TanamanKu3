@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifyJwt } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
@@ -27,16 +26,19 @@ export async function POST(request: Request) {
 
     // Optional user authentication check
     let user = null;
-    const cookieStore = await cookies();
-    const token = cookieStore.get("auth_token")?.value;
-    if (token) {
-      const payload = verifyJwt(token);
-      if (payload?.id) {
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+      if (authUser?.id) {
         user = await prisma.user.findUnique({
-          where: { id: payload.id },
+          where: { id: authUser.id },
           select: { id: true, name: true, email: true },
         });
       }
+    } catch {
+      // Unauthenticated checkout fallback
     }
 
     const orderId = `TK-SUB-${Date.now()}`;

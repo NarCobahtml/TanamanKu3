@@ -13,7 +13,7 @@ import type { ForumPost } from './types';
 import { CategoryText } from './components/CategoryText';
 import { ExpertBadge } from './components/ExpertBadge';
 import { HapusPostDialog } from './components/HapusPostDialog';
-import { getPostById, isPostOwner } from './forum-storage';
+import { getPostById, getAllPosts, fetchForumPostById, submitForumComment, toggleForumLike, isPostOwner } from './forum-storage';
 import { useAuth } from '@/lib/use-auth';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
 import { useAuthGuard } from '@/components/shared/AuthGuardModal';
@@ -32,25 +32,40 @@ export default function ForumDetailPage({ id }: { id: string }) {
 
   const post = currentPost;
   const isOwner = isPostOwner(post, user);
-  const related = forumPosts.filter((p) => p.id !== post.id).slice(0, 3);
+  const related = getAllPosts().filter((p) => p.id !== post.id).slice(0, 3);
 
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(post.likes);
   const [comments, setComments] = useState(post.comments);
   const [draft, setDraft] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    const loaded = getPostById(id) ?? forumPosts.find((p) => p.id === id);
-    if (loaded) {
-      setCurrentPost(loaded);
-      setLikes(loaded.likes);
-      setComments(loaded.comments);
-    }
+    let isMounted = true;
+    const load = async () => {
+      const initial = getPostById(id) ?? forumPosts.find((p) => p.id === id);
+      if (initial && isMounted) {
+        setCurrentPost(initial);
+        setLikes(initial.likes);
+        setComments(initial.comments);
+      }
+
+      const livePost = await fetchForumPostById(id);
+      if (livePost && isMounted) {
+        setCurrentPost(livePost);
+        setLikes(livePost.likes);
+        setComments(livePost.comments);
+      }
+    };
+    load();
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
-  const toggleLike = () => {
+  const toggleLike = async () => {
     if (
       !checkAuth({
         title: 'Login untuk Menyukai Diskusi',
@@ -61,16 +76,13 @@ export default function ForumDetailPage({ id }: { id: string }) {
     ) {
       return;
     }
-    if (liked) {
-      setLikes((n) => n - 1);
-      setLiked(false);
-    } else {
-      setLikes((n) => n + 1);
-      setLiked(true);
-    }
+    const next = !liked;
+    setLiked(next);
+    setLikes((n) => (next ? n + 1 : Math.max(0, n - 1)));
+    await toggleForumLike(post.id, next);
   };
 
-  const submitComment = () => {
+  const submitComment = async () => {
     if (
       !checkAuth({
         title: 'Login untuk Berkomentar',
@@ -82,18 +94,36 @@ export default function ForumDetailPage({ id }: { id: string }) {
       return;
     }
     const text = draft.trim();
-    if (!text) return;
-    setComments((list) => [
-      ...list,
-      {
-        author: 'Alex Saputra',
-        time: t('baruSaja'),
+    if (!text || submittingComment) return;
+
+    setSubmittingComment(true);
+    try {
+      const createdComment = await submitForumComment(post.id, {
         text,
         replyTo: replyingTo || undefined,
-      },
-    ]);
-    setDraft('');
-    setReplyingTo(null);
+      });
+
+      setComments((list) => [...list, createdComment]);
+      setDraft('');
+      setReplyingTo(null);
+    } catch (err) {
+      console.error('Failed to submit comment:', err);
+      // Fallback
+      setComments((list) => [
+        ...list,
+        {
+          author: user?.name || 'Pengguna TanamanKu',
+          avatar: user?.photoUrl || undefined,
+          time: t('baruSaja'),
+          text,
+          replyTo: replyingTo || undefined,
+        },
+      ]);
+      setDraft('');
+      setReplyingTo(null);
+    } finally {
+      setSubmittingComment(false);
+    }
   };
 
   const handleBuatPostingan = () => {

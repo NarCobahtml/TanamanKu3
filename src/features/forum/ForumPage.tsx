@@ -4,23 +4,19 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useLocale } from '@/components/layout/LocaleProvider';
-import Link from 'next/link';
-import { Heart, MessageSquare, Plus, Search, SearchX } from 'lucide-react';
+import { Search, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ActionButton } from '@/components/ui/action-button';
 import { useAuthGuard } from '@/components/shared/AuthGuardModal';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { PageCtaBand } from '@/components/shared/PageCtaBand';
 import { FilterPill } from '@/components/ui/filter-pill';
 import { ForumPostCard } from './ForumPostCard';
-import { cn } from '@/lib/utils';
 import { categories } from './mock';
 import type { ForumPost } from './types';
 import { useAuth } from '@/lib/use-auth';
-import { getAllPosts, isPostOwner } from './forum-storage';
+import { getAllPosts, fetchForumPosts, toggleForumLike, isPostOwner } from './forum-storage';
 import { HapusPostDialog } from './components/HapusPostDialog';
 
 const topics = [
@@ -41,18 +37,27 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
   const [category, setCategory] = useState('Semua');
   const [query, setQuery] = useState('');
   const [liked, setLiked] = useState<Record<string, boolean>>({});
-  const [allPosts, setAllPosts] = useState<ForumPost[]>([]);
+  const [allPosts, setAllPosts] = useState<ForumPost[]>(() => getAllPosts());
   const [postToDelete, setPostToDelete] = useState<ForumPost | null>(null);
   const [openHapusDialog, setOpenHapusDialog] = useState(false);
 
   useEffect(() => {
-    const refreshPosts = () => {
-      setAllPosts(getAllPosts());
+    let isMounted = true;
+    const loadPosts = async () => {
+      const cached = getAllPosts();
+      if (cached.length > 0) setAllPosts(cached);
+
+      const dbPosts = await fetchForumPosts();
+      if (isMounted && dbPosts.length > 0) {
+        setAllPosts(dbPosts);
+      }
     };
-    refreshPosts();
-    window.addEventListener('forum-posts-changed', refreshPosts);
+
+    loadPosts();
+    window.addEventListener('forum-posts-changed', loadPosts);
     return () => {
-      window.removeEventListener('forum-posts-changed', refreshPosts);
+      isMounted = false;
+      window.removeEventListener('forum-posts-changed', loadPosts);
     };
   }, []);
 
@@ -64,7 +69,7 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
     return matchCategory && textToMatch.includes(q);
   });
 
-  const toggleLike = (id: string) => {
+  const toggleLike = async (id: string) => {
     if (
       !checkAuth({
         title: 'Login untuk Menyukai Diskusi',
@@ -77,6 +82,7 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
     }
     const next = !liked[id];
     setLiked((m) => ({ ...m, [id]: next }));
+    await toggleForumLike(id, next);
   };
 
   const handleCreatePost = () => {
@@ -96,8 +102,6 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
     }
     router.push('/forum/create');
   };
-
-  const likeCount = (p: ForumPost) => p.likes + (liked[p.id] ? 1 : 0);
 
   return (
     <div>

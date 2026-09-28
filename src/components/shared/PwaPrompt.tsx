@@ -29,8 +29,23 @@ export default function PwaPrompt() {
   const [, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
-  const [isIos, setIsIos] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
+  const [isIos] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const ua = window.navigator.userAgent.toLowerCase();
+    return (
+      /iphone|ipad|ipod/.test(ua) &&
+      !(window as unknown as { MSStream?: unknown }).MSStream
+    );
+  });
+  const [isStandalone] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as unknown as { standalone?: boolean }).standalone ===
+        true ||
+      document.referrer.includes("android-app://")
+    );
+  });
 
   useEffect(() => {
     // 1. Daftarkan Service Worker
@@ -53,37 +68,21 @@ export default function PwaPrompt() {
       });
     }
 
-    // 2. Cek apakah sudah terinstal sebagai standalone PWA
-    const checkStandalone = () => {
-      const isStandaloneMode =
-        window.matchMedia("(display-mode: standalone)").matches ||
-        (window.navigator as unknown as { standalone?: boolean }).standalone ===
-          true ||
-        document.referrer.includes("android-app://");
-      setIsStandalone(isStandaloneMode);
-      return isStandaloneMode;
-    };
-
-    if (checkStandalone()) return;
-
-    // 3. Cek apakah perangkat iOS Safari
-    const ua = window.navigator.userAgent.toLowerCase();
-    const isIosDevice =
-      /iphone|ipad|ipod/.test(ua) &&
-      !(window as unknown as { MSStream?: unknown }).MSStream;
-    setIsIos(isIosDevice);
+    if (isStandalone) return;
 
     // Cek apakah user pernah menutup banner install dalam 24 jam terakhir
     const dismissedAt = localStorage.getItem("tanamanku_pwa_dismissed");
     const wasDismissedRecently =
       dismissedAt && Date.now() - Number(dismissedAt) < 24 * 60 * 60 * 1000;
 
-    if (typeof window !== "undefined" && window.deferredPwaPrompt) {
-      setDeferredPrompt(window.deferredPwaPrompt);
-      if (!wasDismissedRecently) {
-        setShowPrompt(true);
+    queueMicrotask(() => {
+      if (typeof window !== "undefined" && window.deferredPwaPrompt) {
+        setDeferredPrompt(window.deferredPwaPrompt);
+        if (!wasDismissedRecently) {
+          setShowPrompt(true);
+        }
       }
-    }
+    });
 
     const handlePromptReady = () => {
       if (window.deferredPwaPrompt) {
@@ -123,7 +122,7 @@ export default function PwaPrompt() {
           console.error("Error saat memicu prompt PWA:", err);
           toast.error("Gagal memicu pemasangan aplikasi.");
         }
-      } else if (isIosDevice) {
+      } else if (isIos) {
         setShowGuideModal(true);
       } else {
         toast.info(
@@ -147,7 +146,7 @@ export default function PwaPrompt() {
       window.removeEventListener("pwa-prompt-ready", handlePromptReady);
       if (fallbackTimer) clearTimeout(fallbackTimer);
     };
-  }, []);
+  }, [isIos, isStandalone]);
 
   const handleInstallClick = async () => {
     if (window.triggerPwaInstall) {

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { LocaleProvider } from "@/components/layout/LocaleProvider";
+import { AuthProvider } from "@/lib/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import PwaPrompt from "@/components/shared/PwaPrompt";
@@ -62,7 +63,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <LocaleProvider>{children}</LocaleProvider>
+          <LocaleProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </LocaleProvider>
           <Toaster position="bottom-left" />
           <PwaPrompt />
         </ThemeProvider>
