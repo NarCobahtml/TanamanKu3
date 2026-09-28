@@ -25,6 +25,7 @@ export default function HomePage() {
   const heroHealth = healthById[heroPlant.id] ?? { level: (heroPlant.status === 'terlambat' ? 'penyakit' : 'sehat') as HealthLevel, lastScan: '-' };
 
   const [liveScans, setLiveScans] = useState<typeof defaultScans>(defaultScans);
+  const [scansLoading, setScansLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -52,7 +53,10 @@ export default function HomePage() {
           setLiveScans(formatted);
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) setScansLoading(false);
+      });
     return () => {
       isMounted = false;
     };
@@ -103,7 +107,7 @@ export default function HomePage() {
 
       <div className="mx-auto w-full max-w-7xl space-y-20 px-4 pb-4 pt-16 sm:px-6">
         <div className="grid min-w-0 gap-12 lg:grid-cols-[1.7fr_1fr]">
-          <HomeRecentScans scans={liveScans} />
+          <HomeRecentScans scans={liveScans} loading={scansLoading} />
           <HomeWateringSchedule tasks={dynamicWatering} />
         </div>
 

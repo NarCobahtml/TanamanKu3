@@ -20,6 +20,7 @@ export interface WeatherData {
   condition: string;
   aiSummary?: string;
   aiSaran?: string;
+  loading?: boolean;
 }
 
 const ICON_MAP: Record<string, LucideIcon> = {

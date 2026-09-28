@@ -2,6 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 import { Leaf } from 'lucide-react';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { SectionHeader } from '@/components/shared/PageHeader';
 import { HealthStatus } from '@/components/shared/HealthStatus';
@@ -10,9 +12,10 @@ import type { recentScans } from '../mock';
 
 export interface HomeRecentScansProps {
   scans: typeof recentScans;
+  loading?: boolean;
 }
 
-export function HomeRecentScans({ scans }: HomeRecentScansProps) {
+export function HomeRecentScans({ scans, loading = false }: HomeRecentScansProps) {
   const t = useTranslations("home");
 
   return (
@@ -20,7 +23,15 @@ export function HomeRecentScans({ scans }: HomeRecentScansProps) {
       <SectionHeader title={t("diagnosis")} href="/riwayat" />
       <TkRevealClient>
         <div className="overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
-          {/* Mobile scan cards (< sm) */}
+          {loading ? (
+            <div className="p-6 space-y-4">
+              <Skeleton height={48} className="mb-2 rounded-lg" />
+              <Skeleton height={48} className="mb-2 rounded-lg" />
+              <Skeleton height={48} className="rounded-lg" />
+            </div>
+          ) : (
+            <>
+              {/* Mobile scan cards (< sm) */}
           <div className="divide-y divide-border sm:hidden">
             {scans.map((s) => (
               <div key={s.id} className="flex items-center justify-between gap-3 p-4">
@@ -85,6 +96,8 @@ export function HomeRecentScans({ scans }: HomeRecentScansProps) {
           <p className="border-t border-border bg-secondary/30 px-5 py-3 text-sm text-muted-foreground">
             {t("laporan30")}
           </p>
+            </>
+          )}
         </div>
       </TkRevealClient>
     </section>
