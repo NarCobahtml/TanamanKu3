@@ -76,6 +76,35 @@ export async function PUT(
       },
     });
 
+    // Sync to WateringSchedule table if plant is being watered
+    if (status === 'terjadwal') {
+      try {
+        const { resolvePlantProfile } = await import('@/features/watering/plant-rules');
+        const profile = resolvePlantProfile(updated.name, updated.kategori || undefined, updated.type);
+        const nextDate = new Date(Date.now() + profile.intervalDays * 24 * 60 * 60 * 1000);
+
+        await prisma.wateringSchedule.upsert({
+          where: { plantId: id },
+          update: {
+            lastWateredAt: new Date(),
+            nextWateringAt: nextDate,
+            updatedAt: new Date(),
+          },
+          create: {
+            id: `sched-${id}`,
+            plantId: id,
+            lastWateredAt: new Date(),
+            nextWateringAt: nextDate,
+            isAuto: true,
+            reminderEnabled: true,
+            reminderMinutes: 30,
+          },
+        });
+      } catch (schedErr) {
+        console.warn('Failed to sync WateringSchedule:', schedErr);
+      }
+    }
+
     const formatted = {
       id: updated.id,
       nama: updated.name,

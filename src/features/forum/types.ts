@@ -1,3 +1,15 @@
+export interface ForumComment {
+  id?: string;
+  authorId?: string;
+  author: string;
+  avatar?: string;
+  time: string;
+  text: string;
+  replyTo?: string;
+  parentId?: string;
+  replies?: ForumComment[];
+}
+
 export type ForumPost = {
   id: string;
   authorId?: string;
@@ -13,5 +25,6 @@ export type ForumPost = {
   image?: string;
   likes: number;
   views: number;
-  comments: { author: string; time: string; text: string; replyTo?: string }[];
+  comments: ForumComment[];
+  tags?: string[];
 };

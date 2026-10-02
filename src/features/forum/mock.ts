@@ -26,6 +26,7 @@ export const forumPosts: ForumPost[] = [
       'Apakah ini kelebihan air, kekurangan nutrisi, atau penyakit? Mohon bantuannya dong teman-teman, sayang banget kalau tanamannya makin parah.',
     ],
     image: '/figma-assets/plant-bananaleaf.jpg',
+    tags: ['monstera', 'bercakdaun', 'overwatering'],
     likes: 24,
     views: 312,
     comments: [
@@ -64,6 +65,7 @@ export const forumPosts: ForumPost[] = [
       'Hasilnya satu tanaman bisa panen 1,2 kg untuk putaran pertama. Selamat mencoba, cabai rawit ternyata cocok banget untuk pemula!',
     ],
     image: '/figma-assets/plant-chili.jpg',
+    tags: ['panenpertama', 'cabairawit', 'perawatan'],
     likes: 89,
     views: 1024,
     comments: [
@@ -101,6 +103,7 @@ export const forumPosts: ForumPost[] = [
       'Kondisi kaktusnya masih bagus, tidak ada bagian yang lembek atau menghitam. Cuma saya khawatir salah pola siram dari awal.',
       'Kalau ada yang punya pengalaman merawat kaktus di ruangan ber-AC, mohon masukannya. Terima kasih!',
     ],
+    tags: ['kaktus', 'penyiraman', 'indoor'],
     likes: 5,
     views: 187,
     comments: [
@@ -133,6 +136,7 @@ export const forumPosts: ForumPost[] = [
       'Soal dosis, saya takut overfertilize karena pernah merawat sirih gading sampai ujung daunnya gosong karena pupuk terlalu pekat.',
       'Kalau ada yang punya pengalaman soal jadwal dan dosis pupuk untuk tanaman daun indoor, mohon berbagi. Terima kasih sebelumnya!',
     ],
+    tags: ['pupukorganik', 'npk', 'monstera', 'nutrisi'],
     likes: 12,
     views: 264,
     comments: [
@@ -164,6 +168,7 @@ export const forumPosts: ForumPost[] = [
       'Sebelum mengambil keputusan buang, mohon pencerahan dari teman-teman atau pakar. Apakah masih bisa diselamatkan dengan pestisida nabati?',
     ],
     image: '/figma-assets/plant-cherryleaf.jpg',
+    tags: ['cabairawit', 'hama', 'daunkeriting'],
     likes: 7,
     views: 158,
     comments: [
@@ -195,6 +200,7 @@ export const forumPosts: ForumPost[] = [
       'Saya dua minggu lalu menyiramnya dua kali dalam sepekan karena ada tamu yang "menolong" menyiram.',
       'Kalau akarnya membusuk, apakah masih bisa diselamatkan dengan memotong bagian sehat lalu diangin-anginkan? Mohon pengalamannya.',
     ],
+    tags: ['sansevieria', 'busukakar', 'tanyaahli', 'overwatering'],
     likes: 9,
     views: 203,
     comments: [

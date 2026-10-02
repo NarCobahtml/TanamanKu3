@@ -2,82 +2,15 @@ import { prisma } from '@/lib/prisma';
 import { forumPosts as initialMockPosts } from '@/features/forum/mock';
 import type { ForumPost } from '@/features/forum/types';
 
-export function formatRelativeTime(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 60) return 'Baru saja';
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin} menit lalu`;
-  const diffHours = Math.floor(diffMin / 60);
-  if (diffHours < 24) return `${diffHours} jam lalu`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays === 1) return 'Kemarin';
-  if (diffDays < 7) return `${diffDays} hari yang lalu`;
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+import {
+  formatRelativeTime,
+  getInitials,
+  extractHashtags,
+  parsePostContent,
+  parseCommentContent,
+} from './forum-utils';
 
-export function getInitials(name?: string): string {
-  if (!name || !name.trim()) return 'TK';
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
-export function parsePostContent(rawContent: string) {
-  try {
-    if (rawContent.startsWith('{')) {
-      const parsed = JSON.parse(rawContent);
-      return {
-        category: (parsed.category as string) || 'Perawatan',
-        body: Array.isArray(parsed.body)
-          ? (parsed.body as string[])
-          : typeof parsed.body === 'string'
-            ? [parsed.body]
-            : [rawContent],
-        likes: typeof parsed.likes === 'number' ? parsed.likes : 0,
-        views: typeof parsed.views === 'number' ? parsed.views : 1,
-        authorName: (parsed.authorName as string) || undefined,
-        authorAvatar: (parsed.authorAvatar as string) || undefined,
-        expert: Boolean(parsed.expert),
-      };
-    }
-  } catch {
-    // fallback
-  }
-  return {
-    category: 'Perawatan',
-    body: [rawContent],
-    likes: 0,
-    views: 1,
-    authorName: undefined,
-    authorAvatar: undefined,
-    expert: false,
-  };
-}
-
-export function parseCommentContent(rawContent: string) {
-  try {
-    if (rawContent.startsWith('{')) {
-      const parsed = JSON.parse(rawContent);
-      return {
-        text: (parsed.text as string) || rawContent,
-        replyTo: (parsed.replyTo as string) || undefined,
-        authorName: (parsed.authorName as string) || undefined,
-        authorAvatar: (parsed.authorAvatar as string) || undefined,
-      };
-    }
-  } catch {
-    // fallback
-  }
-  return {
-    text: rawContent,
-    replyTo: undefined,
-    authorName: undefined,
-    authorAvatar: undefined,
-  };
-}
+export * from './forum-utils';
 
 export type PrismaPostWithRelations = {
   id: string;
@@ -98,6 +31,7 @@ export type PrismaPostWithRelations = {
     id: string;
     postId: string;
     authorId: string | null;
+    parentId?: string | null;
     content: string;
     createdAt: Date;
     author?: {
@@ -125,11 +59,18 @@ export function formatForumPost(p: PrismaPostWithRelations): ForumPost {
       time: formatRelativeTime(c.createdAt),
       text: cMeta.text,
       replyTo: cMeta.replyTo,
+      parentId: c.parentId || cMeta.parentId || undefined,
     };
   });
 
   const excerpt =
     meta.body[0]?.slice(0, 140) + (meta.body[0]?.length > 140 ? '...' : '') || p.title;
+
+  const rawBody = meta.body.join(' ');
+  const textToScan = `${p.title} ${rawBody}`;
+  const extractedTags = extractHashtags(textToScan);
+  const metaTags = (meta.tags || []).map((t: string) => t.replace(/^#/, '').toLowerCase());
+  const combinedTags = Array.from(new Set([...metaTags, ...extractedTags]));
 
   return {
     id: p.id,
@@ -147,6 +88,7 @@ export function formatForumPost(p: PrismaPostWithRelations): ForumPost {
     likes: meta.likes,
     views: meta.views,
     comments,
+    tags: combinedTags,
   };
 }
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ScanLine, ArrowRight } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
 import { Button } from "@/components/ui/button";
 
 export interface HomeHeroBandProps {

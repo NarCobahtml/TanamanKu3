@@ -119,18 +119,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
     // 2. Subscribe to Supabase auth state changes (OAuth, sign in, sign out)
-    const supabase = createClient();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
-      if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') {
-        await refresh();
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem(STORAGE_KEY);
+    let unsubscribeFn: (() => void) | null = null;
+    try {
+      const supabase = createClient();
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
+        if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') {
+          await refresh();
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem(STORAGE_KEY);
+          }
+          setLoading(false);
         }
-        setLoading(false);
-      }
-    });
+      });
+      unsubscribeFn = () => subscription.unsubscribe();
+    } catch (err) {
+      console.warn('Supabase auth state listener not available:', err);
+    }
 
     // 3. Listen to local broadcast events
     const onAuthChanged = () => {
@@ -144,7 +150,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       ignore = true;
-      subscription.unsubscribe();
+      if (unsubscribeFn) {
+        unsubscribeFn();
+      }
       window.removeEventListener('auth-changed', onAuthChanged);
       window.removeEventListener('storage', onAuthChanged);
     };

@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -28,7 +29,9 @@ export default function ForumClientPage() {
 
   return (
     <AppShell>
-      <ForumPage onCreatePost={handleCreatePost} />
+      <Suspense fallback={null}>
+        <ForumPage onCreatePost={handleCreatePost} />
+      </Suspense>
 
       {/* FAB thumb-friendly, selalu ada di kanan di mobile seperti di /siram */}
       <button

@@ -61,11 +61,16 @@ export function getPostById(id: string): ForumPost | undefined {
 /**
  * Fetch all posts from database via /api/forum
  */
-export async function fetchForumPosts(category?: string, query?: string): Promise<ForumPost[]> {
+export async function fetchForumPosts(
+  category?: string,
+  query?: string,
+  tag?: string
+): Promise<ForumPost[]> {
   try {
     const params = new URLSearchParams();
     if (category && category !== 'Semua') params.set('category', category);
     if (query && query.trim()) params.set('q', query.trim());
+    if (tag && tag.trim()) params.set('tag', tag.trim());
 
     const url = `/api/forum${params.toString() ? `?${params.toString()}` : ''}`;
     const res = await fetch(url);
@@ -73,7 +78,7 @@ export async function fetchForumPosts(category?: string, query?: string): Promis
 
     const json = await res.json();
     if (json.success && Array.isArray(json.data)) {
-      if (typeof window !== 'undefined' && (!category || category === 'Semua') && !query) {
+      if (typeof window !== 'undefined' && (!category || category === 'Semua') && !query && !tag) {
         localStorage.setItem(STORAGE_KEY_DB_POSTS, JSON.stringify(json.data));
       }
       return json.data;
@@ -110,6 +115,7 @@ export async function createForumPost(data: {
   content: string;
   category: string;
   image?: string;
+  tags?: string[];
 }): Promise<ForumPost> {
   const res = await fetch('/api/forum', {
     method: 'POST',
@@ -161,7 +167,7 @@ export async function deleteForumPost(id: string): Promise<void> {
  */
 export async function submitForumComment(
   postId: string,
-  data: { text: string; replyTo?: string }
+  data: { text: string; replyTo?: string; parentId?: string }
 ) {
   const res = await fetch(`/api/forum/${postId}/comments`, {
     method: 'POST',

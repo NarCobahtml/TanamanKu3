@@ -37,8 +37,10 @@ export default function Navbar() {
   const isScan = pathname === "/scan";
   const [notifOpen, setNotifOpen] = useState(false);
   const [liveNotifs, setLiveNotifs] = useState(defaultNotifications);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     let isMounted = true;
     fetch('/api/notifications')
       .then((r) => r.json())
@@ -225,8 +227,8 @@ export default function Navbar() {
                     className="object-cover"
                   />
                 ) : null}
-                <AvatarFallback className="bg-accent text-xs font-semibold text-primary">
-                  {initials || "TK"}
+                <AvatarFallback suppressHydrationWarning className="bg-accent text-xs font-semibold text-primary">
+                  {mounted ? (initials || "TK") : "TK"}
                 </AvatarFallback>
               </Avatar>
             </Link>

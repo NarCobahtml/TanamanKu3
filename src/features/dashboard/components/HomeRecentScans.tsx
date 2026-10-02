@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 import { Leaf } from 'lucide-react';
 import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { SectionHeader } from '@/components/shared/PageHeader';
 import { HealthStatus } from '@/components/shared/HealthStatus';

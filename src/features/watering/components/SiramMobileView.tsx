@@ -3,10 +3,10 @@
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
 import { cn } from '@/lib/utils';
 import type { Tanaman } from '@/features/plants';
 import { weatherNum as defaultWeatherNum, timeSlots as defaultTimeSlots, forecast as defaultForecast, slotVisual } from '../constants';
+import type { SlotStatus } from '../types';
 import type { WeatherData } from '../use-weather';
 
 export interface SiramMobileViewProps {
@@ -176,11 +176,13 @@ export default function SiramMobileView({
             {timeSlots.map((slot) => {
               const v = slotVisual[slot.status];
               const Icon = v.icon;
+              const slotAny = slot as { reason?: string; time: string; status: SlotStatus };
               return (
                 <div
                   key={slot.time === "Now" ? t("now") : slot.time}
+                  title={slotAny.reason || undefined}
                   className={cn(
-                    "watering-slot aspect-square flex flex-col items-center justify-center gap-1 p-1 rounded-xl border text-center transition-colors",
+                    "watering-slot aspect-square flex flex-col items-center justify-center gap-1 p-1 rounded-xl border text-center transition-colors active:scale-95",
                     v.chip
                   )}
                 >

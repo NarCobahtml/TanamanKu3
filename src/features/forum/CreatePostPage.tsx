@@ -19,6 +19,17 @@ import { createForumPost } from "./forum-storage";
 
 const categories = ["Hama & Penyakit", "Perawatan", "Nutrisi", "Tanya Ahli"];
 
+const suggestedTags = [
+  "monstera",
+  "cabairawit",
+  "overwatering",
+  "hama",
+  "pupuk",
+  "kaktus",
+  "perawatan",
+  "indoor",
+];
+
 export default function CreatePostPage() {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -66,6 +77,13 @@ export default function CreatePostPage() {
   const removePhoto = () => {
     setPhotoPreview(null);
     if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const addHashtag = (tag: string) => {
+    const formattedTag = `#${tag}`;
+    if (!content.includes(formattedTag)) {
+      setContent((prev) => (prev.trim() ? `${prev.trim()} ${formattedTag}` : formattedTag));
+    }
   };
 
   const valid = title.trim() !== "" && content.trim() !== "";
@@ -163,6 +181,29 @@ export default function CreatePostPage() {
               rows={5}
               className="w-full bg-transparent text-[15px] sm:text-[16px] text-foreground placeholder:text-[#A0ABA0] dark:placeholder:text-muted-foreground/60 outline-none border-none p-0 focus:ring-0 resize-none leading-relaxed mt-2.5 min-h-[110px]"
             />
+
+            {/* Suggested Hashtag Pills */}
+            <div className="mt-3 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-muted-foreground mr-1">Rekomendasi topik:</span>
+              {suggestedTags.map((tag) => {
+                const active = content.includes(`#${tag}`);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => addHashtag(tag)}
+                    className={cn(
+                      "text-[11px] font-medium px-2.5 py-0.5 rounded-full transition-colors cursor-pointer border",
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border-transparent"
+                    )}
+                  >
+                    #{tag}
+                  </button>
+                );
+              })}
+            </div>
 
             {/* Photo preview if chosen */}
             {photoPreview && (

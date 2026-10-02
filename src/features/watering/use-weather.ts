@@ -15,12 +15,18 @@ export interface WeatherData {
     sunset: string;
     humidity: string;
   };
-  timeSlots: Array<{ time: string; status: SlotStatus; temp?: string }>;
+  timeSlots: Array<{ time: string; status: SlotStatus; temp?: string; reason?: string }>;
   forecast: Array<{ day: string; temp: string; icon: LucideIcon }>;
   condition: string;
   aiSummary?: string;
   aiSaran?: string;
   loading?: boolean;
+}
+
+export interface UseWeatherOptions {
+  plantName?: string;
+  plantCategory?: string;
+  plantType?: string;
 }
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -30,7 +36,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
   CloudRain,
 };
 
-export function useWeather() {
+export function useWeather(options?: UseWeatherOptions) {
+  const plantName = options?.plantName;
+  const plantCategory = options?.plantCategory;
+  const plantType = options?.plantType;
+
   const [data, setData] = useState<WeatherData>({
     locationName: 'Memuat lokasi...',
     city: 'Jakarta',
@@ -44,10 +54,17 @@ export function useWeather() {
   const fetchWeather = useCallback(async (lat?: number, lon?: number) => {
     try {
       setLoading(true);
-      const url =
-        typeof lat === 'number' && typeof lon === 'number'
-          ? `/api/weather?lat=${lat}&lon=${lon}`
-          : '/api/weather';
+      const params = new URLSearchParams();
+      if (typeof lat === 'number' && typeof lon === 'number') {
+        params.set('lat', lat.toString());
+        params.set('lon', lon.toString());
+      }
+      if (plantName) params.set('plantName', plantName);
+      if (plantCategory) params.set('plantCategory', plantCategory);
+      if (plantType) params.set('plantType', plantType);
+
+      const qs = params.toString();
+      const url = qs ? `/api/weather?${qs}` : '/api/weather';
 
       const res = await fetch(url);
       if (!res.ok) throw new Error('Gagal mengambil data cuaca');
@@ -82,7 +99,7 @@ export function useWeather() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [plantName, plantCategory, plantType]);
 
   useEffect(() => {
     let isMounted = true;

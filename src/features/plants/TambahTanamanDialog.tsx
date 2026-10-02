@@ -36,7 +36,12 @@ export default function TambahTanamanDialog({
 }) {
   const ts = useTranslations('siram');
   const tc = useTranslations('common');
-  const [form, setForm] = useState({ nama: '', jenis: 'hias', foto: '' });
+  const [form, setForm] = useState({
+    nama: '',
+    jenis: 'hias',
+    kategori: 'Indoor' as 'Indoor' | 'Outdoor' | 'Kebun',
+    foto: '',
+  });
   const [submitting, setSubmitting] = useState(false);
   const fotoRef = useRef<HTMLInputElement>(null);
 
@@ -45,16 +50,12 @@ export default function TambahTanamanDialog({
     setSubmitting(true);
     try {
       const numericId = Date.now().toString();
-      let resolvedKategori: 'Indoor' | 'Outdoor' | 'Kebun' = 'Indoor';
-      if (form.jenis === 'hias') resolvedKategori = 'Indoor';
-      else if (form.jenis === 'sayuran' || form.jenis === 'buah') resolvedKategori = 'Kebun';
-      else resolvedKategori = 'Outdoor';
 
       await tanamanStore.tambahAsync({
         id: numericId,
         nama: form.nama.trim(),
         jenis: form.jenis,
-        kategori: resolvedKategori,
+        kategori: form.kategori,
         status: 'terjadwal',
         nextWater: 'nw.berikutnyaBesok',
         photo: form.foto || undefined,
@@ -63,7 +64,7 @@ export default function TambahTanamanDialog({
       toast.success('Tanaman berhasil ditambahkan', {
         description: `${form.nama} telah tersimpan di Supabase.`,
       });
-      setForm({ nama: '', jenis: 'hias', foto: '' });
+      setForm({ nama: '', jenis: 'hias', kategori: 'Indoor', foto: '' });
       onOpenChange(false);
     } catch (err) {
       console.error(err);
@@ -98,20 +99,38 @@ export default function TambahTanamanDialog({
                 placeholder={ts("cthTanaman")}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="jenis-tanaman">{ts("jenisTanaman")}</Label>
-              <Select value={form.jenis} onValueChange={(v) => setForm({ ...form, jenis: v })}>
-                <SelectTrigger id="jenis-tanaman" className="w-full">
-                  <SelectValue placeholder={ts("pilihJenis")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {jenisList.map((j) => (
-                    <SelectItem key={j} value={j}>
-                      {ts(j)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="jenis-tanaman">{ts("jenisTanaman")}</Label>
+                <Select value={form.jenis} onValueChange={(v) => setForm({ ...form, jenis: v })}>
+                  <SelectTrigger id="jenis-tanaman" className="w-full">
+                    <SelectValue placeholder={ts("pilihJenis")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jenisList.map((j) => (
+                      <SelectItem key={j} value={j}>
+                        {ts(j)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="kategori-tanaman">Penempatan</Label>
+                <Select
+                  value={form.kategori}
+                  onValueChange={(v: 'Indoor' | 'Outdoor' | 'Kebun') => setForm({ ...form, kategori: v })}
+                >
+                  <SelectTrigger id="kategori-tanaman" className="w-full">
+                    <SelectValue placeholder="Pilih Penempatan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Indoor">Indoor (Dalam Ruangan)</SelectItem>
+                    <SelectItem value="Outdoor">Outdoor (Luar Ruangan)</SelectItem>
+                    <SelectItem value="Kebun">Kebun / Pekarangan</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="space-y-2">
               <Label>{ts("fotoTanaman")}</Label>

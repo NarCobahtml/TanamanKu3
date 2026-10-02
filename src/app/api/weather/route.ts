@@ -80,6 +80,14 @@ export async function GET(request: Request) {
       humidity: `${humidityNow}%`,
     };
 
+    // Process plant parameters if provided
+    const plantName = searchParams.get('plantName') || undefined;
+    const plantCategory = searchParams.get('plantCategory') || undefined;
+    const plantType = searchParams.get('plantType') || undefined;
+
+    const { resolvePlantProfile, evaluatePlantHourlySlot } = await import('@/features/watering/plant-rules');
+    const plantProfile = resolvePlantProfile(plantName, plantCategory, plantType);
+
     // 5. Process next 5 hourly slots starting from current hour
     const hourly = weatherData.hourly;
     const nowIsoHour = new Date().toISOString().slice(0, 13); // "2026-09-28T13"
@@ -95,6 +103,7 @@ export async function GET(request: Request) {
       const hour = parseInt(timeStr.slice(11, 13), 10);
       const slotTemp = Math.round(hourly.temperature_2m[idx]);
       const slotCode = hourly.weather_code[idx];
+      const slotHumidity = Math.round(hourly.relative_humidity_2m?.[idx] ?? humidityNow);
 
       let slotTimeLabel = i === 0 ? 'Sekarang' : `${hour}:00`;
       if (i !== 0 && hour >= 12) {
@@ -103,22 +112,20 @@ export async function GET(request: Request) {
         slotTimeLabel = `${hour} AM`;
       }
 
-      // Slot recommendation logic:
-      // - If rain (code >= 51): unfavourable (tanaman sudah kehujanan)
-      // - If hot (> 30°C): unfavourable (penguapan tinggi, daun bisa terbakar)
-      // - If moderate (26-29°C): moderate
-      // - If cool evening/morning (<= 25°C or morning/sunset): optimal
-      let status: 'optimal' | 'moderate' | 'unfavourable' = 'moderate';
-      if (slotCode >= 51 || slotTemp >= 32) {
-        status = 'unfavourable';
-      } else if (slotTemp <= 26 || hour === 6 || hour === 7 || hour >= 17) {
-        status = 'optimal';
-      }
+      // Dynamic calculation based on plant botany profile & live hour weather
+      const evalResult = evaluatePlantHourlySlot(
+        hour,
+        slotTemp,
+        slotCode,
+        slotHumidity,
+        plantProfile
+      );
 
       timeSlots.push({
         time: slotTimeLabel,
         temp: `${slotTemp}°C`,
-        status,
+        status: evalResult.status,
+        reason: evalResult.reason,
         code: slotCode,
       });
     }
@@ -140,18 +147,28 @@ export async function GET(request: Request) {
       });
     }
 
-    // 7. Dynamic AI summary based on real live weather
-    let aiSummary = `Berdasarkan prakiraan cuaca, hari ini kondisi ${conditionNow.toLowerCase()} dengan suhu sekitar ${tempNow}°C dan kelembapan ${humidityNow}%.`;
+    // 7. Dynamic AI summary tailored for this specific plant
+    const plantDisplayName = plantName || 'tanaman Anda';
+    let aiSummary = `Untuk ${plantDisplayName} (${plantProfile.category}), kondisi lingkungan saat ini ${conditionNow.toLowerCase()} dengan suhu ${tempNow}°C dan kelembapan ${humidityNow}%.`;
     let aiSaran = 'Disarankan menyiram di pagi hari sebelum terik atau di sore hari.';
+
     if (codeNow >= 51) {
-      aiSummary = `Hari ini berpotensi terjadi ${conditionNow.toLowerCase()} dengan kelembapan mencapai ${humidityNow}%. Tanah kemungkinan sudah lembap alami.`;
-      aiSaran = 'Tunda penyiraman luar ruangan agar akar tidak mengalami pembusukan akibat air berlebih.';
+      if (plantProfile.category === 'Outdoor' || plantProfile.category === 'Kebun') {
+        aiSummary = `Hujan sedang/berpotensi turun untuk area ${plantDisplayName}. Media tanam sudah mendapat pasokan air alami.`;
+        aiSaran = 'Hindari menyiram hari ini agar akar tidak membusuk akibat genangan air berlebih.';
+      } else {
+        aiSummary = `Cuaca luar sedang hujan dengan kelembapan tinggi (${humidityNow}%). Meskipun ${plantDisplayName} berada di dalam ruangan, laju penguapannya lebih lambat.`;
+        aiSaran = 'Cukup siram sedikit atau semprot kabut ringan jika media tanam mulai terasa kering.';
+      }
     } else if (tempNow >= 32) {
-      aiSummary = `Cuaca hari ini cukup terik (${tempNow}°C) dengan suhu puncak ${maxTempToday}°C. Penguapan air tanah berlangsung cepat.`;
-      aiSaran = 'Lakukan penyiraman di pagi atau sore hari, dan hindari menyiram saat matahari tepat di atas kepala.';
+      aiSummary = `Suhu lingkungan tergolong panas (${tempNow}°C). Laju transpirasi ${plantDisplayName} meningkat signifikan.`;
+      aiSaran = 'Siram di sore hari setelah matahari teduh dan hindari menyiram daun di tengah hari terik.';
+    } else if (plantProfile.waterNeed === 'low') {
+      aiSummary = `${plantDisplayName} memiliki kebutuhan air rendah (tipe sukulen/kaktus). Kelembapan saat ini tercatat ${humidityNow}%.`;
+      aiSaran = 'Pastikan tanah benar-benar kering hingga kedalaman 3 cm sebelum melakukan penyiraman berikutnya.';
     } else if (tempNow <= 25) {
-      aiSummary = `Suhu lingkungan cukup sejuk (${tempNow}°C) dengan kondisi ${conditionNow.toLowerCase()}. Penguapan air relatif lambat.`;
-      aiSaran = 'Siram secukupnya dan periksa kelembapan media tanam sebelum menyiram.';
+      aiSummary = `Suhu lingkungan cukup sejuk (${tempNow}°C) dengan kondisi ${conditionNow.toLowerCase()}. Penyerapan air berlangsung stabil.`;
+      aiSaran = 'Siram secukupnya di pangkal batang pada jam optimal yang bertanda centang hijau.';
     }
 
     return NextResponse.json({
@@ -162,6 +179,13 @@ export async function GET(request: Request) {
           label: locationName,
           latitude: lat,
           longitude: lon,
+        },
+        plant: {
+          name: plantName,
+          category: plantProfile.category,
+          waterNeed: plantProfile.waterNeed,
+          kc: plantProfile.kc,
+          intervalDays: plantProfile.intervalDays,
         },
         current: {
           temp: tempNow,

@@ -19,37 +19,72 @@ import TkRevealClient from '@/components/shared/tk-reveal-client';
 import { useAuthGuard } from '@/components/shared/AuthGuardModal';
 import { cn } from '@/lib/utils';
 
-export default function ForumDetailPage({ id }: { id: string }) {
+function renderTextWithHashtags(text: string) {
+  const parts = text.split(/(#[\w\u00C0-\u024F\u1E00-\u1EFF]+)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith('#')) {
+      const tag = part.slice(1);
+      return (
+        <Link
+          key={index}
+          href={`/forum?tag=${encodeURIComponent(tag.toLowerCase())}`}
+          className="font-semibold text-primary hover:underline transition-colors"
+        >
+          {part}
+        </Link>
+      );
+    }
+    return part;
+  });
+}
+
+export default function ForumDetailPage({
+  id,
+  initialPost,
+}: {
+  id: string;
+  initialPost?: ForumPost | null;
+}) {
   const t = useTranslations('forum');
   const router = useRouter();
   const { user } = useAuth();
   const { checkAuth, AuthModal } = useAuthGuard();
 
   const [currentPost, setCurrentPost] = useState<ForumPost>(() => {
-    return getPostById(id) ?? forumPosts.find((p) => p.id === id) ?? forumPosts[0];
+    return initialPost ?? forumPosts.find((p) => p.id === id) ?? forumPosts[0];
   });
   const [openHapusDialog, setOpenHapusDialog] = useState(false);
 
   const post = currentPost;
   const isOwner = isPostOwner(post, user);
-  const related = getAllPosts().filter((p) => p.id !== post.id).slice(0, 3);
+  const [related, setRelated] = useState<ForumPost[]>(() => {
+    return forumPosts.filter((p) => p.id !== (initialPost?.id ?? id)).slice(0, 3);
+  });
 
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(post.likes);
   const [comments, setComments] = useState(post.comments);
   const [draft, setDraft] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyingTarget, setReplyingTarget] = useState<{ author: string; commentId?: string } | null>(null);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     let isMounted = true;
     const load = async () => {
-      const initial = getPostById(id) ?? forumPosts.find((p) => p.id === id);
-      if (initial && isMounted) {
-        setCurrentPost(initial);
-        setLikes(initial.likes);
-        setComments(initial.comments);
+      // Sync related posts from cache or db
+      const cachedRelated = getAllPosts().filter((p) => p.id !== id).slice(0, 3);
+      if (isMounted && cachedRelated.length > 0) {
+        setRelated(cachedRelated);
+      }
+
+      if (!initialPost) {
+        const cached = getPostById(id) ?? forumPosts.find((p) => p.id === id);
+        if (cached && isMounted) {
+          setCurrentPost(cached);
+          setLikes(cached.likes);
+          setComments(cached.comments);
+        }
       }
 
       const livePost = await fetchForumPostById(id);
@@ -63,7 +98,7 @@ export default function ForumDetailPage({ id }: { id: string }) {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, initialPost]);
 
   const toggleLike = async () => {
     if (
@@ -97,15 +132,19 @@ export default function ForumDetailPage({ id }: { id: string }) {
     if (!text || submittingComment) return;
 
     setSubmittingComment(true);
+    const replyAuthor = replyingTarget?.author;
+    const parentId = replyingTarget?.commentId;
+
     try {
       const createdComment = await submitForumComment(post.id, {
         text,
-        replyTo: replyingTo || undefined,
+        replyTo: replyAuthor,
+        parentId,
       });
 
       setComments((list) => [...list, createdComment]);
       setDraft('');
-      setReplyingTo(null);
+      setReplyingTarget(null);
     } catch (err) {
       console.error('Failed to submit comment:', err);
       // Fallback
@@ -116,11 +155,12 @@ export default function ForumDetailPage({ id }: { id: string }) {
           avatar: user?.photoUrl || undefined,
           time: t('baruSaja'),
           text,
-          replyTo: replyingTo || undefined,
+          replyTo: replyAuthor,
+          parentId,
         },
       ]);
       setDraft('');
-      setReplyingTo(null);
+      setReplyingTarget(null);
     } finally {
       setSubmittingComment(false);
     }
@@ -182,7 +222,7 @@ export default function ForumDetailPage({ id }: { id: string }) {
                   <span className="text-sm font-semibold">{post.author}</span>
                   {post.expert && <ExpertBadge />}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground" suppressHydrationWarning>
                   {post.time} · <CategoryText category={post.category} />
                 </p>
               </div>
@@ -210,9 +250,24 @@ export default function ForumDetailPage({ id }: { id: string }) {
           <TkRevealClient>
             <div className="space-y-5 text-[15px] leading-8">
               {(post.content ?? [post.excerpt]).map((para, i) => (
-                <p key={i}>{para}</p>
+                <p key={i}>{renderTextWithHashtags(para)}</p>
               ))}
             </div>
+
+            {post.tags && post.tags.length > 0 && (
+              <div className="mt-8 flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold text-muted-foreground">Topik terkait:</span>
+                {post.tags.map((tag) => (
+                  <Link
+                    key={tag}
+                    href={`/forum?tag=${encodeURIComponent(tag.replace(/^#/, '').toLowerCase())}`}
+                    className="inline-flex items-center text-xs font-medium text-primary hover:text-primary-foreground hover:bg-primary bg-primary/10 rounded-full px-3 py-1 transition-colors"
+                  >
+                    #{tag.replace(/^#/, '')}
+                  </Link>
+                ))}
+              </div>
+            )}
 
             {post.image && (
               <img
@@ -268,58 +323,155 @@ export default function ForumDetailPage({ id }: { id: string }) {
               {t("komentarJudul")} (<span className="tnum">{comments.length}</span>)
             </h2>
             <TkRevealClient>
-              <ul className="mt-6 divide-y divide-border border-t border-border">
-                {comments.map((c, i) => (
-                  <li key={i} className={cn('flex items-start gap-3 py-5 transition-colors hover:bg-accent/20', c.replyTo && 'ml-8 sm:ml-12 border-l-2 border-primary/30 pl-4 -mb-px')}>
-                    <Avatar>
-                      <AvatarFallback className="bg-secondary text-xs font-semibold">
-                        {c.author
-                          .split(' ')
-                          .map((w) => w[0])
-                          .join('')
-                          .slice(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0 flex-1">
-                      {c.replyTo && (
-                        <p className="mb-0.5 text-xs text-muted-foreground">
-                          {t('membalas')} <span className="font-medium text-primary">@{c.replyTo}</span>
-                        </p>
-                      )}
-                      <p className="text-sm">
-                        <span className="font-medium">{c.author}</span>{' '}
-                        <span className="text-muted-foreground">· {c.time}</span>
-                      </p>
-                      <p className="mt-1 text-sm leading-6">{c.text}</p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReplyingTo(c.author);
-                          commentInputRef.current?.focus();
-                          commentInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }}
-                        className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary transition-colors hover:text-primary/80 hover:underline cursor-pointer"
-                      >
-                        <Reply className="h-3.5 w-3.5" aria-hidden="true" />
-                        {t("balas")}
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {(() => {
+                // Group comments: top-level comments and nested replies attached to parent comment
+                const topLevelComments: Array<typeof comments[0] & { nestedReplies: typeof comments }> = [];
+
+                // 1. Index top-level comments (comments without parentId and without replyTo)
+                for (const c of comments) {
+                  if (!c.parentId && !c.replyTo) {
+                    topLevelComments.push({ ...c, nestedReplies: [] });
+                  }
+                }
+
+                // If all comments have replyTo / parentId (legacy data), pick first as top-level
+                if (topLevelComments.length === 0 && comments.length > 0) {
+                  topLevelComments.push({ ...comments[0], nestedReplies: [] });
+                }
+
+                // 2. Attach replies to the appropriate top-level comment
+                for (const c of comments) {
+                  // Skip if it is already one of the topLevelComments root items
+                  if (topLevelComments.some((tl) => (tl.id && tl.id === c.id) || (!tl.id && tl === c))) {
+                    continue;
+                  }
+
+                  let attached = false;
+
+                  // 2a. Match by parentId to a top-level comment
+                  if (c.parentId) {
+                    const parent = topLevelComments.find((p) => p.id === c.parentId);
+                    if (parent) {
+                      parent.nestedReplies.push(c);
+                      attached = true;
+                    }
+                  }
+
+                  // 2b. Match by replyTo author
+                  if (!attached && c.replyTo) {
+                    const parent = topLevelComments.find((p) => p.author === c.replyTo);
+                    if (parent) {
+                      parent.nestedReplies.push(c);
+                      attached = true;
+                    }
+                  }
+
+                  // 2c. Fallback if parent wasn't found: attach to latest top-level comment or make top-level
+                  if (!attached) {
+                    if (topLevelComments.length > 0) {
+                      topLevelComments[topLevelComments.length - 1].nestedReplies.push(c);
+                    } else {
+                      topLevelComments.push({ ...c, nestedReplies: [] });
+                    }
+                  }
+                }
+
+                return (
+                  <ul className="mt-6 divide-y divide-border border-t border-border">
+                    {topLevelComments.map((parent, pIdx) => (
+                      <li key={parent.id || pIdx} className="py-5 space-y-4">
+                        {/* Parent Comment */}
+                        <div className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-accent/20">
+                          <Avatar>
+                            <AvatarFallback className="bg-secondary text-xs font-semibold">
+                              {parent.author
+                                .split(' ')
+                                .map((w) => w[0])
+                                .join('')
+                                .slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm">
+                              <span className="font-semibold text-foreground">{parent.author}</span>{' '}
+                              <span className="text-muted-foreground text-xs" suppressHydrationWarning>· {parent.time}</span>
+                            </p>
+                            <p className="mt-1 text-sm leading-6 text-foreground/90">{parent.text}</p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReplyingTarget({ author: parent.author, commentId: parent.id });
+                                commentInputRef.current?.focus();
+                                commentInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              }}
+                              className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-primary/80 hover:underline cursor-pointer"
+                            >
+                              <Reply className="h-3.5 w-3.5" aria-hidden="true" />
+                              {t("balas")}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Nested Replies specifically under THIS comment */}
+                        {parent.nestedReplies.length > 0 && (
+                          <div className="ml-6 sm:ml-10 space-y-3 border-l-2 border-primary/30 pl-4 sm:pl-6">
+                            {parent.nestedReplies.map((reply, rIdx) => (
+                              <div key={reply.id || rIdx} className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-accent/20">
+                                <Avatar className="h-7 w-7">
+                                  <AvatarFallback className="bg-accent text-[11px] font-semibold text-primary">
+                                    {reply.author
+                                      .split(' ')
+                                      .map((w) => w[0])
+                                      .join('')
+                                      .slice(0, 2)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0 flex-1">
+                                  {reply.replyTo && (
+                                    <p className="mb-0.5 text-xs text-muted-foreground">
+                                      {t('membalas')} <span className="font-medium text-primary">@{reply.replyTo}</span>
+                                    </p>
+                                  )}
+                                  <p className="text-xs">
+                                    <span className="font-semibold text-foreground">{reply.author}</span>{' '}
+                                    <span className="text-muted-foreground" suppressHydrationWarning>· {reply.time}</span>
+                                  </p>
+                                  <p className="mt-1 text-sm leading-6 text-foreground/90">{reply.text}</p>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setReplyingTarget({ author: reply.author, commentId: parent.id || reply.id });
+                                      commentInputRef.current?.focus();
+                                      commentInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }}
+                                    className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-primary transition-colors hover:text-primary/80 hover:underline cursor-pointer"
+                                  >
+                                    <Reply className="h-3 w-3" aria-hidden="true" />
+                                    {t("balas")}
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                );
+              })()}
             </TkRevealClient>
 
             {/* Composer */}
             <div className="mt-8 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40">
-              {replyingTo && (
+              {replyingTarget && (
                 <div className="mb-3 flex items-center justify-between rounded-lg border border-primary/20 bg-accent/60 px-3.5 py-2 text-xs">
                   <span className="text-foreground">
-                    {t('membalas')} <strong className="font-semibold text-primary">@{replyingTo}</strong>
+                    {t('membalas')} <strong className="font-semibold text-primary">@{replyingTarget.author}</strong>
                   </span>
                   <button
                     type="button"
-                    onClick={() => setReplyingTo(null)}
-                    className="rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                    onClick={() => setReplyingTarget(null)}
+                    className="rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer"
                     aria-label="Batalkan balasan"
                   >
                     <X className="h-4 w-4" />
@@ -327,30 +479,30 @@ export default function ForumDetailPage({ id }: { id: string }) {
                 </div>
               )}
               <label htmlFor="comment" className="text-sm font-semibold">
-                {replyingTo ? `${t("balas")} @${replyingTo}` : t("tulisKomentar")}
+                {replyingTarget ? `${t("balas")} @${replyingTarget.author}` : t("tulisKomentar")}
               </label>
               <Textarea
                 id="comment"
                 ref={commentInputRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder={replyingTo ? `Tulis balasan untuk @${replyingTo}...` : t("bagikanJawaban")}
+                placeholder={replyingTarget ? `Tulis balasan untuk @${replyingTarget.author}...` : t("bagikanJawaban")}
                 className="mt-2"
               />
               <div className="mt-3 flex items-center justify-between">
-                {replyingTo ? (
+                {replyingTarget ? (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => setReplyingTo(null)}
-                    className="text-xs text-muted-foreground hover:text-foreground"
+                    onClick={() => setReplyingTarget(null)}
+                    className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
                   >
                     Batal Balas
                   </Button>
                 ) : <span />}
                 <Button onClick={submitComment} className="btn-cta rounded-full cursor-pointer" disabled={draft.trim() === ''}>
-                  {replyingTo ? 'Kirim Balasan' : t("kirimKomentar")}
+                  {replyingTarget ? 'Kirim Balasan' : t("kirimKomentar")}
                 </Button>
               </div>
             </div>

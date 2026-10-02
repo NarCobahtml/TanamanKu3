@@ -16,6 +16,7 @@ export interface ForumPostCardProps {
   onToggleLike: () => void;
   isOwner?: boolean;
   onDelete?: () => void;
+  onSelectTag?: (tag: string) => void;
 }
 
 export function ForumPostCard({
@@ -24,6 +25,7 @@ export function ForumPostCard({
   onToggleLike,
   isOwner,
   onDelete,
+  onSelectTag,
 }: ForumPostCardProps) {
   const t = useTranslations('forum');
   const likeCount = post.likes + (isLiked ? 1 : 0);
@@ -86,6 +88,30 @@ export function ForumPostCard({
               className="aspect-[16/9] w-full max-h-64 sm:max-h-80 object-cover transition-transform duration-300 hover:scale-[1.01]"
             />
           </Link>
+        )}
+
+        {post.tags && post.tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {post.tags.slice(0, 5).map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (onSelectTag) {
+                    onSelectTag(tag);
+                  } else {
+                    window.location.assign(`/forum?tag=${encodeURIComponent(tag)}`);
+                  }
+                }}
+                className="inline-flex items-center text-[11px] font-medium text-primary hover:text-primary-foreground hover:bg-primary bg-primary/10 rounded-full px-2.5 py-0.5 transition-colors cursor-pointer"
+                title={`Filter topik #${tag}`}
+              >
+                #{tag.replace(/^#/, '')}
+              </button>
+            ))}
+          </div>
         )}
 
         <div className="mt-3.5 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">

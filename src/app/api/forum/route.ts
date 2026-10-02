@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { uploadToStorage } from '@/lib/storage';
-import { formatForumPost, seedForumPostsIfEmpty } from '@/lib/forum';
+import { formatForumPost, seedForumPostsIfEmpty, extractHashtags } from '@/lib/forum';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const query = searchParams.get('q');
+    const tag = searchParams.get('tag');
 
     // Ensure database has initial community posts if freshly started
     await seedForumPostsIfEmpty();
@@ -36,11 +37,30 @@ export async function GET(request: Request) {
       formatted = formatted.filter((p) => p.category.toLowerCase() === category.toLowerCase());
     }
 
+    if (tag && tag.trim()) {
+      const cleanTag = tag.trim().toLowerCase().replace(/^#/, '');
+      formatted = formatted.filter((p) => {
+        const postTags = (p.tags || []).map((t) => t.toLowerCase().replace(/^#/, ''));
+        const text = `${p.title} ${p.excerpt} ${(p.content || []).join(' ')}`.toLowerCase();
+        return (
+          postTags.includes(cleanTag) ||
+          text.includes(`#${cleanTag}`) ||
+          text.includes(cleanTag)
+        );
+      });
+    }
+
     if (query && query.trim()) {
       const q = query.trim().toLowerCase();
+      const cleanQ = q.replace(/^#/, '');
       formatted = formatted.filter((p) => {
-        const text = `${p.title} ${p.excerpt} ${p.author} ${p.category}`.toLowerCase();
-        return text.includes(q);
+        const postTags = (p.tags || []).map((t) => t.toLowerCase().replace(/^#/, ''));
+        const text = `${p.title} ${p.excerpt} ${p.author} ${p.category} ${(p.content || []).join(' ')}`.toLowerCase();
+        return (
+          text.includes(q) ||
+          text.includes(cleanQ) ||
+          postTags.some((t) => t.includes(cleanQ))
+        );
       });
     }
 
@@ -73,7 +93,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, content, category = 'Perawatan', image } = body;
+    const { title, content, category = 'Perawatan', image, tags } = body;
 
     if (!title || !title.trim()) {
       return NextResponse.json(
@@ -124,6 +144,11 @@ export async function POST(request: Request) {
       ? content.map((s) => String(s).trim()).filter(Boolean)
       : [content.trim()];
 
+    const textToScan = `${title.trim()} ${bodyArray.join(' ')}`;
+    const extractedTags = extractHashtags(textToScan);
+    const explicitTags = Array.isArray(tags) ? tags.map((t: string) => String(t).replace(/^#/, '').toLowerCase()) : [];
+    const combinedTags = Array.from(new Set([...explicitTags, ...extractedTags]));
+
     const newPost = await prisma.post.create({
       data: {
         id: `post-${Date.now()}`,
@@ -135,6 +160,7 @@ export async function POST(request: Request) {
           body: bodyArray,
           likes: 0,
           views: 1,
+          tags: combinedTags,
         }),
       },
       include: {

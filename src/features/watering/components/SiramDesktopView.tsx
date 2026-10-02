@@ -16,7 +16,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
 import type { Tanaman } from '@/features/plants';
 import { weatherNum as defaultWeatherNum, timeSlots as defaultTimeSlots, forecast as defaultForecast, slotVisual } from '../constants';
@@ -241,11 +240,13 @@ export default function SiramDesktopView({
                         {timeSlots.map((slot) => {
                           const v = slotVisual[slot.status];
                           const Icon = v.icon;
+                          const slotAny = slot as { reason?: string; time: string; status: SlotStatus };
                           return (
                             <div
                               key={slot.time === "Now" ? t("now") : slot.time}
+                              title={slotAny.reason || undefined}
                               className={cn(
-                                'flex flex-col items-center gap-2 rounded-lg border px-2 py-4',
+                                'flex flex-col items-center gap-2 rounded-lg border px-2 py-4 transition-transform hover:scale-105',
                                 v.chip,
                               )}
                             >

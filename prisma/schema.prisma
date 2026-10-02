@@ -12,6 +12,11 @@ enum Role {
   USER
 }
 
+enum SubscriptionTier {
+  FREE
+  PRO
+}
+
 enum ScanStatus {
   DIPROSES
   BERHASIL
@@ -24,23 +29,26 @@ enum NotificationType {
   FORUM_REPLY
 }
 
-
 model User {
-  id           String   @id
-  email        String   @unique
-  passwordHash String
-  name         String
-  role         Role     @default(USER)
-  bio          String?
-  photoUrl     String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                    String            @id
+  email                 String            @unique
+  passwordHash          String
+  name                  String
+  role                  Role              @default(USER)
+  subscriptionTier      SubscriptionTier  @default(FREE)
+  scanQuotaUsed         Int               @default(0)
+  subscriptionExpiresAt DateTime?
+  bio                   String?
+  photoUrl              String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
 
   plants        Plant[]
   scanRecords   ScanRecord[]
   posts         Post[]
   comments      Comment[]
   notifications Notification[]
+  postLikes     PostLike[]
 
   @@index([email])
 }
@@ -99,12 +107,12 @@ model ScanRecord {
   @@index([userId, createdAt])
 }
 
-
 model WateringSchedule {
   id               String    @id @default(cuid())
   plantId          String    @unique
   nextWateringAt   DateTime
   lastWateredAt    DateTime?
+  intervalDays     Int       @default(2)
   isAuto           Boolean   @default(true)
   reminderEnabled  Boolean   @default(true)
   reminderMinutes  Int       @default(30)
@@ -128,25 +136,44 @@ model Post {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  author   User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  scan     ScanRecord? @relation(fields: [scanId], references: [id], onDelete: SetNull)
-  comments Comment[]
+  author    User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  scan      ScanRecord? @relation(fields: [scanId], references: [id], onDelete: SetNull)
+  comments  Comment[]
+  likes     PostLike[]
 
   @@index([authorId, createdAt])
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
 }
 
 model Comment {
   id         String   @id @default(cuid())
   postId     String
   authorId   String?
+  parentId   String?
   content    String
   isApproved Boolean  @default(true)
   createdAt  DateTime @default(now())
 
-  post   Post  @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author   User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
 
   @@index([postId])
+  @@index([parentId])
 }
 
 model Notification {

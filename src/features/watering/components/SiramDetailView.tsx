@@ -13,7 +13,11 @@ export default function SiramDetailView() {
   const router = useRouter();
   const tanamanList = useTanamanList();
   const plant = tanamanList.find((x) => x.id === id) ?? tanamanStore.getById(id) ?? tanamanList[0];
-  const weather = useWeather();
+  const weather = useWeather({
+    plantName: plant?.nama,
+    plantCategory: plant?.kategori,
+    plantType: plant?.jenis,
+  });
 
   const [sudahDisiram, setSudahDisiram] = useState(false);
   const [notifOn, setNotifOn] = useState(false);
