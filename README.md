@@ -4,7 +4,7 @@ Platform deteksi penyakit tanaman cerdas berbasis AI, pemantauan kesehatan tanam
 
 ---
 
-## 🌿 Fitur Utama
+## Fitur Utama
 
 - **Deteksi Penyakit AI (Vision Inference)**: Identifikasi penyakit tanaman secara instan melalui foto daun menggunakan model CNN terlatih (Roboflow) dengan fallback Vision LLM serta rekomendasi penanganan terkurasi dari Knowledge Base.
 - **Jadwal Penyiraman Cerdas**: Rekomendasi waktu penyiraman otomatis berdasarkan baseline varietas tanaman, kondisi cuaca riil (Open-Meteo), dan riwayat kesehatan tanaman.
@@ -26,7 +26,7 @@ Platform deteksi penyakit tanaman cerdas berbasis AI, pemantauan kesehatan tanam
 
 ---
 
-## 📁 Struktur Direktori
+## Struktur Direktori
 
 ```text
 ├── prisma/               # Skema database Prisma (schema.prisma)
@@ -51,7 +51,7 @@ Platform deteksi penyakit tanaman cerdas berbasis AI, pemantauan kesehatan tanam
 
 ---
 
-## 🚀 Memulai Pengembangan
+## Memulai Pengembangan
 
 ### 1. Instalasi Dependencies
 
