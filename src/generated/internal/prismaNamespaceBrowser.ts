@@ -57,6 +57,7 @@ export const ModelName = {
   ScanRecord: 'ScanRecord',
   WateringSchedule: 'WateringSchedule',
   Post: 'Post',
+  PostLike: 'PostLike',
   Comment: 'Comment',
   Notification: 'Notification'
 } as const
@@ -83,6 +84,9 @@ export const UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   name: 'name',
   role: 'role',
+  subscriptionTier: 'subscriptionTier',
+  scanQuotaUsed: 'scanQuotaUsed',
+  subscriptionExpiresAt: 'subscriptionExpiresAt',
   bio: 'bio',
   photoUrl: 'photoUrl',
   createdAt: 'createdAt',
@@ -145,6 +149,7 @@ export const WateringScheduleScalarFieldEnum = {
   plantId: 'plantId',
   nextWateringAt: 'nextWateringAt',
   lastWateredAt: 'lastWateredAt',
+  intervalDays: 'intervalDays',
   isAuto: 'isAuto',
   reminderEnabled: 'reminderEnabled',
   reminderMinutes: 'reminderMinutes',
@@ -173,10 +178,21 @@ export const PostScalarFieldEnum = {
 export type PostScalarFieldEnum = (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum]
 
 
+export const PostLikeScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type PostLikeScalarFieldEnum = (typeof PostLikeScalarFieldEnum)[keyof typeof PostLikeScalarFieldEnum]
+
+
 export const CommentScalarFieldEnum = {
   id: 'id',
   postId: 'postId',
   authorId: 'authorId',
+  parentId: 'parentId',
   content: 'content',
   isApproved: 'isApproved',
   createdAt: 'createdAt'

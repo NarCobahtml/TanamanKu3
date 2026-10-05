@@ -403,6 +403,7 @@ export const ModelName = {
   ScanRecord: 'ScanRecord',
   WateringSchedule: 'WateringSchedule',
   Post: 'Post',
+  PostLike: 'PostLike',
   Comment: 'Comment',
   Notification: 'Notification'
 } as const
@@ -420,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "plant" | "disease" | "scanRecord" | "wateringSchedule" | "post" | "comment" | "notification"
+    modelProps: "user" | "plant" | "disease" | "scanRecord" | "wateringSchedule" | "post" | "postLike" | "comment" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -868,6 +869,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PostLike: {
+      payload: Prisma.$PostLikePayload<ExtArgs>
+      fields: Prisma.PostLikeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PostLikeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostLikePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PostLikeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostLikePayload>
+        }
+        findFirst: {
+          args: Prisma.PostLikeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostLikePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PostLikeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostLikePayload>
+        }
+        findMany: {
+          args: Prisma.PostLikeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostLikePayload>[]
+        }
+        create: {
+          args: Prisma.PostLikeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostLikePayload>
+        }
+        createMany: {
+          args: Prisma.PostLikeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PostLikeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostLikePayload>[]
+        }
+        delete: {
+          args: Prisma.PostLikeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostLikePayload>
+        }
+        update: {
+          args: Prisma.PostLikeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostLikePayload>
+        }
+        deleteMany: {
+          args: Prisma.PostLikeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PostLikeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PostLikeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostLikePayload>[]
+        }
+        upsert: {
+          args: Prisma.PostLikeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostLikePayload>
+        }
+        aggregate: {
+          args: Prisma.PostLikeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePostLike>
+        }
+        groupBy: {
+          args: Prisma.PostLikeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostLikeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PostLikeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostLikeCountAggregateOutputType> | number
+        }
+      }
+    }
     Comment: {
       payload: Prisma.$CommentPayload<ExtArgs>
       fields: Prisma.CommentFieldRefs
@@ -1061,6 +1136,9 @@ export const UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   name: 'name',
   role: 'role',
+  subscriptionTier: 'subscriptionTier',
+  scanQuotaUsed: 'scanQuotaUsed',
+  subscriptionExpiresAt: 'subscriptionExpiresAt',
   bio: 'bio',
   photoUrl: 'photoUrl',
   createdAt: 'createdAt',
@@ -1123,6 +1201,7 @@ export const WateringScheduleScalarFieldEnum = {
   plantId: 'plantId',
   nextWateringAt: 'nextWateringAt',
   lastWateredAt: 'lastWateredAt',
+  intervalDays: 'intervalDays',
   isAuto: 'isAuto',
   reminderEnabled: 'reminderEnabled',
   reminderMinutes: 'reminderMinutes',
@@ -1151,10 +1230,21 @@ export const PostScalarFieldEnum = {
 export type PostScalarFieldEnum = (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum]
 
 
+export const PostLikeScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type PostLikeScalarFieldEnum = (typeof PostLikeScalarFieldEnum)[keyof typeof PostLikeScalarFieldEnum]
+
+
 export const CommentScalarFieldEnum = {
   id: 'id',
   postId: 'postId',
   authorId: 'authorId',
+  parentId: 'parentId',
   content: 'content',
   isApproved: 'isApproved',
   createdAt: 'createdAt'
@@ -1237,6 +1327,34 @@ export type ListEnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'SubscriptionTier'
+ */
+export type EnumSubscriptionTierFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionTier'>
+    
+
+
+/**
+ * Reference to a field of type 'SubscriptionTier[]'
+ */
+export type ListEnumSubscriptionTierFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionTier[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -1282,20 +1400,6 @@ export type ListEnumScanStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -1469,6 +1573,7 @@ export type GlobalOmitConfig = {
   scanRecord?: Prisma.ScanRecordOmit
   wateringSchedule?: Prisma.WateringScheduleOmit
   post?: Prisma.PostOmit
+  postLike?: Prisma.PostLikeOmit
   comment?: Prisma.CommentOmit
   notification?: Prisma.NotificationOmit
 }

@@ -111,7 +111,7 @@ const INITIAL_MOCK_SCANS = [
   {
     id: 'scan-2',
     diseaseId: 'disease-tomat-sehat',
-    imageUrl: '',
+    imageUrl: '/figma-assets/plant-tomat-chery.jpg',
     confidence: 0.98,
     status: 'BERHASIL' as const,
     createdAt: new Date('2026-08-30T14:30:00Z'),

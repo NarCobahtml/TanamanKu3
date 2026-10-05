@@ -12,6 +12,9 @@ export interface UserSession {
   photoUrl?: string | null;
   bio?: string | null;
   createdAt?: string;
+  subscriptionTier?: 'FREE' | 'PRO';
+  scanQuotaUsed?: number;
+  subscriptionExpiresAt?: string | null;
 }
 
 export interface AuthContextType {

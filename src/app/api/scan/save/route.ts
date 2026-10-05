@@ -16,56 +16,47 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Resolve User
-    let userId: string | null = null;
-    try {
-      const supabase = await createClient();
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
+    // 1. Resolve User (Wajib Login)
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-      if (authUser) {
-        // Ensure user exists in Prisma DB
-        let dbUser = await prisma.user.findUnique({ where: { id: authUser.id } });
-        if (!dbUser) {
-          const metaName =
-            authUser.user_metadata?.name ||
-            authUser.user_metadata?.full_name ||
-            authUser.email?.split('@')[0] ||
-            'Pengguna TanamanKu';
-
-          dbUser = await prisma.user.create({
-            data: {
-              id: authUser.id,
-              email: authUser.email || `user-${authUser.id}@tumbuhkita.id`,
-              name: metaName,
-              passwordHash: '',
-              role: 'USER',
-            },
-          });
-        }
-        userId = dbUser.id;
-      }
-    } catch {
-      // Unauthenticated
+    if (authError || !authUser) {
+      return NextResponse.json(
+        { success: false, error: 'Anda harus masuk terlebih dahulu untuk menyimpan hasil scan.' },
+        { status: 401 }
+      );
     }
 
-    if (!userId) {
-      // Fallback to demo/guest user
-      let fallbackUser = await prisma.user.findFirst();
-      if (!fallbackUser) {
-        fallbackUser = await prisma.user.create({
-          data: {
-            id: 'guest-user',
-            email: 'guest@tumbuhkita.id',
-            name: 'Pengguna Tamu',
-            passwordHash: '',
-            role: 'USER',
-          },
-        });
-      }
-      userId = fallbackUser.id;
+    let dbUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ id: authUser.id }, { email: authUser.email || '' }],
+      },
+    });
+
+    if (!dbUser) {
+      const metaName =
+        authUser.user_metadata?.name ||
+        authUser.user_metadata?.full_name ||
+        authUser.email?.split('@')[0] ||
+        'Pengguna TanamanKu';
+
+      dbUser = await prisma.user.create({
+        data: {
+          id: authUser.id,
+          email: authUser.email || `user-${authUser.id}@tumbuhkita.id`,
+          name: metaName,
+          passwordHash: '',
+          role: 'USER',
+          subscriptionTier: 'FREE',
+          scanQuotaUsed: 0,
+        },
+      });
     }
+
+    const userId = dbUser.id;
 
     // 2. Resolve / Upsert Disease in database
     const diseaseData = resolveDiseaseForClass(scanClass);
@@ -91,6 +82,14 @@ export async function POST(request: Request) {
           const mimeType = matches[1];
           const base64Data = matches[2];
           const buffer = Buffer.from(base64Data, 'base64');
+
+          // Validasi ukuran maksimal 5MB
+          if (buffer.length > 5 * 1024 * 1024) {
+            return NextResponse.json(
+              { success: false, error: 'Ukuran foto maksimal 5MB.' },
+              { status: 400 }
+            );
+          }
 
           let ext = 'jpg';
           if (mimeType.includes('png')) ext = 'png';

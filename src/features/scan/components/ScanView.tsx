@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import AppShell from '@/components/layout/AppShell';
 import { useAuthGuard } from '@/components/shared/AuthGuardModal';
 import ScanMobileView from './ScanMobileView';
@@ -84,7 +85,33 @@ export default function ScanView() {
       form.append('file', blob, 'capture.jpg');
       const res = await fetch('/api/scan', { method: 'POST', body: form });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error ?? t('analisisGagal'));
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          toast.error('Silakan masuk terlebih dahulu untuk melakukan scan tanaman.');
+          router.push('/login?next=/scan');
+          return;
+        }
+
+        if (res.status === 403 && data.code === 'QUOTA_EXCEEDED') {
+          toast.error(
+            data.error || 'Batas kuota scan gratis Anda telah habis (5/5).',
+            {
+              action: {
+                label: 'Upgrade Premium',
+                onClick: () => router.push('/langganan'),
+              },
+              duration: 8000,
+            }
+          );
+          setCameraError(data.error);
+          setAnalyzing(false);
+          return;
+        }
+
+        throw new Error(data?.error ?? t('analisisGagal'));
+      }
+
       sessionStorage.setItem('scan-result', JSON.stringify(data));
       try {
         sessionStorage.setItem('scan-capture', dataUrl); // tampil di halaman hasil

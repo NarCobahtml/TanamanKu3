@@ -82,7 +82,7 @@ export async function DELETE(
     }
 
     // Check authorization: author or ADMIN
-    if (existing.authorId && existing.authorId !== authUser.id) {
+    if (!existing.authorId || existing.authorId !== authUser.id) {
       const user = await prisma.user.findUnique({
         where: { id: authUser.id },
         select: { role: true },

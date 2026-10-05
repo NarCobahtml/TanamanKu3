@@ -34,6 +34,9 @@ export async function GET() {
         role: true,
         photoUrl: true,
         bio: true,
+        subscriptionTier: true,
+        scanQuotaUsed: true,
+        subscriptionExpiresAt: true,
         createdAt: true,
       },
     });
@@ -48,6 +51,9 @@ export async function GET() {
           role: true,
           photoUrl: true,
           bio: true,
+          subscriptionTier: true,
+          scanQuotaUsed: true,
+          subscriptionExpiresAt: true,
           createdAt: true,
         },
       });
@@ -68,6 +74,8 @@ export async function GET() {
           name: metaName,
           passwordHash: '',
           role: 'USER',
+          subscriptionTier: 'FREE',
+          scanQuotaUsed: 0,
         },
         select: {
           id: true,
@@ -76,6 +84,9 @@ export async function GET() {
           role: true,
           photoUrl: true,
           bio: true,
+          subscriptionTier: true,
+          scanQuotaUsed: true,
+          subscriptionExpiresAt: true,
           createdAt: true,
         },
       });
@@ -130,6 +141,14 @@ export async function PUT(request: Request) {
           const mimeType = matches[1];
           const base64Data = matches[2];
           const buffer = Buffer.from(base64Data, 'base64');
+
+          // Validasi ukuran avatar maksimal 5MB
+          if (buffer.length > 5 * 1024 * 1024) {
+            return NextResponse.json(
+              { success: false, data: null, message: 'Ukuran foto profil maksimal 5MB.' },
+              { status: 400 }
+            );
+          }
 
           let ext = 'jpg';
           if (mimeType.includes('png')) ext = 'png';

@@ -17,7 +17,7 @@ export const healthById: Record<string, PlantHealth> = {
 };
 
 export const recentScans = [
-  { id: 1, plant: 'Tomat Ceri', disease: 'Early Blight (Alternaria solani)', confidence: 94, date: '01.09.2026', level: 'penyakit' as HealthLevel, photo: undefined },
+  { id: 1, plant: 'Tomat Ceri', disease: 'Early Blight (Alternaria solani)', confidence: 94, date: '01.09.2026', level: 'penyakit' as HealthLevel, photo: '/figma-assets/plant-tomat-chery.jpg' },
   { id: 2, plant: 'Pisang', disease: 'Sehat, tidak ada gejala', confidence: 88, date: '02.09.2026', level: 'sehat' as HealthLevel, photo: '/figma-assets/plant-bananaleaf.jpg' },
   { id: 3, plant: 'Cabai Rawit', disease: 'Sehat, tidak ada gejala', confidence: 98, date: '30.08.2026', level: 'sehat' as HealthLevel, photo: '/figma-assets/plant-chili.jpg' },
   { id: 4, plant: 'Lidah Mertua', disease: 'Bercak Bakteri (Xanthomonas)', confidence: 91, date: '25.08.2026', level: 'penyakit' as HealthLevel, photo: '/figma-assets/plant-lidahmertua.jpg' },

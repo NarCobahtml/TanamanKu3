@@ -21,9 +21,12 @@ export async function GET() {
       // Unauthenticated / guest mode
     }
 
-    // If authenticated, fetch scans belonging to user or global demo scans
+    // Fetch user scans if logged in, or only initial sample scans (scan-1 to scan-5) for demo
+    const demoScanIds = ['scan-1', 'scan-2', 'scan-3', 'scan-4', 'scan-5'];
     const records = await prisma.scanRecord.findMany({
-      where: userId ? { OR: [{ userId }, { id: { startsWith: 'scan-' } }] } : undefined,
+      where: userId
+        ? { OR: [{ userId }, { id: { in: demoScanIds } }] }
+        : { id: { in: demoScanIds } },
       include: {
         disease: true,
         plant: true,

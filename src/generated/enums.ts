@@ -17,6 +17,14 @@ export const Role = {
 export type Role = (typeof Role)[keyof typeof Role]
 
 
+export const SubscriptionTier = {
+  FREE: 'FREE',
+  PRO: 'PRO'
+} as const
+
+export type SubscriptionTier = (typeof SubscriptionTier)[keyof typeof SubscriptionTier]
+
+
 export const ScanStatus = {
   DIPROSES: 'DIPROSES',
   BERHASIL: 'BERHASIL',

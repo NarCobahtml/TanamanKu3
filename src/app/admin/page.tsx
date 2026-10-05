@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { prisma } from '@/lib/prisma';
 import AdminDashboard from '@/features/admin/AdminDashboard';
 
 export const metadata: Metadata = {
@@ -6,6 +9,22 @@ export const metadata: Metadata = {
   description: 'Panel admin front-end TanamanKu untuk manajemen pengguna, diagnostik penyakit tanaman, dan moderasi forum.',
 };
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login?next=/admin');
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  if (dbUser?.role !== 'ADMIN') {
+    redirect('/home');
+  }
+
   return <AdminDashboard />;
 }

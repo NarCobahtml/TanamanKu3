@@ -27,12 +27,14 @@ export type AggregateWateringSchedule = {
 }
 
 export type WateringScheduleAvgAggregateOutputType = {
+  intervalDays: number | null
   reminderMinutes: number | null
   temperatureC: number | null
   humidityPct: number | null
 }
 
 export type WateringScheduleSumAggregateOutputType = {
+  intervalDays: number | null
   reminderMinutes: number | null
   temperatureC: number | null
   humidityPct: number | null
@@ -43,6 +45,7 @@ export type WateringScheduleMinAggregateOutputType = {
   plantId: string | null
   nextWateringAt: Date | null
   lastWateredAt: Date | null
+  intervalDays: number | null
   isAuto: boolean | null
   reminderEnabled: boolean | null
   reminderMinutes: number | null
@@ -58,6 +61,7 @@ export type WateringScheduleMaxAggregateOutputType = {
   plantId: string | null
   nextWateringAt: Date | null
   lastWateredAt: Date | null
+  intervalDays: number | null
   isAuto: boolean | null
   reminderEnabled: boolean | null
   reminderMinutes: number | null
@@ -73,6 +77,7 @@ export type WateringScheduleCountAggregateOutputType = {
   plantId: number
   nextWateringAt: number
   lastWateredAt: number
+  intervalDays: number
   isAuto: number
   reminderEnabled: number
   reminderMinutes: number
@@ -86,12 +91,14 @@ export type WateringScheduleCountAggregateOutputType = {
 
 
 export type WateringScheduleAvgAggregateInputType = {
+  intervalDays?: true
   reminderMinutes?: true
   temperatureC?: true
   humidityPct?: true
 }
 
 export type WateringScheduleSumAggregateInputType = {
+  intervalDays?: true
   reminderMinutes?: true
   temperatureC?: true
   humidityPct?: true
@@ -102,6 +109,7 @@ export type WateringScheduleMinAggregateInputType = {
   plantId?: true
   nextWateringAt?: true
   lastWateredAt?: true
+  intervalDays?: true
   isAuto?: true
   reminderEnabled?: true
   reminderMinutes?: true
@@ -117,6 +125,7 @@ export type WateringScheduleMaxAggregateInputType = {
   plantId?: true
   nextWateringAt?: true
   lastWateredAt?: true
+  intervalDays?: true
   isAuto?: true
   reminderEnabled?: true
   reminderMinutes?: true
@@ -132,6 +141,7 @@ export type WateringScheduleCountAggregateInputType = {
   plantId?: true
   nextWateringAt?: true
   lastWateredAt?: true
+  intervalDays?: true
   isAuto?: true
   reminderEnabled?: true
   reminderMinutes?: true
@@ -234,6 +244,7 @@ export type WateringScheduleGroupByOutputType = {
   plantId: string
   nextWateringAt: Date
   lastWateredAt: Date | null
+  intervalDays: number
   isAuto: boolean
   reminderEnabled: boolean
   reminderMinutes: number
@@ -272,6 +283,7 @@ export type WateringScheduleWhereInput = {
   plantId?: Prisma.StringFilter<"WateringSchedule"> | string
   nextWateringAt?: Prisma.DateTimeFilter<"WateringSchedule"> | Date | string
   lastWateredAt?: Prisma.DateTimeNullableFilter<"WateringSchedule"> | Date | string | null
+  intervalDays?: Prisma.IntFilter<"WateringSchedule"> | number
   isAuto?: Prisma.BoolFilter<"WateringSchedule"> | boolean
   reminderEnabled?: Prisma.BoolFilter<"WateringSchedule"> | boolean
   reminderMinutes?: Prisma.IntFilter<"WateringSchedule"> | number
@@ -288,6 +300,7 @@ export type WateringScheduleOrderByWithRelationInput = {
   plantId?: Prisma.SortOrder
   nextWateringAt?: Prisma.SortOrder
   lastWateredAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  intervalDays?: Prisma.SortOrder
   isAuto?: Prisma.SortOrder
   reminderEnabled?: Prisma.SortOrder
   reminderMinutes?: Prisma.SortOrder
@@ -307,6 +320,7 @@ export type WateringScheduleWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.WateringScheduleWhereInput | Prisma.WateringScheduleWhereInput[]
   nextWateringAt?: Prisma.DateTimeFilter<"WateringSchedule"> | Date | string
   lastWateredAt?: Prisma.DateTimeNullableFilter<"WateringSchedule"> | Date | string | null
+  intervalDays?: Prisma.IntFilter<"WateringSchedule"> | number
   isAuto?: Prisma.BoolFilter<"WateringSchedule"> | boolean
   reminderEnabled?: Prisma.BoolFilter<"WateringSchedule"> | boolean
   reminderMinutes?: Prisma.IntFilter<"WateringSchedule"> | number
@@ -323,6 +337,7 @@ export type WateringScheduleOrderByWithAggregationInput = {
   plantId?: Prisma.SortOrder
   nextWateringAt?: Prisma.SortOrder
   lastWateredAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  intervalDays?: Prisma.SortOrder
   isAuto?: Prisma.SortOrder
   reminderEnabled?: Prisma.SortOrder
   reminderMinutes?: Prisma.SortOrder
@@ -346,6 +361,7 @@ export type WateringScheduleScalarWhereWithAggregatesInput = {
   plantId?: Prisma.StringWithAggregatesFilter<"WateringSchedule"> | string
   nextWateringAt?: Prisma.DateTimeWithAggregatesFilter<"WateringSchedule"> | Date | string
   lastWateredAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WateringSchedule"> | Date | string | null
+  intervalDays?: Prisma.IntWithAggregatesFilter<"WateringSchedule"> | number
   isAuto?: Prisma.BoolWithAggregatesFilter<"WateringSchedule"> | boolean
   reminderEnabled?: Prisma.BoolWithAggregatesFilter<"WateringSchedule"> | boolean
   reminderMinutes?: Prisma.IntWithAggregatesFilter<"WateringSchedule"> | number
@@ -360,6 +376,7 @@ export type WateringScheduleCreateInput = {
   id?: string
   nextWateringAt: Date | string
   lastWateredAt?: Date | string | null
+  intervalDays?: number
   isAuto?: boolean
   reminderEnabled?: boolean
   reminderMinutes?: number
@@ -376,6 +393,7 @@ export type WateringScheduleUncheckedCreateInput = {
   plantId: string
   nextWateringAt: Date | string
   lastWateredAt?: Date | string | null
+  intervalDays?: number
   isAuto?: boolean
   reminderEnabled?: boolean
   reminderMinutes?: number
@@ -390,6 +408,7 @@ export type WateringScheduleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nextWateringAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastWateredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  intervalDays?: Prisma.IntFieldUpdateOperationsInput | number
   isAuto?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -406,6 +425,7 @@ export type WateringScheduleUncheckedUpdateInput = {
   plantId?: Prisma.StringFieldUpdateOperationsInput | string
   nextWateringAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastWateredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  intervalDays?: Prisma.IntFieldUpdateOperationsInput | number
   isAuto?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -421,6 +441,7 @@ export type WateringScheduleCreateManyInput = {
   plantId: string
   nextWateringAt: Date | string
   lastWateredAt?: Date | string | null
+  intervalDays?: number
   isAuto?: boolean
   reminderEnabled?: boolean
   reminderMinutes?: number
@@ -435,6 +456,7 @@ export type WateringScheduleUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nextWateringAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastWateredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  intervalDays?: Prisma.IntFieldUpdateOperationsInput | number
   isAuto?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -450,6 +472,7 @@ export type WateringScheduleUncheckedUpdateManyInput = {
   plantId?: Prisma.StringFieldUpdateOperationsInput | string
   nextWateringAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastWateredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  intervalDays?: Prisma.IntFieldUpdateOperationsInput | number
   isAuto?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -470,6 +493,7 @@ export type WateringScheduleCountOrderByAggregateInput = {
   plantId?: Prisma.SortOrder
   nextWateringAt?: Prisma.SortOrder
   lastWateredAt?: Prisma.SortOrder
+  intervalDays?: Prisma.SortOrder
   isAuto?: Prisma.SortOrder
   reminderEnabled?: Prisma.SortOrder
   reminderMinutes?: Prisma.SortOrder
@@ -481,6 +505,7 @@ export type WateringScheduleCountOrderByAggregateInput = {
 }
 
 export type WateringScheduleAvgOrderByAggregateInput = {
+  intervalDays?: Prisma.SortOrder
   reminderMinutes?: Prisma.SortOrder
   temperatureC?: Prisma.SortOrder
   humidityPct?: Prisma.SortOrder
@@ -491,6 +516,7 @@ export type WateringScheduleMaxOrderByAggregateInput = {
   plantId?: Prisma.SortOrder
   nextWateringAt?: Prisma.SortOrder
   lastWateredAt?: Prisma.SortOrder
+  intervalDays?: Prisma.SortOrder
   isAuto?: Prisma.SortOrder
   reminderEnabled?: Prisma.SortOrder
   reminderMinutes?: Prisma.SortOrder
@@ -506,6 +532,7 @@ export type WateringScheduleMinOrderByAggregateInput = {
   plantId?: Prisma.SortOrder
   nextWateringAt?: Prisma.SortOrder
   lastWateredAt?: Prisma.SortOrder
+  intervalDays?: Prisma.SortOrder
   isAuto?: Prisma.SortOrder
   reminderEnabled?: Prisma.SortOrder
   reminderMinutes?: Prisma.SortOrder
@@ -517,6 +544,7 @@ export type WateringScheduleMinOrderByAggregateInput = {
 }
 
 export type WateringScheduleSumOrderByAggregateInput = {
+  intervalDays?: Prisma.SortOrder
   reminderMinutes?: Prisma.SortOrder
   temperatureC?: Prisma.SortOrder
   humidityPct?: Prisma.SortOrder
@@ -558,18 +586,11 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type WateringScheduleCreateWithoutPlantInput = {
   id?: string
   nextWateringAt: Date | string
   lastWateredAt?: Date | string | null
+  intervalDays?: number
   isAuto?: boolean
   reminderEnabled?: boolean
   reminderMinutes?: number
@@ -584,6 +605,7 @@ export type WateringScheduleUncheckedCreateWithoutPlantInput = {
   id?: string
   nextWateringAt: Date | string
   lastWateredAt?: Date | string | null
+  intervalDays?: number
   isAuto?: boolean
   reminderEnabled?: boolean
   reminderMinutes?: number
@@ -614,6 +636,7 @@ export type WateringScheduleUpdateWithoutPlantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nextWateringAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastWateredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  intervalDays?: Prisma.IntFieldUpdateOperationsInput | number
   isAuto?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -628,6 +651,7 @@ export type WateringScheduleUncheckedUpdateWithoutPlantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nextWateringAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastWateredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  intervalDays?: Prisma.IntFieldUpdateOperationsInput | number
   isAuto?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reminderMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -645,6 +669,7 @@ export type WateringScheduleSelect<ExtArgs extends runtime.Types.Extensions.Inte
   plantId?: boolean
   nextWateringAt?: boolean
   lastWateredAt?: boolean
+  intervalDays?: boolean
   isAuto?: boolean
   reminderEnabled?: boolean
   reminderMinutes?: boolean
@@ -661,6 +686,7 @@ export type WateringScheduleSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   plantId?: boolean
   nextWateringAt?: boolean
   lastWateredAt?: boolean
+  intervalDays?: boolean
   isAuto?: boolean
   reminderEnabled?: boolean
   reminderMinutes?: boolean
@@ -677,6 +703,7 @@ export type WateringScheduleSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   plantId?: boolean
   nextWateringAt?: boolean
   lastWateredAt?: boolean
+  intervalDays?: boolean
   isAuto?: boolean
   reminderEnabled?: boolean
   reminderMinutes?: boolean
@@ -693,6 +720,7 @@ export type WateringScheduleSelectScalar = {
   plantId?: boolean
   nextWateringAt?: boolean
   lastWateredAt?: boolean
+  intervalDays?: boolean
   isAuto?: boolean
   reminderEnabled?: boolean
   reminderMinutes?: boolean
@@ -703,7 +731,7 @@ export type WateringScheduleSelectScalar = {
   updatedAt?: boolean
 }
 
-export type WateringScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "plantId" | "nextWateringAt" | "lastWateredAt" | "isAuto" | "reminderEnabled" | "reminderMinutes" | "weatherCondition" | "temperatureC" | "humidityPct" | "createdAt" | "updatedAt", ExtArgs["result"]["wateringSchedule"]>
+export type WateringScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "plantId" | "nextWateringAt" | "lastWateredAt" | "intervalDays" | "isAuto" | "reminderEnabled" | "reminderMinutes" | "weatherCondition" | "temperatureC" | "humidityPct" | "createdAt" | "updatedAt", ExtArgs["result"]["wateringSchedule"]>
 export type WateringScheduleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plant?: boolean | Prisma.PlantDefaultArgs<ExtArgs>
 }
@@ -724,6 +752,7 @@ export type $WateringSchedulePayload<ExtArgs extends runtime.Types.Extensions.In
     plantId: string
     nextWateringAt: Date
     lastWateredAt: Date | null
+    intervalDays: number
     isAuto: boolean
     reminderEnabled: boolean
     reminderMinutes: number
@@ -1160,6 +1189,7 @@ export interface WateringScheduleFieldRefs {
   readonly plantId: Prisma.FieldRef<"WateringSchedule", 'String'>
   readonly nextWateringAt: Prisma.FieldRef<"WateringSchedule", 'DateTime'>
   readonly lastWateredAt: Prisma.FieldRef<"WateringSchedule", 'DateTime'>
+  readonly intervalDays: Prisma.FieldRef<"WateringSchedule", 'Int'>
   readonly isAuto: Prisma.FieldRef<"WateringSchedule", 'Boolean'>
   readonly reminderEnabled: Prisma.FieldRef<"WateringSchedule", 'Boolean'>
   readonly reminderMinutes: Prisma.FieldRef<"WateringSchedule", 'Int'>

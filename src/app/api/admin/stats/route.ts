@@ -1,8 +1,30 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: 'Akses ditolak: Anda harus masuk terlebih dahulu' },
+        { status: 401 }
+      );
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.id },
+      select: { role: true },
+    });
+
+    if (dbUser?.role !== 'ADMIN') {
+      return NextResponse.json(
+        { success: false, error: 'Akses ditolak: Hanya administrator yang dapat mengakses data ini' },
+        { status: 403 }
+      );
+    }
     const [userCount, plantCount, postCount, scanCount] = await Promise.all([
       prisma.user.count(),
       prisma.plant.count(),

@@ -537,10 +537,6 @@ export type PlantUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.PlantScalarWhereInput | Prisma.PlantScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type PlantCreateNestedOneWithoutScansInput = {
   create?: Prisma.XOR<Prisma.PlantCreateWithoutScansInput, Prisma.PlantUncheckedCreateWithoutScansInput>
   connectOrCreate?: Prisma.PlantCreateOrConnectWithoutScansInput

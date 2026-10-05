@@ -7,3 +7,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+# Aturan Proyek Video Promo
+- **DILARANG** membuat, men-generate, merender, atau menyimpan video proyek maupun proyek video di dalam folder `tumbuhkita3` (baik di `public/`, `src/`, maupun subfolder lainnya).
+- Seluruh kode sumber, aset, skrip Remotion, dan file video `.mp4` promosi harus berada di luar `tumbuhkita3`, yaitu di folder khusus: `/mnt/d/belajar/pjbl/ApjblTumbuhKita/video-promo-tumbuhkita/`.

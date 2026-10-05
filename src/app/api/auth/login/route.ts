@@ -4,8 +4,43 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { prisma } from '@/lib/prisma';
 import { comparePassword } from '@/lib/auth';
 
+interface RateLimitRecord {
+  attempts: number;
+  blockedUntil: number | null;
+  lastAttempt: number;
+}
+
+// In-memory rate limiting map per client IP (OWASP A07: Authentication Failures)
+const loginRateLimitMap = new Map<string, RateLimitRecord>();
+const MAX_FAILED_ATTEMPTS = 5;
+const BLOCK_DURATION_MS = 5 * 60 * 1000; // 5 menit blokir jika 5x gagal
+const WINDOW_DURATION_MS = 10 * 60 * 1000; // 10 menit batas window percobaan
+
 export async function POST(request: Request) {
   try {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      '127.0.0.1';
+
+    const now = Date.now();
+    const rateLimit = loginRateLimitMap.get(ip);
+
+    // Cek apakah IP sedang diblokir karena brute-force
+    if (rateLimit && rateLimit.blockedUntil && rateLimit.blockedUntil > now) {
+      const remainingSeconds = Math.ceil((rateLimit.blockedUntil - now) / 1000);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'RATE_LIMIT_EXCEEDED',
+            message: `Terlalu banyak percobaan masuk yang gagal. Silakan tunggu ${remainingSeconds} detik lagi sebelum mencoba kembali.`,
+          },
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { email, password } = body;
 
@@ -71,17 +106,34 @@ export async function POST(request: Request) {
     }
 
     if (error || !data.user) {
+      const existing = loginRateLimitMap.get(ip);
+      const attempts =
+        (existing && now - existing.lastAttempt < WINDOW_DURATION_MS
+          ? existing.attempts
+          : 0) + 1;
+      const blockedUntil = attempts >= MAX_FAILED_ATTEMPTS ? now + BLOCK_DURATION_MS : null;
+      loginRateLimitMap.set(ip, { attempts, blockedUntil, lastAttempt: now });
+
+      const remainingAttempts = Math.max(0, MAX_FAILED_ATTEMPTS - attempts);
+      const warningText =
+        remainingAttempts > 0
+          ? ` Sisa percobaan: ${remainingAttempts} kali.`
+          : ' Akun/IP terkunci sementara selama 5 menit karena terlalu banyak percobaan gagal.';
+
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'INVALID_CREDENTIALS',
-            message: 'Email atau password yang Anda masukkan salah.',
+            message: `Email atau password yang Anda masukkan salah.${warningText}`,
           },
         },
         { status: 401 }
       );
     }
+
+    // Berhasil login: bersihkan riwayat gagal untuk IP ini
+    loginRateLimitMap.delete(ip);
 
     const authUser = data.user;
 

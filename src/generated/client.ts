@@ -72,6 +72,11 @@ export type WateringSchedule = Prisma.WateringScheduleModel
  */
 export type Post = Prisma.PostModel
 /**
+ * Model PostLike
+ * 
+ */
+export type PostLike = Prisma.PostLikeModel
+/**
  * Model Comment
  * 
  */
