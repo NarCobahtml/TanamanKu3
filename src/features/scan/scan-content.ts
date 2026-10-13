@@ -31,6 +31,8 @@ export interface ClassContent {
   products: ProductRec[];
 }
 
+export type ScanResultContent = ClassContent;
+
 const npk: ProductRec[] = [
   { name: 'Pupuk NPK Seimbang', note: 'Mendukung pertumbuhan optimal' },
   { name: 'Pupuk Organik Cair', note: 'Menjaga kesuburan tanah secara alami' },
