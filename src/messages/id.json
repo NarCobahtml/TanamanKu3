@@ -119,7 +119,27 @@
     "sayaSetuju": "Saya setuju dengan",
     "syarat": "Syarat & Ketentuan",
     "kebijakan": "Kebijakan Privasi",
-    "daftar": "Daftar"
+    "daftar": "Daftar",
+    "verifikasiEmail": "Verifikasi Email",
+    "kodeDikirimKe": "Kode 6 digit telah dikirim ke",
+    "cekSpam": "Cek juga folder spam.",
+    "kodeVerifikasi": "Kode verifikasi",
+    "kodePlaceholder": "000000",
+    "kodeBantu": "Kode berlaku 10 menit dan hanya bisa dipakai satu kali.",
+    "verifikasiEmailGagal": "Email belum berhasil dikirim. Periksa konfigurasi email atau gunakan tombol kirim ulang.",
+    "devOtpLabel": "Mode pengembangan — kode OTP:",
+    "memverifikasi": "Memverifikasi…",
+    "verifikasi": "Verifikasi email",
+    "ubahData": "Ubah data",
+    "kirimUlang": "Kirim ulang kode",
+    "kirimUlangDetik": "Kirim ulang ({n}d)",
+    "verifiedBadge": "Verifikasi email memastikan alamat email Anda benar dan akun tidak dibuat orang lain.",
+    "notFoundSession": "Sesi pendaftaran tidak ditemukan. Silakan daftar ulang.",
+    "serverUnreachable": "Tidak dapat terhubung ke server. Silakan coba lagi.",
+    "verifikasiGagalUmum": "Verifikasi gagal. Silakan coba lagi.",
+    "emailBelumVerifikasi": "Email belum diverifikasi.",
+    "emailBerhasilDiverifikasi": "Email berhasil diverifikasi! Silakan masuk untuk melanjutkan.",
+    "pakaiKodeDev": "Gunakan kode ini"
   },
   "home": {
     "selamatPagi": "Selamat pagi,",
@@ -366,7 +386,12 @@
     "ciriTerdeteksi": "Ciri-ciri Terdeteksi",
     "gejalaTerdeteksi": "Gejala Terdeteksi",
     "rekomendasiPerawatan": "Rekomendasi Perawatan",
-    "rekomendasiPenanganan": "Rekomendasi Penanganan"
+    "rekomendasiPenanganan": "Rekomendasi Penanganan",
+    "tanyaKomunitas": "Tanya ke Forum",
+    "hasilTidakCocok": "Hasil diagnosis AI dirasa tidak cocok?",
+    "hasilTidakCocokDesc": "Kirimkan foto daun dan temuan ini langsung ke Forum Komunitas untuk mendapatkan masukan kedua dari sesama pecinta tanaman dan ahli.",
+    "bukanPenyakitIni": "Bukan penyakit ini?",
+    "tanyaAhliKomunitas": "Tanya Ahli & Komunitas"
   },
   "forum": {
     "forumKomunitas": "Forum Komunitas",

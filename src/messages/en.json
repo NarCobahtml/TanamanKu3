@@ -119,7 +119,27 @@
     "sayaSetuju": "I agree to the",
     "syarat": "Terms & Conditions",
     "kebijakan": "Privacy Policy",
-    "daftar": "Sign Up"
+    "daftar": "Sign Up",
+    "verifikasiEmail": "Email Verification",
+    "kodeDikirimKe": "A 6-digit code has been sent to",
+    "cekSpam": "Also check your spam folder.",
+    "kodeVerifikasi": "Verification code",
+    "kodePlaceholder": "000000",
+    "kodeBantu": "The code is valid for 10 minutes and can only be used once.",
+    "verifikasiEmailGagal": "Email could not be sent. Check the email configuration or use the resend button.",
+    "devOtpLabel": "Development mode — OTP code:",
+    "memverifikasi": "Verifying…",
+    "verifikasi": "Verify email",
+    "ubahData": "Change details",
+    "kirimUlang": "Resend code",
+    "kirimUlangDetik": "Resend ({n}s)",
+    "verifiedBadge": "Email verification makes sure your address is real and nobody else made this account.",
+    "notFoundSession": "Registration session not found. Please sign up again.",
+    "serverUnreachable": "Cannot reach the server. Please try again.",
+    "verifikasiGagalUmum": "Verification failed. Please try again.",
+    "emailBelumVerifikasi": "Email not verified yet.",
+    "emailBerhasilDiverifikasi": "Email successfully verified! Please log in to continue.",
+    "pakaiKodeDev": "Use this code"
   },
   "home": {
     "selamatPagi": "Good morning,",
@@ -366,7 +386,12 @@
     "ciriTerdeteksi": "Detected Features",
     "gejalaTerdeteksi": "Detected Symptoms",
     "rekomendasiPerawatan": "Care Recommendations",
-    "rekomendasiPenanganan": "Handling Recommendations"
+    "rekomendasiPenanganan": "Handling Recommendations",
+    "tanyaKomunitas": "Ask the Forum",
+    "hasilTidakCocok": "AI diagnosis doesn't seem right?",
+    "hasilTidakCocokDesc": "Share this leaf photo and findings directly to the Community Forum to get a second opinion from fellow plant lovers and experts.",
+    "bukanPenyakitIni": "Not this disease?",
+    "tanyaAhliKomunitas": "Ask Experts & Community"
   },
   "forum": {
     "forumKomunitas": "Community Forum",

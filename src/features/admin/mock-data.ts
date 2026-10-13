@@ -9,8 +9,10 @@ export interface AdminStat {
 
 export interface UserItem {
   id: string;
+  fullId?: string;
   name: string;
   email: string;
+  role?: string;
   plan: "Gratis" | "Pro";
   postsCount: number;
   joinDate: string;

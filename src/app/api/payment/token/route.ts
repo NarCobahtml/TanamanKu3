@@ -18,49 +18,81 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const {
-      planId = "premium",
-      planName = "Paket Premium TanamanKu",
-      price = 29000,
-    } = body;
+    const { planId = "premium" } = body;
 
-    // Optional user authentication check
-    let user = null;
-    try {
-      const supabase = await createClient();
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-      if (authUser?.id) {
-        user = await prisma.user.findUnique({
-          where: { id: authUser.id },
-          select: { id: true, name: true, email: true },
-        });
-      }
-    } catch {
-      // Unauthenticated checkout fallback
+    const VALID_PLANS: Record<string, { name: string; price: number }> = {
+      premium: { name: "Paket Premium TanamanKu", price: 29000 },
+      annual: { name: "Paket Premium TanamanKu (1 Tahun)", price: 290000 },
+    };
+
+    const selectedPlan = VALID_PLANS[planId] || VALID_PLANS.premium;
+    const planName = selectedPlan.name;
+    const verifiedPrice = selectedPlan.price;
+
+    // 1. Verifikasi Autentikasi Pengguna (Wajib Login untuk Berlangganan)
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Anda harus masuk terlebih dahulu untuk membeli paket langganan.",
+          },
+        },
+        { status: 401 },
+      );
     }
 
-    const orderId = `TK-SUB-${Date.now()}`;
+    let user = await prisma.user.findFirst({
+      where: {
+        OR: [{ id: authUser.id }, { email: authUser.email || "" }],
+      },
+      select: { id: true, name: true, email: true },
+    });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          id: authUser.id,
+          email: authUser.email || `user-${authUser.id}@tumbuhkita.id`,
+          name: authUser.user_metadata?.name || "Pengguna",
+          passwordHash: "",
+          role: "USER",
+          subscriptionTier: "FREE",
+          scanQuotaUsed: 0,
+        },
+        select: { id: true, name: true, email: true },
+      });
+    }
+
+    const orderId = `TK-SUB-${user.id.slice(0, 8)}-${Date.now()}`;
     const authHeader = `Basic ${Buffer.from(serverKey.trim() + ":").toString("base64")}`;
 
     const snapPayload = {
       transaction_details: {
         order_id: orderId,
-        gross_amount: Number(price),
+        gross_amount: verifiedPrice,
       },
       item_details: [
         {
           id: planId,
-          price: Number(price),
+          price: verifiedPrice,
           quantity: 1,
           name: planName.slice(0, 50),
         },
       ],
       customer_details: {
-        first_name: user?.name || "Pelanggan TanamanKu",
-        email: user?.email || "pelanggan@tanamanku.id",
+        first_name: user.name || "Pelanggan TanamanKu",
+        email: user.email,
       },
+      custom_field1: user.id,
+      custom_field2: planId,
     };
 
     const midtransRes = await fetch(

@@ -33,14 +33,17 @@ export default function ProfilPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [scanCount, setScanCount] = useState(0);
+  const [userTier, setUserTier] = useState<string>('FREE');
+  const isPro = userTier === 'PRO';
 
   useEffect(() => {
     let isMounted = true;
-    fetch('/api/scan/history')
+    fetch('/api/scan')
       .then((r) => r.json())
       .then((j) => {
-        if (j.success && Array.isArray(j.data) && isMounted) {
-          setScanCount(j.data.length);
+        if (j.success && j.data && isMounted) {
+          setScanCount(j.data.used ?? 0);
+          setUserTier(j.data.tier ?? 'FREE');
         }
       })
       .catch(() => {});
@@ -162,25 +165,31 @@ export default function ProfilPage() {
             <SettingsHeading title={t('langganan')} desc={t('preferensiDesc').split('.')[0] + '.'} />
             <div className="mt-4 grid gap-4 sm:mt-5 sm:gap-8 md:grid-cols-2">
               <CurrentPlanCard
-                name={t('paketGratis')}
+                name={isPro ? 'TumbuhKita Pro' : t('paketGratis')}
                 badgeLabel={t('aktif')}
-                description={t('paketDesc')}
-                renewalNote={t('perpanjangan')}
+                description={
+                  isPro
+                    ? 'Akses penuh fitur AI diagnosis scan tanpa batas dan prioritas.'
+                    : t('paketDesc')
+                }
+                renewalNote={isPro ? 'Berlangganan bulanan aktif' : t('perpanjangan')}
               />
               <ScanUsageCard
                 title={t('penggunaanScan')}
-                usageText={t('bulanIni', { count: scanCount })}
-                current={scanCount}
-                max={5}
+                usageText={isPro ? 'Tanpa Batas' : t('bulanIni', { count: scanCount })}
+                current={isPro ? 100 : scanCount}
+                max={isPro ? 100 : 5}
               >
-                <Button
-                  asChild
-                  className="btn-cta mt-4 h-11 w-full rounded-full text-sm font-semibold cursor-pointer"
-                >
-                  <Link href="/langganan">
-                    {t('upgrade')}
-                  </Link>
-                </Button>
+                {!isPro && (
+                  <Button
+                    asChild
+                    className="btn-cta mt-4 h-11 w-full rounded-full text-sm font-semibold cursor-pointer"
+                  >
+                    <Link href="/langganan">
+                      {t('upgrade')}
+                    </Link>
+                  </Button>
+                )}
               </ScanUsageCard>
             </div>
           </section>

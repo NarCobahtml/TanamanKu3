@@ -17,8 +17,10 @@ export async function GET() {
     }
 
     if (!userId) {
-      const firstUser = await prisma.user.findFirst();
-      userId = firstUser ? firstUser.id : 'demo-user';
+      return NextResponse.json({
+        success: true,
+        data: [],
+      });
     }
 
     // Seed initial notifications if user has none

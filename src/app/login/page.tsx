@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   description: 'Masuk ke akun TumbuhKita Anda untuk mengelola tanaman dan konsultasi AI.',
 };
 
-export default function Page() {
-  return <AuthForm mode="login" />;
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ verified?: string }>;
+}) {
+  const params = await searchParams;
+  return <AuthForm mode="login" verified={params?.verified === '1'} />;
 }

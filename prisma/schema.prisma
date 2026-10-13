@@ -40,17 +40,38 @@ model User {
   subscriptionExpiresAt DateTime?
   bio                   String?
   photoUrl              String?
+  emailVerified         Boolean           @default(false)
+  emailVerifiedAt       DateTime?
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 
-  plants        Plant[]
-  scanRecords   ScanRecord[]
-  posts         Post[]
-  comments      Comment[]
-  notifications Notification[]
-  postLikes     PostLike[]
+  plants              Plant[]
+  scanRecords         ScanRecord[]
+  posts               Post[]
+  comments            Comment[]
+  notifications       Notification[]
+  postLikes           PostLike[]
+  verificationTokens  VerificationToken[]
 
   @@index([email])
+}
+
+// OTP email verification (register flow). Token disimpan sebagai SHA-256 hash,
+// bukan plaintext, agar bocor DB tidak langsung jadi bypass verifikasi.
+model VerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  tokenHash String   @unique
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([email])
+  @@index([expiresAt])
 }
 
 model Plant {

@@ -23,6 +23,11 @@ export * from './enums';
  */
 export type User = Prisma.UserModel
 /**
+ * Model VerificationToken
+ * 
+ */
+export type VerificationToken = Prisma.VerificationTokenModel
+/**
  * Model Plant
  * 
  */
@@ -47,6 +52,11 @@ export type WateringSchedule = Prisma.WateringScheduleModel
  * 
  */
 export type Post = Prisma.PostModel
+/**
+ * Model PostLike
+ * 
+ */
+export type PostLike = Prisma.PostLikeModel
 /**
  * Model Comment
  * 

@@ -4,8 +4,43 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { prisma } from '@/lib/prisma';
 import { comparePassword } from '@/lib/auth';
 
+interface RateLimitRecord {
+  attempts: number;
+  blockedUntil: number | null;
+  lastAttempt: number;
+}
+
+// In-memory rate limiting map per client IP (OWASP A07: Authentication Failures)
+const loginRateLimitMap = new Map<string, RateLimitRecord>();
+const MAX_FAILED_ATTEMPTS = 5;
+const BLOCK_DURATION_MS = 5 * 60 * 1000; // 5 menit blokir jika 5x gagal
+const WINDOW_DURATION_MS = 10 * 60 * 1000; // 10 menit batas window percobaan
+
 export async function POST(request: Request) {
   try {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      '127.0.0.1';
+
+    const now = Date.now();
+    const rateLimit = loginRateLimitMap.get(ip);
+
+    // Cek apakah IP sedang diblokir karena brute-force
+    if (rateLimit && rateLimit.blockedUntil && rateLimit.blockedUntil > now) {
+      const remainingSeconds = Math.ceil((rateLimit.blockedUntil - now) / 1000);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'RATE_LIMIT_EXCEEDED',
+            message: `Terlalu banyak percobaan masuk yang gagal. Silakan tunggu ${remainingSeconds} detik lagi sebelum mencoba kembali.`,
+          },
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { email, password } = body;
 
@@ -23,6 +58,34 @@ export async function POST(request: Request) {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
+
+    // 0. Gate verifikasi email: akun dari /register (passwordHash scrypt) baru bisa
+    //    login setelah OTP benar. User legacy & social login lolos — keduanya sudah
+    //    punya passwordHash yang bukan scrypt hash kita, jadi Supabase yang pegang
+    //    otorisasi dan email-nya sudah terverifikasi di sana.
+    const preAuthUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: { id: true, emailVerified: true, passwordHash: true },
+    });
+    // passwordHash === '' artinya akun dibuat lewat Supabase (social login) atau
+    // sudah dimigrasi dari legacy scrypt. Supabase sudah memverifikasi email-nya,
+    // jadi jangan dikunci oleh gate OTP.
+    const isSocialOrMigrated = preAuthUser?.passwordHash === '';
+    if (preAuthUser && !preAuthUser.emailVerified && !isSocialOrMigrated) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'EMAIL_NOT_VERIFIED',
+            message:
+              'Email belum diverifikasi. Periksa inbox Anda untuk kode OTP, atau minta kode baru.',
+            data: { userId: preAuthUser.id },
+          },
+        },
+        { status: 403 }
+      );
+    }
+
     const supabase = await createClient();
 
     // 1. Authenticate with official Supabase Auth (sets HTTP-only cookie automatically)
@@ -71,17 +134,34 @@ export async function POST(request: Request) {
     }
 
     if (error || !data.user) {
+      const existing = loginRateLimitMap.get(ip);
+      const attempts =
+        (existing && now - existing.lastAttempt < WINDOW_DURATION_MS
+          ? existing.attempts
+          : 0) + 1;
+      const blockedUntil = attempts >= MAX_FAILED_ATTEMPTS ? now + BLOCK_DURATION_MS : null;
+      loginRateLimitMap.set(ip, { attempts, blockedUntil, lastAttempt: now });
+
+      const remainingAttempts = Math.max(0, MAX_FAILED_ATTEMPTS - attempts);
+      const warningText =
+        remainingAttempts > 0
+          ? ` Sisa percobaan: ${remainingAttempts} kali.`
+          : ' Akun/IP terkunci sementara selama 5 menit karena terlalu banyak percobaan gagal.';
+
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'INVALID_CREDENTIALS',
-            message: 'Email atau password yang Anda masukkan salah.',
+            message: `Email atau password yang Anda masukkan salah.${warningText}`,
           },
         },
         { status: 401 }
       );
     }
+
+    // Berhasil login: bersihkan riwayat gagal untuk IP ini
+    loginRateLimitMap.delete(ip);
 
     const authUser = data.user;
 
@@ -109,7 +189,15 @@ export async function POST(request: Request) {
           name: metaName,
           passwordHash: '',
           role: 'USER',
+          emailVerified: true, // social/OAuth: Supabase sudah verifikasi email
+          emailVerifiedAt: new Date(),
         },
+      });
+    } else if (!user.emailVerified && user.passwordHash === '') {
+      // Backfill akun social yang dibuat sebelum fitur OTP ada.
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true, emailVerifiedAt: new Date() },
       });
     }
 

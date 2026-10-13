@@ -17,8 +17,16 @@ export async function GET() {
   try {
     const userId = await getCurrentUserId();
 
+    // Guest users have no server-side plants
+    if (!userId) {
+      return NextResponse.json({
+        success: true,
+        data: [],
+      });
+    }
+
     const plants = await prisma.plant.findMany({
-      where: userId ? { OR: [{ userId }, { userId: null }] } : { userId: null },
+      where: { userId },
       orderBy: { createdAt: 'desc' },
       include: {
         wateringSchedule: true,
@@ -53,6 +61,15 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'Anda harus masuk terlebih dahulu untuk menambahkan tanaman' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { id: customId, nama, jenis = 'hias', kategori, status = 'terjadwal', nextWater = 'nw.berikutnyaBesok', foto, notes } = body;
 
@@ -62,8 +79,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
-    const userId = await getCurrentUserId();
 
     // Use pure numeric ID (either passed in or generated from Date.now())
     const plantId = customId && /^\d+$/.test(customId) ? customId : Date.now().toString();
@@ -85,7 +100,7 @@ export async function POST(request: Request) {
         nextWater: nextWater || 'nw.berikutnyaBesok',
         photoUrl: foto || null,
         notes: notes || null,
-        userId: userId || null,
+        userId: userId,
         wateringSchedule: {
           create: {
             id: `sched-${randomUUID()}`,

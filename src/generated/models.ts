@@ -9,11 +9,13 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User'
+export type * from './models/VerificationToken'
 export type * from './models/Plant'
 export type * from './models/Disease'
 export type * from './models/ScanRecord'
 export type * from './models/WateringSchedule'
 export type * from './models/Post'
+export type * from './models/PostLike'
 export type * from './models/Comment'
 export type * from './models/Notification'
 export type * from './commonInputTypes'

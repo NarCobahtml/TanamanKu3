@@ -1,5 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
+
+async function getCurrentUserId(): Promise<string | null> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.id || null;
+  } catch {
+    return null;
+  }
+}
 
 export async function GET(
   _request: Request,
@@ -47,6 +58,14 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'Anda harus masuk terlebih dahulu untuk mengubah tanaman' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
     const { nama, jenis, kategori, status, nextWater, foto, notes } = body;
@@ -59,6 +78,14 @@ export async function PUT(
       return NextResponse.json(
         { success: false, error: 'Tanaman tidak ditemukan di database' },
         { status: 404 }
+      );
+    }
+
+    // Verify ownership: only the owner or an ADMIN can modify the plant
+    if (existing.userId && existing.userId !== userId) {
+      return NextResponse.json(
+        { success: false, error: 'Anda tidak memiliki hak akses untuk mengubah tanaman ini' },
+        { status: 403 }
       );
     }
 
@@ -137,6 +164,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'Anda harus masuk terlebih dahulu untuk menghapus tanaman' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
 
     const existing = await prisma.plant.findUnique({
@@ -147,6 +182,14 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: 'Tanaman tidak ditemukan' },
         { status: 404 }
+      );
+    }
+
+    // Verify ownership: only the owner can delete the plant
+    if (existing.userId && existing.userId !== userId) {
+      return NextResponse.json(
+        { success: false, error: 'Anda tidak memiliki hak akses untuk menghapus tanaman ini' },
+        { status: 403 }
       );
     }
 

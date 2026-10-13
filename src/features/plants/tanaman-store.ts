@@ -16,7 +16,7 @@ export const initialTanamanList: Tanaman[] = [
   { id: '8', nama: 'Melati', jenis: 'hias', kategori: 'Outdoor', status: 'hari-ini', nextWater: 'nw.hariIniPagi', photo: '/figma-assets/plant-melati.jpg' },
 ];
 
-const STORAGE_KEY = 'tanamanku_plants_v2';
+const STORAGE_KEY = 'tanamanku_plants_v3';
 
 let cachedRaw: string | null = null;
 let memoryList: Tanaman[] = initialTanamanList;

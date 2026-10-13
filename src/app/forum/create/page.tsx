@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import CreatePostPage from '@/features/forum/CreatePostPage';
 
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <CreatePostPage />;
+  return (
+    <Suspense fallback={<div className="min-h-dvh bg-background" />}>
+      <CreatePostPage />
+    </Suspense>
+  );
 }

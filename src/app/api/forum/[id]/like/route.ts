@@ -33,25 +33,68 @@ export async function POST(
       );
     }
 
+    // Ensure user exists in Prisma
+    let dbUser = await prisma.user.findFirst({
+      where: { OR: [{ id: authUser.id }, { email: authUser.email || '' }] },
+    });
+
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
+        data: {
+          id: authUser.id,
+          email: authUser.email || `user-${authUser.id}@tumbuhkita.id`,
+          name: authUser.user_metadata?.name || 'Pengguna',
+          passwordHash: '',
+          role: 'USER',
+        },
+      });
+    }
+
     const body = await request.json().catch(() => ({}));
-    const increment = body.liked !== false;
+    const shouldLike = body.liked !== false;
+
+    // Check existing like
+    const existingLike = await prisma.postLike.findUnique({
+      where: {
+        postId_userId: {
+          postId,
+          userId: dbUser.id,
+        },
+      },
+    });
+
+    if (shouldLike && !existingLike) {
+      await prisma.postLike.create({
+        data: {
+          postId,
+          userId: dbUser.id,
+        },
+      });
+    } else if (!shouldLike && existingLike) {
+      await prisma.postLike.delete({
+        where: { id: existingLike.id },
+      });
+    }
+
+    const totalLikes = await prisma.postLike.count({
+      where: { postId },
+    });
 
     const parsed = parsePostContent(post.content);
-    const newLikes = Math.max(0, parsed.likes + (increment ? 1 : -1));
-
     await prisma.post.update({
       where: { id: postId },
       data: {
         content: JSON.stringify({
           ...parsed,
-          likes: newLikes,
+          likes: totalLikes,
         }),
       },
     });
 
     return NextResponse.json({
       success: true,
-      likes: newLikes,
+      likes: totalLikes,
+      liked: shouldLike,
     });
   } catch (error) {
     console.error('Error toggling like:', error);

@@ -31,14 +31,17 @@ export default function LanggananPage() {
   const t = useTranslations("langganan");
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [scanCount, setScanCount] = useState(0);
+  const [userTier, setUserTier] = useState<string>("FREE");
+  const isPro = userTier === "PRO";
 
   useEffect(() => {
     let isMounted = true;
-    fetch("/api/scan/history")
+    fetch("/api/scan")
       .then((r) => r.json())
       .then((j) => {
-        if (j.success && Array.isArray(j.data) && isMounted) {
-          setScanCount(j.data.length);
+        if (j.success && j.data && isMounted) {
+          setScanCount(j.data.used ?? 0);
+          setUserTier(j.data.tier ?? "FREE");
         }
       })
       .catch(() => {});
@@ -55,8 +58,8 @@ export default function LanggananPage() {
       amount: 0,
       period: t("selamanya"),
       features: [t("scanBulan"), t("fitur1"), t("fitur2")],
-      buttonLabel: t("paketAktif"),
-      isCurrent: true,
+      buttonLabel: !isPro ? t("paketAktif") : "Paket Dasar",
+      isCurrent: !isPro,
     },
     {
       id: "premium",
@@ -70,8 +73,8 @@ export default function LanggananPage() {
         t("fiturPremium3"),
         t("fiturPremium4"),
       ],
-      buttonLabel: t("upgradeSekarang"),
-      isCurrent: false,
+      buttonLabel: isPro ? t("paketAktif") : t("upgradeSekarang"),
+      isCurrent: isPro,
     },
   ];
 
@@ -159,9 +162,9 @@ export default function LanggananPage() {
           </div>
           <div>
             <p className="tnum text-4xl font-extrabold leading-none">
-              {t("gratis")}
+              {isPro ? t("harga") : t("gratis")}
             </p>
-            <p className="overline mt-2">{t("paketAktif")}</p>
+            <p className="overline mt-2">{isPro ? "Paket Premium Aktif" : t("paketAktif")}</p>
           </div>
         </div>
       </PageHeader>
@@ -176,22 +179,34 @@ export default function LanggananPage() {
             </h2>
             <div className="mt-5 grid gap-8 md:grid-cols-2">
               <CurrentPlanCard
-                name={t("paketGratis")}
+                name={isPro ? "TumbuhKita Pro" : t("paketGratis")}
                 badgeLabel={t("aktif")}
-                description={t("paketDesc")}
-                renewalNote={t("perpanjangan")}
+                description={
+                  isPro
+                    ? "Akses penuh fitur AI diagnosis scan tanpa batas dan prioritas."
+                    : t("paketDesc")
+                }
+                renewalNote={
+                  isPro
+                    ? "Berlangganan bulanan aktif"
+                    : t("perpanjangan")
+                }
                 className="p-5"
               />
               <ScanUsageCard
                 title={t("penggunaanScan")}
-                usageText={`${scanCount}/5`}
-                current={scanCount}
-                max={5}
+                usageText={isPro ? "Tanpa Batas" : `${scanCount}/5`}
+                current={isPro ? 100 : scanCount}
+                max={isPro ? 100 : 5}
                 barHeightClass="h-1.5"
                 className="p-5"
               >
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {t("tersisa")}
+                  {isPro
+                    ? "Anda memiliki akses diagnosis tanpa batasan kuota bulanan."
+                    : scanCount >= 5
+                    ? "Kuota scan bulan ini telah habis (5/5). Upgrade ke Premium untuk scan tanpa batas."
+                    : `Tersisa ${Math.max(0, 5 - scanCount)} scan bulan ini`}
                 </p>
               </ScanUsageCard>
             </div>

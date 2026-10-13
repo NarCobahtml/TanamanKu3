@@ -1,10 +1,27 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { prisma } from '@/lib/prisma';
+import { issueOtp, OTP_POLICY } from '@/lib/otp';
+import { sendOtpEmail } from '@/lib/mailer';
+import { hashPassword } from '@/lib/auth';
+import { getSystemSettings } from '@/lib/admin-settings';
 
 export async function POST(request: Request) {
   try {
+    const settings = getSystemSettings();
+    if (!settings.allowRegistration) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'REGISTRATION_CLOSED',
+            message: 'Pendaftaran pengguna baru sedang ditutup sementara oleh administrator.',
+          },
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { email, password, name } = body;
 
@@ -53,7 +70,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Create user in Supabase Auth with bcrypt hash and confirmed email
+    // 1. Create user in Supabase Auth. email_confirm: true di Supabase karena kita
+    //    yang memegang otorisasi login — verifikasi email ditegakkan lewat gate
+    //    emailVerified di /api/auth/login (lihat file tersebut).
     const admin = createAdminClient();
     const { data: createData, error: createError } = await admin.auth.admin.createUser({
       email: normalizedEmail,
@@ -80,38 +99,52 @@ export async function POST(request: Request) {
 
     const authUser = createData.user;
 
-    // 2. Create public.User profile row in Prisma
+    // 2. Create public.User profile row in Prisma.
+    //    passwordHash diisi dengan scrypt hash asli (bukan '') karena login gate
+    //    memakai passwordHash === '' sebagai penanda "akun ini milik Supabase
+    //    (social/OAuth), email-nya sudah terverifikasi di sana" — akun yang daftar
+    //    lewat form wajib lewat OTP, jadi harus punya hash.
     const user = await prisma.user.create({
       data: {
         id: authUser.id,
         email: normalizedEmail,
         name: name.trim(),
-        passwordHash: '',
+        passwordHash: await hashPassword(password),
         role: 'USER',
+        emailVerified: false,
       },
     });
 
-    // 3. Establish official Supabase session cookies via signInWithPassword
-    const supabase = await createClient();
-    const { data: sessionData } = await supabase.auth.signInWithPassword({
-      email: normalizedEmail,
-      password,
+    // 3. Issue OTP + kirim email. Sengaja TIDAK ada signInWithPassword di sini:
+    //    session cookie baru dibuat setelah OTP terverifikasi, saat user login.
+    const { otp, expiresAt } = await issueOtp(user.id, user.email);
+    const mail = await sendOtpEmail({
+      to: user.email,
+      name: user.name,
+      otp,
+      ttlMinutes: OTP_POLICY.ttlMinutes,
+      idempotencyKey: `otp-register/${user.id}/${Date.now()}`,
     });
+
+    // ponytail: OTP dikembalikan ke client hanya di development tanpa RESEND_API_KEY,
+    // supaya flow bisa dites tanpa setup email. Hilangkan blok ini saat prod punya key.
+    const devOtp =
+      process.env.NODE_ENV === 'development' && !process.env.RESEND_API_KEY ? otp : undefined;
+    if (devOtp) {
+      console.log(`[otp] ${user.email} kode verifikasi (dev): ${devOtp}`);
+    }
 
     return NextResponse.json(
       {
         success: true,
         data: {
-          user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            createdAt: user.createdAt,
-          },
-          session: {
-            access_token: sessionData?.session?.access_token,
-          },
+          requiresVerification: true,
+          userId: user.id,
+          email: user.email,
+          emailSent: mail.sent,
+          expiresAt: expiresAt.toISOString(),
+          resendCooldownSeconds: Math.ceil(OTP_POLICY.resendCooldownMs / 1000),
+          ...(devOtp ? { devOtp } : {}),
         },
       },
       { status: 201 }
