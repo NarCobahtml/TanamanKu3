@@ -57,45 +57,54 @@ export default function AdminDashboard() {
     "Semua" | "Aktif" | "Ditangguhkan"
   >("Semua");
   const [moderations, setModerations] = useState<ModerationItem[]>(initialModeration);
+  const [transactions, setTransactions] = useState<TransactionItem[]>(initialTransactions);
 
-  useEffect(() => {
-    let isMounted = true;
+  // Settings states
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [allowRegistration, setAllowRegistration] = useState(true);
+  const [broadcastMessage, setBroadcastMessage] = useState("");
+  const [isSubmittingBroadcast, setIsSubmittingBroadcast] = useState(false);
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+
+  const fetchAdminData = () => {
     fetch('/api/admin/stats')
       .then((res) => res.json())
       .then((json) => {
-        if (json.success && json.data && isMounted) {
+        if (json.success && json.data) {
           if (json.data.stats && Array.isArray(json.data.stats)) {
             setStats(json.data.stats);
           }
           if (json.data.users && Array.isArray(json.data.users) && json.data.users.length > 0) {
             setUsers(json.data.users);
           }
-          if (json.data.moderations && Array.isArray(json.data.moderations) && json.data.moderations.length > 0) {
+          if (json.data.moderations && Array.isArray(json.data.moderations)) {
             setModerations(json.data.moderations);
+          }
+          if (json.data.transactions && Array.isArray(json.data.transactions) && json.data.transactions.length > 0) {
+            setTransactions(json.data.transactions);
+          }
+          if (json.data.settings) {
+            setMaintenanceMode(Boolean(json.data.settings.maintenanceMode));
+            setAllowRegistration(Boolean(json.data.settings.allowRegistration));
           }
         }
       })
       .catch((err) => {
         console.warn('Failed to fetch admin stats:', err);
       });
-    return () => {
-      isMounted = false;
-    };
+  };
+
+  useEffect(() => {
+    fetchAdminData();
   }, []);
+
   const [modFilter] = useState<
     "Semua" | "Perlu Tindakan" | "Diselesaikan" | "Diabaikan"
   >("Semua");
 
-  const [transactions] =
-    useState<TransactionItem[]>(initialTransactions);
   const [trxFilter, setTrxFilter] = useState<"Semua" | "Berhasil" | "Menunggu">(
     "Semua",
   );
-
-  // Settings states
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
-  const [allowRegistration, setAllowRegistration] = useState(true);
-  const [broadcastMessage, setBroadcastMessage] = useState("");
 
   const isDark = resolvedTheme === "dark";
 
@@ -131,46 +140,206 @@ export default function AdminDashboard() {
   }, [moderations]);
 
   // Action handlers
-  const handleToggleUserStatus = (id: string, currentStatus: string) => {
-    const nextStatus = currentStatus === "Aktif" ? "Ditangguhkan" : "Aktif";
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === id
-          ? { ...u, status: nextStatus as "Aktif" | "Ditangguhkan" }
-          : u,
-      ),
-    );
-    if (nextStatus === "Ditangguhkan") {
-      toast.error(`Akun ${id} berhasil ditangguhkan dari sistem.`);
-    } else {
-      toast.success(`Akun ${id} telah diaktifkan kembali.`);
-    }
-  };
+  const handleToggleUserStatus = async (user: UserItem) => {
+    const targetId = user.fullId || user.id;
+    const nextStatus = user.status === "Aktif" ? "Ditangguhkan" : "Aktif";
+    setUpdatingUserId(user.id);
 
-  const handleResolveModeration = (id: string, action: "Hapus" | "Abaikan") => {
-    setModerations((prev) =>
-      prev.map((m) =>
-        m.id === id
-          ? { ...m, status: action === "Hapus" ? "Diselesaikan" : "Diabaikan" }
-          : m,
-      ),
-    );
-    if (action === "Hapus") {
-      toast.success(
-        `Postingan berhasil dihapus dari forum dan laporan diselesaikan.`,
+    try {
+      const res = await fetch(`/api/admin/users/${targetId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Gagal memperbarui status pengguna");
+      }
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === user.id
+            ? { ...u, status: nextStatus as "Aktif" | "Ditangguhkan" }
+            : u,
+        ),
       );
-    } else {
-      toast.info(`Laporan telah diabaikan (postingan tetap tayang).`);
+
+      if (nextStatus === "Ditangguhkan") {
+        toast.error(`Akun ${user.name} berhasil ditangguhkan dari sistem.`);
+      } else {
+        toast.success(`Akun ${user.name} telah diaktifkan kembali.`);
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Terjadi kesalahan";
+      toast.error(message);
+    } finally {
+      setUpdatingUserId(null);
     }
   };
 
-  const handleSendBroadcast = (e: React.FormEvent) => {
+  const handleToggleUserPlan = async (user: UserItem) => {
+    const targetId = user.fullId || user.id;
+    const nextPlan = user.plan === "Pro" ? "FREE" : "PRO";
+    setUpdatingUserId(user.id);
+
+    try {
+      const res = await fetch(`/api/admin/users/${targetId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: nextPlan }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Gagal mengubah paket pengguna");
+      }
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === user.id
+            ? { ...u, plan: nextPlan === "PRO" ? "Pro" : "Gratis" }
+            : u,
+        ),
+      );
+      toast.success(`Paket ${user.name} berhasil diubah menjadi ${nextPlan === "PRO" ? "Pro" : "Gratis"}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Terjadi kesalahan";
+      toast.error(message);
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  const handleDeleteUser = async (user: UserItem) => {
+    const confirmDelete = window.confirm(
+      `Apakah Anda yakin ingin MENGHAPUS PERMANEN akun "${user.name}" (${user.email})? Seluruh data tanaman, scan, dan postingan pengguna ini akan dihapus.`
+    );
+    if (!confirmDelete) return;
+
+    const targetId = user.fullId || user.id;
+    setUpdatingUserId(user.id);
+
+    try {
+      const res = await fetch(`/api/admin/users/${targetId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Gagal menghapus pengguna");
+      }
+
+      setUsers((prev) => prev.filter((u) => u.id !== user.id));
+      toast.success(`Akun ${user.name} berhasil dihapus permanen.`);
+      fetchAdminData();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Terjadi kesalahan";
+      toast.error(message);
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  const handleResolveModeration = async (id: string, action: "Hapus" | "Abaikan") => {
+    try {
+      if (action === "Hapus") {
+        const confirmDelete = window.confirm("Hapus postingan ini secara permanen dari basis data?");
+        if (!confirmDelete) return;
+
+        const res = await fetch(`/api/admin/moderation/${id}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Gagal menghapus postingan");
+        }
+
+        setModerations((prev) =>
+          prev.map((m) =>
+            m.id === id ? { ...m, status: "Diselesaikan" as const } : m,
+          ),
+        );
+        toast.success(`Postingan berhasil dihapus dari forum dan laporan diselesaikan.`);
+      } else {
+        const res = await fetch(`/api/admin/moderation/${id}`, {
+          method: "PATCH",
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Gagal menyetujui laporan");
+        }
+
+        setModerations((prev) =>
+          prev.map((m) =>
+            m.id === id ? { ...m, status: "Diabaikan" as const } : m,
+          ),
+        );
+        toast.info(`Laporan telah disetujui/diabaikan (postingan tetap tayang).`);
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Terjadi kesalahan";
+      toast.error(message);
+    }
+  };
+
+  const handleSendBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!broadcastMessage.trim()) return;
-    toast.success(
-      `Pengumuman berhasil disiarkan ke seluruh pengguna: "${broadcastMessage}"`,
-    );
-    setBroadcastMessage("");
+
+    setIsSubmittingBroadcast(true);
+    try {
+      const res = await fetch('/api/admin/broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: broadcastMessage.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Gagal mengirim pengumuman broadcast');
+      }
+
+      toast.success(
+        `Pengumuman berhasil disiarkan ke ${data.data.recipientCount} pengguna di sistem.`
+      );
+      setBroadcastMessage("");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Terjadi kesalahan";
+      toast.error(message);
+    } finally {
+      setIsSubmittingBroadcast(false);
+    }
+  };
+
+  const handleUpdateSettings = async (updates: { allowRegistration?: boolean; maintenanceMode?: boolean }) => {
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Gagal memperbarui pengaturan sistem');
+      }
+
+      if (typeof updates.allowRegistration !== 'undefined') {
+        setAllowRegistration(updates.allowRegistration);
+        toast.success(
+          updates.allowRegistration
+            ? "Pendaftaran pengguna baru kini DIBUKA."
+            : "Pendaftaran pengguna baru DITUTUP sementara."
+        );
+      }
+      if (typeof updates.maintenanceMode !== 'undefined') {
+        setMaintenanceMode(updates.maintenanceMode);
+        toast.success(
+          updates.maintenanceMode
+            ? "Mode pemeliharaan DIAKTIFKAN."
+            : "Mode pemeliharaan DINONAKTIFKAN."
+        );
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Terjadi kesalahan";
+      toast.error(message);
+    }
   };
 
   return (
@@ -633,10 +802,9 @@ export default function AdminDashboard() {
                             <Button
                               size="sm"
                               variant="outline"
+                              disabled={updatingUserId === u.id}
                               className="h-7 text-xs cursor-pointer"
-                              onClick={() =>
-                                handleToggleUserStatus(u.id, u.status)
-                              }
+                              onClick={() => handleToggleUserStatus(u)}
                             >
                               {u.status === "Aktif" ? "Tangguhkan" : "Aktifkan"}
                             </Button>
@@ -778,28 +946,51 @@ export default function AdminDashboard() {
                             </Badge>
                           </td>
                           <td className="px-5 py-3.5 text-right">
-                            <Button
-                              size="sm"
-                              variant={
-                                u.status === "Aktif" ? "outline" : "default"
-                              }
-                              onClick={() =>
-                                handleToggleUserStatus(u.id, u.status)
-                              }
-                              className="h-7 text-xs cursor-pointer"
-                            >
-                              {u.status === "Aktif" ? (
-                                <>
-                                  <UserX className="mr-1.5 h-3.5 w-3.5" />
-                                  Tangguhkan
-                                </>
-                              ) : (
-                                <>
-                                  <UserCheck className="mr-1.5 h-3.5 w-3.5" />
-                                  Aktifkan
-                                </>
-                              )}
-                            </Button>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={updatingUserId === u.id}
+                                onClick={() => handleToggleUserPlan(u)}
+                                className="h-7 text-xs px-2 cursor-pointer"
+                                title="Ubah paket langganan"
+                              >
+                                {u.plan === "Pro" ? "Jadikan Gratis" : "Jadikan Pro"}
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant={
+                                  u.status === "Aktif" ? "outline" : "default"
+                                }
+                                disabled={updatingUserId === u.id}
+                                onClick={() => handleToggleUserStatus(u)}
+                                className="h-7 text-xs px-2 cursor-pointer"
+                              >
+                                {u.status === "Aktif" ? (
+                                  <>
+                                    <UserX className="mr-1 h-3.5 w-3.5" />
+                                    Tangguhkan
+                                  </>
+                                ) : (
+                                  <>
+                                    <UserCheck className="mr-1 h-3.5 w-3.5" />
+                                    Aktifkan
+                                  </>
+                                )}
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                disabled={updatingUserId === u.id}
+                                onClick={() => handleDeleteUser(u)}
+                                className="h-7 w-7 p-0 cursor-pointer"
+                                title="Hapus pengguna permanen"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1037,11 +1228,12 @@ export default function AdminDashboard() {
                     placeholder="Tulis pengumuman penting (misal: Maintenance malam ini pukul 23:00 WIB)..."
                     value={broadcastMessage}
                     onChange={(e) => setBroadcastMessage(e.target.value)}
+                    disabled={isSubmittingBroadcast}
                     className="bg-card rounded-xl text-xs flex-1"
                   />
-                  <Button type="submit" size="sm" className="cursor-pointer">
+                  <Button type="submit" size="sm" disabled={isSubmittingBroadcast} className="cursor-pointer">
                     <Send className="mr-1.5 h-3.5 w-3.5" />
-                    Kirim Banner
+                    {isSubmittingBroadcast ? "Mengirim..." : "Kirim Banner"}
                   </Button>
                 </form>
               </div>
@@ -1067,8 +1259,7 @@ export default function AdminDashboard() {
                     size="sm"
                     className="cursor-pointer"
                     onClick={() => {
-                      setAllowRegistration(!allowRegistration);
-                      toast.info(`Pendaftaran pengguna baru diubah`);
+                      handleUpdateSettings({ allowRegistration: !allowRegistration });
                     }}
                   >
                     {allowRegistration ? "Diizinkan" : "Ditutup"}
@@ -1090,10 +1281,7 @@ export default function AdminDashboard() {
                     size="sm"
                     className="cursor-pointer"
                     onClick={() => {
-                      setMaintenanceMode(!maintenanceMode);
-                      toast.info(
-                        `Mode pemeliharaan ${!maintenanceMode ? "diaktifkan" : "dinonaktifkan"}`,
-                      );
+                      handleUpdateSettings({ maintenanceMode: !maintenanceMode });
                     }}
                   >
                     {maintenanceMode ? "Sedang Aktif" : "Non-Aktif"}

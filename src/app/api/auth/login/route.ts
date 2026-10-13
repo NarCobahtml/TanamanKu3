@@ -58,6 +58,34 @@ export async function POST(request: Request) {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
+
+    // 0. Gate verifikasi email: akun dari /register (passwordHash scrypt) baru bisa
+    //    login setelah OTP benar. User legacy & social login lolos — keduanya sudah
+    //    punya passwordHash yang bukan scrypt hash kita, jadi Supabase yang pegang
+    //    otorisasi dan email-nya sudah terverifikasi di sana.
+    const preAuthUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: { id: true, emailVerified: true, passwordHash: true },
+    });
+    // passwordHash === '' artinya akun dibuat lewat Supabase (social login) atau
+    // sudah dimigrasi dari legacy scrypt. Supabase sudah memverifikasi email-nya,
+    // jadi jangan dikunci oleh gate OTP.
+    const isSocialOrMigrated = preAuthUser?.passwordHash === '';
+    if (preAuthUser && !preAuthUser.emailVerified && !isSocialOrMigrated) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'EMAIL_NOT_VERIFIED',
+            message:
+              'Email belum diverifikasi. Periksa inbox Anda untuk kode OTP, atau minta kode baru.',
+            data: { userId: preAuthUser.id },
+          },
+        },
+        { status: 403 }
+      );
+    }
+
     const supabase = await createClient();
 
     // 1. Authenticate with official Supabase Auth (sets HTTP-only cookie automatically)
@@ -161,7 +189,15 @@ export async function POST(request: Request) {
           name: metaName,
           passwordHash: '',
           role: 'USER',
+          emailVerified: true, // social/OAuth: Supabase sudah verifikasi email
+          emailVerifiedAt: new Date(),
         },
+      });
+    } else if (!user.emailVerified && user.passwordHash === '') {
+      // Backfill akun social yang dibuat sebelum fitur OTP ada.
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true, emailVerifiedAt: new Date() },
       });
     }
 

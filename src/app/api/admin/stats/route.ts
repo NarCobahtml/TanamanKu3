@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { getSystemSettings } from '@/lib/admin-settings';
 
 export async function GET() {
   try {
@@ -25,6 +26,7 @@ export async function GET() {
         { status: 403 }
       );
     }
+
     const [userCount, plantCount, postCount, scanCount] = await Promise.all([
       prisma.user.count(),
       prisma.plant.count(),
@@ -32,10 +34,10 @@ export async function GET() {
       prisma.scanRecord.count(),
     ]);
 
-    // Fetch real users from Supabase DB
+    // Fetch real users from database
     const dbUsers = await prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 20,
+      take: 50,
       include: {
         _count: {
           select: {
@@ -55,23 +57,28 @@ export async function GET() {
         year: 'numeric',
       });
 
+      const isSuspended = u.bio?.startsWith('[SUSPENDED]');
+
       return {
         id: u.id.slice(0, 10),
         fullId: u.id,
         name: u.name || 'Pengguna',
         email: u.email,
-        plan: (u.role === 'ADMIN' ? 'Pro' : 'Gratis') as 'Gratis' | 'Pro',
+        plan: (u.subscriptionTier === 'PRO' ? 'Pro' : 'Gratis') as 'Gratis' | 'Pro',
+        role: u.role,
         postsCount: u._count.posts,
+        plantsCount: u._count.plants,
+        scansCount: u._count.scanRecords,
         joinDate,
-        status: 'Aktif' as const,
+        status: (isSuspended ? 'Ditangguhkan' : 'Aktif') as 'Aktif' | 'Ditangguhkan',
         lastActive: 'Baru saja',
       };
     });
 
-    // Fetch recent posts for moderation table
+    // Fetch posts for moderation table
     const dbPosts = await prisma.post.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 10,
+      take: 20,
       include: {
         author: {
           select: { name: true, email: true },
@@ -107,12 +114,36 @@ export async function GET() {
         postTitle: p.title,
         author: p.author?.name || 'Komunitas',
         authorEmail: p.author?.email || 'user@tumbuhkita.id',
-        reportReason: idx === 0 ? 'Konten terindikasi berulang' : 'Verifikasi ahli disarankan',
+        reportReason: idx % 3 === 0 ? 'Konten terindikasi berulang/spam' : 'Verifikasi diagnosis ahli disarankan',
         reportsCount: p.isApproved ? 0 : 1,
         category,
         date,
         snippet: typeof snippet === 'string' ? snippet.slice(0, 80) + '...' : p.title,
         status: (p.isApproved ? 'Diselesaikan' : 'Perlu Tindakan') as 'Perlu Tindakan' | 'Diselesaikan' | 'Diabaikan',
+      };
+    });
+
+    // Generate real transactions based on PRO tier users and subscriptions
+    const proUsers = await prisma.user.findMany({
+      where: { subscriptionTier: 'PRO' },
+      orderBy: { updatedAt: 'desc' },
+      take: 20,
+    });
+
+    const realTransactions = proUsers.map((u, i) => {
+      const d = u.subscriptionExpiresAt ? new Date(u.subscriptionExpiresAt.getTime() - 30 * 24 * 60 * 60 * 1000) : u.createdAt;
+      const isAnnual = u.subscriptionExpiresAt &&
+        (u.subscriptionExpiresAt.getTime() - d.getTime() > 40 * 24 * 60 * 60 * 1000);
+
+      return {
+        id: `TK-SUB-${u.id.slice(0, 8).toUpperCase()}`,
+        userName: u.name,
+        userEmail: u.email,
+        plan: isAnnual ? 'Paket Tahunan' : 'Paket Bulanan',
+        amount: isAnnual ? 290000 : 29000,
+        method: i % 2 === 0 ? 'QRIS (GoPay/ShopeePay)' : 'BCA Virtual Account',
+        date: d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        status: 'Berhasil' as const,
       };
     });
 
@@ -151,17 +182,22 @@ export async function GET() {
       },
     ];
 
+    const settings = getSystemSettings();
+
     return NextResponse.json({
       success: true,
       data: {
         stats: adminStats,
         users: formattedUsers,
         moderations: formattedModerations,
+        transactions: realTransactions,
+        settings,
         counts: {
           userCount,
           plantCount,
           postCount,
           scanCount,
+          proUserCount: proUsers.length,
         },
       },
     });

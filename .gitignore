@@ -31,10 +31,19 @@ yarn-error.log*
 .windsurf/
 .agents/
 .vscode/
+.antigravity/
+.gemini/
+skills-lock.json
+memory.md
 
 # typescript
 *.tsbuildinfo
 
 # repomix
 repomix*
+
+# temporary scripts & tests
+test.js
+scripts/
+
 

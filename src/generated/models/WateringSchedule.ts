@@ -582,10 +582,6 @@ export type WateringScheduleUncheckedUpdateOneWithoutPlantNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.WateringScheduleUpdateToOneWithWhereWithoutPlantInput, Prisma.WateringScheduleUpdateWithoutPlantInput>, Prisma.WateringScheduleUncheckedUpdateWithoutPlantInput>
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type WateringScheduleCreateWithoutPlantInput = {
   id?: string
   nextWateringAt: Date | string

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   BookmarkPlus,
   ScanLine,
@@ -9,6 +10,7 @@ import {
   Bug,
   ShieldCheck,
   FlaskConical,
+  MessageSquarePlus,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -26,6 +28,7 @@ interface ScanData {
 
 export default function ScanResultPage() {
   const t = useTranslations('scanResult');
+  const router = useRouter();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const data = useScanResult<ScanData>();
@@ -63,6 +66,28 @@ export default function ScanResultPage() {
   const { locale } = useLocale();
   const timestamp = new Intl.DateTimeFormat(locale, { dateStyle: 'short', timeStyle: 'short' }).format(new Date());
 
+  const handleAskCommunity = () => {
+    if (!content || !data) return;
+
+    const draftTitle = `[Tanya Komunitas] Daun ${content.crop}: Dugaan ${content.label} tidak cocok?`;
+    const draftContent = `Halo teman-teman komunitas!\n\nSaya baru saja memindai tanaman ${content.crop} saya menggunakan AI TumbuhKita.\nHasil diagnosis AI memperkirakan:\n• Dugaan Diagnosis: ${content.label} ${content.latin ? `(${content.latin})` : ''}\n• Tingkat Keyakinan AI: ${accuracy}%\n\nNamun setelah saya perhatikan langsung, gejalanya tampak berbeda atau saya masih ragu. Kondisi yang terlihat pada tanaman saya saat ini:\n- [Tuliskan gejala atau kecurigaan Anda di sini...]\n\nMohon masukan dan bantuan diagnosis dari teman-teman atau ahli tanaman. Terima kasih banyak! #tanyaahli #${content.crop.toLowerCase().replace(/\s+/g, '')} #diagnosis`;
+
+    const draft = {
+      title: draftTitle,
+      content: draftContent,
+      category: 'Tanya Ahli',
+      photo: photo || '',
+    };
+
+    try {
+      sessionStorage.setItem('scan_forum_draft', JSON.stringify(draft));
+    } catch (e) {
+      console.warn('Failed to save scan draft to sessionStorage:', e);
+    }
+
+    router.push('/forum/create?fromScan=1');
+  };
+
   if (!data || !content) {
     return (
       <div>
@@ -95,13 +120,21 @@ export default function ScanResultPage() {
         description={t("laporanDesc")}
         actions={
           <>
-            <Button asChild variant="outline" className="rounded-full border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white">
+            <Button asChild variant="outline" className="rounded-full border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white cursor-pointer">
               <Link href="/scan">
                 <ScanLine className="h-4 w-4" aria-hidden="true" />
                 {t("scanUlang")}
               </Link>
             </Button>
-            <Button onClick={handleSave} disabled={saved || saving} className="btn-cta rounded-full bg-white px-6 text-[#123526] hover:bg-primary/10">
+            <Button
+              onClick={handleAskCommunity}
+              variant="outline"
+              className="rounded-full border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white cursor-pointer"
+            >
+              <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
+              {t("tanyaKomunitas")}
+            </Button>
+            <Button onClick={handleSave} disabled={saved || saving} className="btn-cta rounded-full bg-white px-6 text-[#123526] hover:bg-primary/10 cursor-pointer">
               <BookmarkPlus className="h-4 w-4" aria-hidden="true" />
               {saving ? 'Menyimpan...' : saved ? t('tersimpan') : t('simpanRiwayat')}
             </Button>
@@ -171,6 +204,35 @@ export default function ScanResultPage() {
           </div>
         </TkRevealClient>
       </section>
+
+      {/* Banner Tanya Komunitas jika hasil tidak cocok */}
+      <TkRevealClient>
+        <div className="rounded-2xl border border-primary/25 bg-card p-6 sm:p-7 shadow-xs transition-colors hover:border-primary/50">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                  {t("bukanPenyakitIni")}
+                </span>
+                <span className="text-xs text-muted-foreground">{t("tanyaAhliKomunitas")}</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">
+                {t("hasilTidakCocok")}
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                {t("hasilTidakCocokDesc")}
+              </p>
+            </div>
+            <Button
+              onClick={handleAskCommunity}
+              className="btn-cta rounded-full px-6 py-5 text-sm font-semibold shrink-0 cursor-pointer shadow-sm flex items-center gap-2 self-start sm:self-center"
+            >
+              <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
+              <span>{t("tanyaKomunitas")}</span>
+            </Button>
+          </div>
+        </div>
+      </TkRevealClient>
 
       <div className="grid gap-12 lg:grid-cols-2">
         <TkRevealClient>

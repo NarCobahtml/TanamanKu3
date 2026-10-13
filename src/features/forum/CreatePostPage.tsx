@@ -1,13 +1,14 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   Camera,
   ChevronDown,
   Loader2,
   Send,
+  Sparkles,
   User,
   X,
 } from "lucide-react";
@@ -32,6 +33,7 @@ const suggestedTags = [
 
 export default function CreatePostPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState("");
@@ -40,7 +42,34 @@ export default function CreatePostPage() {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [isFromScan, setIsFromScan] = useState(false);
   const { checkAuth, AuthModal } = useAuthGuard();
+
+  // Load prefilled draft from scan if coming from /scan/result
+  useEffect(() => {
+    const fromScan = searchParams.get("fromScan") === "1";
+    const draftRaw = typeof window !== "undefined" ? sessionStorage.getItem("scan_forum_draft") : null;
+
+    if (fromScan || draftRaw) {
+      if (draftRaw) {
+        try {
+          const parsed = JSON.parse(draftRaw);
+          if (parsed.title) setTitle(parsed.title);
+          if (parsed.content) setContent(parsed.content);
+          if (parsed.category) setCategory(parsed.category);
+          const img = parsed.photo || sessionStorage.getItem("scan-capture");
+          if (img) setPhotoPreview(img);
+          setIsFromScan(true);
+          toast.info(
+            "Data hasil scan otomatis dimasukkan ke draf postingan. Anda dapat mengedit judul, teks, atau foto sebelum memposting."
+          );
+        } catch (e) {
+          console.warn("Failed to parse scan forum draft:", e);
+        }
+        sessionStorage.removeItem("scan_forum_draft");
+      }
+    }
+  }, [searchParams]);
 
   // useEffect(() => {
   //   checkAuth({
@@ -163,6 +192,26 @@ export default function CreatePostPage() {
 
           {/* Right: Form inputs and tool controls */}
           <div className="flex-1 min-w-0 pt-0.5">
+            {isFromScan && (
+              <div className="mb-4 rounded-xl border border-primary/30 bg-primary/10 p-3.5 text-xs sm:text-sm text-foreground flex items-start gap-2.5">
+                <Sparkles className="size-4 text-primary shrink-0 mt-0.5" aria-hidden="true" />
+                <div className="flex-1">
+                  <p className="font-semibold text-primary">Draf Diisi Otomatis dari Hasil Scan AI</p>
+                  <p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
+                    Foto daun, judul, dan detail diagnosis Anda telah dimasukkan. Anda dapat mengedit judul, teks, atau foto sebelum mempublikasikannya ke forum.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsFromScan(false)}
+                  className="text-muted-foreground hover:text-foreground cursor-pointer p-1"
+                  aria-label="Tutup info"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+            )}
+
             {/* Judul Postingan... */}
             <input
               type="text"
