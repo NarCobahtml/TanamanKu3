@@ -8,25 +8,12 @@ import {
   LayoutDashboard,
   Users,
   MessageSquareWarning,
-  MessageSquare,
   CreditCard,
   Settings,
-  Search,
-  CheckCircle2,
-  AlertTriangle,
-  ArrowUpRight,
   Sun,
   Moon,
   Bell,
-  Trash2,
-  UserCheck,
-  UserX,
-  Activity,
-  Send,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   adminStats as defaultStats,
   forumCategoryStats,
@@ -34,11 +21,20 @@ import {
   initialModeration,
   initialTransactions,
   platformActivityLogs,
-  type AdminStat,
-  type UserItem,
-  type ModerationItem,
-  type TransactionItem,
 } from "./mock-data";
+import type {
+  AdminStat,
+  UserItem,
+  ModerationItem,
+  TransactionItem,
+} from "./types";
+import {
+  OverviewTab,
+  UsersTab,
+  ModerationTab,
+  BillingTab,
+  SettingsTab,
+} from "./components";
 
 export default function AdminDashboard() {
   const { setTheme, resolvedTheme } = useTheme();
@@ -98,10 +94,6 @@ export default function AdminDashboard() {
     fetchAdminData();
   }, []);
 
-  const [modFilter] = useState<
-    "Semua" | "Perlu Tindakan" | "Diselesaikan" | "Diabaikan"
-  >("Semua");
-
   const [trxFilter, setTrxFilter] = useState<"Semua" | "Berhasil" | "Menunggu">(
     "Semua",
   );
@@ -120,13 +112,6 @@ export default function AdminDashboard() {
       return matchSearch && matchPlan && matchStatus;
     });
   }, [users, userSearch, userPlanFilter, userStatusFilter]);
-
-  // Filtered Moderations
-  const filteredModerations = useMemo(() => {
-    return moderations.filter((m) => {
-      return modFilter === "Semua" || m.status === modFilter;
-    });
-  }, [moderations, modFilter]);
 
   // Filtered Transactions
   const filteredTransactions = useMemo(() => {
@@ -200,7 +185,9 @@ export default function AdminDashboard() {
             : u,
         ),
       );
-      toast.success(`Paket ${user.name} berhasil diubah menjadi ${nextPlan === "PRO" ? "Pro" : "Gratis"}`);
+      toast.success(
+        `Paket ${user.name} berhasil diubah menjadi ${nextPlan === "PRO" ? "Pro" : "Gratis"}`
+      );
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Terjadi kesalahan";
       toast.error(message);
@@ -241,7 +228,9 @@ export default function AdminDashboard() {
   const handleResolveModeration = async (id: string, action: "Hapus" | "Abaikan") => {
     try {
       if (action === "Hapus") {
-        const confirmDelete = window.confirm("Hapus postingan ini secara permanen dari basis data?");
+        const confirmDelete = window.confirm(
+          "Hapus postingan ini secara permanen dari basis data?"
+        );
         if (!confirmDelete) return;
 
         const res = await fetch(`/api/admin/moderation/${id}`, {
@@ -308,7 +297,10 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleUpdateSettings = async (updates: { allowRegistration?: boolean; maintenanceMode?: boolean }) => {
+  const handleUpdateSettings = async (updates: {
+    allowRegistration?: boolean;
+    maintenanceMode?: boolean;
+  }) => {
     try {
       const res = await fetch('/api/admin/settings', {
         method: 'POST',
@@ -560,735 +552,59 @@ export default function AdminDashboard() {
 
         {/* Page Content Body */}
         <main className="p-6 sm:p-8 space-y-8 flex-1 max-w-7xl w-full mx-auto">
-          {/* ================= TAB 1: OVERVIEW ================= */}
           {activeTab === "overview" && (
-            <div className="space-y-8">
-              {/* Header Title */}
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">
-                  Ringkasan Platform & Operasional
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Pantau pertumbuhan pengguna, pendapatan langganan, aktivitas
-                  forum, dan moderasi laporan komunitas.
-                </p>
-              </div>
-
-              {/* 4 Stat Cards */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {stats.map((stat, i) => (
-                  <div
-                    key={stat.title}
-                    className="rounded-2xl border border-border bg-card p-5 shadow-xs transition-all hover:border-primary/40"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {stat.title}
-                      </span>
-                      <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                        {i === 0 && <Users className="h-4 w-4" />}
-                        {i === 1 && <CreditCard className="h-4 w-4" />}
-                        {i === 2 && <MessageSquare className="h-4 w-4" />}
-                        {i === 3 && <AlertTriangle className="h-4 w-4" />}
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <p className="text-2xl font-bold tracking-tight">
-                        {stat.value}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1.5">
-                        <span
-                          className={
-                            stat.isPositive
-                              ? "font-semibold text-emerald-600 dark:text-emerald-400"
-                              : "font-semibold text-amber-600"
-                          }
-                        >
-                          {stat.change}
-                        </span>
-                        <span>{stat.period}</span>
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* 2 Grid: Forum Categories & Activity Logs */}
-              <div className="grid gap-6 lg:grid-cols-12">
-                {/* Forum Categories Activity */}
-                <div className="lg:col-span-7 rounded-2xl border border-border bg-card p-6 shadow-xs">
-                  <div className="flex items-center justify-between pb-4 border-b border-border">
-                    <div>
-                      <h2 className="text-base font-bold">
-                        Aktivitas Kategori Forum Komunitas
-                      </h2>
-                      <p className="text-xs text-muted-foreground">
-                        Distribusi topik diskusi dari total 5.420 postingan
-                      </p>
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      Aktif
-                    </Badge>
-                  </div>
-
-                  <div className="mt-5 space-y-4">
-                    {forumCategoryStats.map((cat) => (
-                      <div key={cat.name} className="space-y-1.5">
-                        <div className="flex items-center justify-between text-xs font-medium">
-                          <span className="text-foreground">{cat.name}</span>
-                          <span className="text-muted-foreground font-semibold">
-                            {cat.postsCount} diskusi ({cat.percentage}%)
-                          </span>
-                        </div>
-                        <div className="h-2.5 w-full rounded-full bg-secondary overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${cat.color}`}
-                            style={{ width: `${cat.percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* System Activity & Logs */}
-                <div className="lg:col-span-5 rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between pb-4 border-b border-border">
-                      <h2 className="text-base font-bold">
-                        Log Aktivitas Sistem
-                      </h2>
-                      <span className="text-xs text-muted-foreground">
-                        Real-time
-                      </span>
-                    </div>
-
-                    <div className="mt-4 space-y-3.5">
-                      {platformActivityLogs.map((log) => (
-                        <div
-                          key={log.id}
-                          className="flex items-start gap-3 text-xs"
-                        >
-                          <span
-                            className={`p-1.5 rounded-lg mt-0.5 ${
-                              log.type === "success"
-                                ? "bg-emerald-500/10 text-emerald-600"
-                                : log.type === "warning"
-                                  ? "bg-amber-500/10 text-amber-600"
-                                  : "bg-blue-500/10 text-blue-600"
-                            }`}
-                          >
-                            {log.type === "success" && (
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                            )}
-                            {log.type === "warning" && (
-                              <AlertTriangle className="h-3.5 w-3.5" />
-                            )}
-                            {log.type === "info" && (
-                              <Activity className="h-3.5 w-3.5" />
-                            )}
-                          </span>
-                          <div>
-                            <p className="font-semibold text-foreground">
-                              {log.title}
-                            </p>
-                            <p className="text-muted-foreground">{log.desc}</p>
-                            <span className="text-[10px] text-muted-foreground">
-                              {log.time}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="pt-4 mt-4 border-t border-border">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-xs cursor-pointer"
-                      onClick={() =>
-                        toast.success("Semua metrik dan log telah diperbarui")
-                      }
-                    >
-                      Segarkan Metrik
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick User List Table */}
-              <div className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
-                <div className="flex items-center justify-between p-5 border-b border-border">
-                  <div>
-                    <h2 className="text-base font-bold">Pengguna Terbaru</h2>
-                    <p className="text-xs text-muted-foreground">
-                      Pengguna yang baru mendaftar di TanamanKu
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveTab("users")}
-                    className="cursor-pointer"
-                  >
-                    Kelola Semua Pengguna
-                    <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
-                  </Button>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-secondary/50 text-muted-foreground uppercase font-bold border-b border-border">
-                      <tr>
-                        <th className="px-5 py-3.5">Pengguna</th>
-                        <th className="px-5 py-3.5">Paket Akun</th>
-                        <th className="px-5 py-3.5">Postingan Forum</th>
-                        <th className="px-5 py-3.5">Tanggal Daftar</th>
-                        <th className="px-5 py-3.5">Status</th>
-                        <th className="px-5 py-3.5 text-right">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {users.slice(0, 4).map((u) => (
-                        <tr
-                          key={u.id}
-                          className="hover:bg-secondary/30 transition-colors"
-                        >
-                          <td className="px-5 py-3.5">
-                            <div className="flex items-center gap-2.5">
-                              <div className="h-7 w-7 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-[10px]">
-                                {u.name.slice(0, 2).toUpperCase()}
-                              </div>
-                              <div>
-                                <p className="font-bold text-foreground">
-                                  {u.name}
-                                </p>
-                                <p className="text-[11px] text-muted-foreground">
-                                  {u.email}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-5 py-3.5">
-                            <Badge
-                              variant="outline"
-                              className={
-                                u.plan === "Pro"
-                                  ? "bg-primary/10 border-primary text-primary font-bold"
-                                  : ""
-                              }
-                            >
-                              {u.plan}
-                            </Badge>
-                          </td>
-                          <td className="px-5 py-3.5 text-foreground">
-                            {u.postsCount} postingan
-                          </td>
-                          <td className="px-5 py-3.5 text-muted-foreground">
-                            {u.joinDate}
-                          </td>
-                          <td className="px-5 py-3.5">
-                            <Badge
-                              variant={
-                                u.status === "Aktif" ? "default" : "destructive"
-                              }
-                              className="text-[10px]"
-                            >
-                              {u.status}
-                            </Badge>
-                          </td>
-                          <td className="px-5 py-3.5 text-right">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={updatingUserId === u.id}
-                              className="h-7 text-xs cursor-pointer"
-                              onClick={() => handleToggleUserStatus(u)}
-                            >
-                              {u.status === "Aktif" ? "Tangguhkan" : "Aktifkan"}
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <OverviewTab
+              stats={stats}
+              users={users}
+              forumCategoryStats={forumCategoryStats}
+              platformActivityLogs={platformActivityLogs}
+              onNavigateToUsers={() => setActiveTab("users")}
+              onToggleUserStatus={handleToggleUserStatus}
+              updatingUserId={updatingUserId}
+            />
           )}
 
-          {/* ================= TAB 2: PENGGUNA ================= */}
           {activeTab === "users" && (
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">
-                  Manajemen Pengguna
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Kelola akun pengguna, paket langganan, dan status aktif
-                  komunitas petani TanamanKu.
-                </p>
-              </div>
-
-              {/* Toolbar */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="relative w-full sm:max-w-xs">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Cari nama atau email pengguna..."
-                    value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
-                    className="pl-9 bg-card rounded-xl"
-                  />
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                  <span className="text-xs text-muted-foreground font-medium mr-1">
-                    Paket:
-                  </span>
-                  {(["Semua", "Gratis", "Pro"] as const).map((plan) => (
-                    <Button
-                      key={plan}
-                      variant={userPlanFilter === plan ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setUserPlanFilter(plan)}
-                      className="rounded-xl text-xs cursor-pointer"
-                    >
-                      {plan}
-                    </Button>
-                  ))}
-
-                  <span className="text-xs text-muted-foreground font-medium ml-2 mr-1">
-                    Status:
-                  </span>
-                  {(["Semua", "Aktif", "Ditangguhkan"] as const).map(
-                    (status) => (
-                      <Button
-                        key={status}
-                        variant={
-                          userStatusFilter === status ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setUserStatusFilter(status)}
-                        className="rounded-xl text-xs cursor-pointer"
-                      >
-                        {status}
-                      </Button>
-                    ),
-                  )}
-                </div>
-              </div>
-
-              {/* Users Table */}
-              <div className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-secondary/50 text-muted-foreground uppercase font-bold border-b border-border">
-                      <tr>
-                        <th className="px-5 py-3.5">Pengguna</th>
-                        <th className="px-5 py-3.5">Paket</th>
-                        <th className="px-5 py-3.5">Aktivitas Forum</th>
-                        <th className="px-5 py-3.5">Tanggal Bergabung</th>
-                        <th className="px-5 py-3.5">Status Akun</th>
-                        <th className="px-5 py-3.5 text-right">
-                          Aksi Moderator
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {filteredUsers.map((u) => (
-                        <tr
-                          key={u.id}
-                          className="hover:bg-secondary/30 transition-colors"
-                        >
-                          <td className="px-5 py-3.5">
-                            <div className="flex items-center gap-3">
-                              <div className="h-8 w-8 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-xs">
-                                {u.name.slice(0, 2).toUpperCase()}
-                              </div>
-                              <div>
-                                <p className="font-bold text-foreground">
-                                  {u.name}
-                                </p>
-                                <p className="text-[11px] text-muted-foreground">
-                                  {u.email}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-5 py-3.5">
-                            <Badge
-                              variant="outline"
-                              className={
-                                u.plan === "Pro"
-                                  ? "bg-primary/10 border-primary text-primary font-bold"
-                                  : ""
-                              }
-                            >
-                              {u.plan}
-                            </Badge>
-                          </td>
-                          <td className="px-5 py-3.5 text-muted-foreground">
-                            {u.postsCount} postingan
-                          </td>
-                          <td className="px-5 py-3.5 text-muted-foreground">
-                            {u.joinDate}
-                          </td>
-                          <td className="px-5 py-3.5">
-                            <Badge
-                              variant={
-                                u.status === "Aktif" ? "default" : "destructive"
-                              }
-                              className="text-[10px]"
-                            >
-                              {u.status}
-                            </Badge>
-                          </td>
-                          <td className="px-5 py-3.5 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={updatingUserId === u.id}
-                                onClick={() => handleToggleUserPlan(u)}
-                                className="h-7 text-xs px-2 cursor-pointer"
-                                title="Ubah paket langganan"
-                              >
-                                {u.plan === "Pro" ? "Jadikan Gratis" : "Jadikan Pro"}
-                              </Button>
-
-                              <Button
-                                size="sm"
-                                variant={
-                                  u.status === "Aktif" ? "outline" : "default"
-                                }
-                                disabled={updatingUserId === u.id}
-                                onClick={() => handleToggleUserStatus(u)}
-                                className="h-7 text-xs px-2 cursor-pointer"
-                              >
-                                {u.status === "Aktif" ? (
-                                  <>
-                                    <UserX className="mr-1 h-3.5 w-3.5" />
-                                    Tangguhkan
-                                  </>
-                                ) : (
-                                  <>
-                                    <UserCheck className="mr-1 h-3.5 w-3.5" />
-                                    Aktifkan
-                                  </>
-                                )}
-                              </Button>
-
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                disabled={updatingUserId === u.id}
-                                onClick={() => handleDeleteUser(u)}
-                                className="h-7 w-7 p-0 cursor-pointer"
-                                title="Hapus pengguna permanen"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {filteredUsers.length === 0 && (
-                  <div className="py-12 text-center text-muted-foreground text-sm">
-                    Tidak ada pengguna yang cocok dengan kriteria pencarian atau
-                    filter.
-                  </div>
-                )}
-              </div>
-            </div>
+            <UsersTab
+              userSearch={userSearch}
+              setUserSearch={setUserSearch}
+              userPlanFilter={userPlanFilter}
+              setUserPlanFilter={setUserPlanFilter}
+              userStatusFilter={userStatusFilter}
+              setUserStatusFilter={setUserStatusFilter}
+              filteredUsers={filteredUsers}
+              updatingUserId={updatingUserId}
+              onToggleUserStatus={handleToggleUserStatus}
+              onToggleUserPlan={handleToggleUserPlan}
+              onDeleteUser={handleDeleteUser}
+            />
           )}
 
-          {/* ================= TAB 3: MODERASI FORUM ================= */}
           {activeTab === "moderation" && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl font-bold tracking-tight">
-                    Moderasi Diskusi & Laporan Forum
-                  </h1>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Tinjau dan tindak lanjuti postingan forum yang dilaporkan
-                    karena indikasi spam, penipuan, atau informasi yang
-                    berbahaya.
-                  </p>
-                </div>
-              </div>
-
-              {/* Moderation Cards */}
-              <div className="space-y-4">
-                {filteredModerations.map((mod) => (
-                  <div
-                    key={mod.id}
-                    className="rounded-2xl border border-border bg-card p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5 transition-colors hover:border-primary/30"
-                  >
-                    <div className="space-y-2 max-w-3xl">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-mono font-bold text-muted-foreground">
-                          {mod.id}
-                        </span>
-                        <Badge variant="outline" className="text-[10px]">
-                          Kategori: {mod.category}
-                        </Badge>
-                        <span className="text-xs font-bold text-red-600 dark:text-red-400">
-                          ⚠ {mod.reportsCount} ({mod.reportReason})
-                        </span>
-                      </div>
-
-                      <h3 className="font-bold text-base text-foreground leading-snug">
-                        {mod.postTitle}
-                      </h3>
-                      <p className="text-xs text-muted-foreground italic bg-secondary/50 p-2.5 rounded-lg border border-border/50">
-                        &ldquo;{mod.snippet}&rdquo;
-                      </p>
-
-                      <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                        <span>
-                          Penulis: <strong>{mod.author}</strong> (
-                          {mod.authorEmail})
-                        </span>
-                        <span>·</span>
-                        <span>Dilaporkan pada: {mod.date}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-                      {mod.status === "Perlu Tindakan" ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() =>
-                              handleResolveModeration(mod.id, "Hapus")
-                            }
-                            className="h-8 text-xs cursor-pointer"
-                          >
-                            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                            Hapus Postingan
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              handleResolveModeration(mod.id, "Abaikan")
-                            }
-                            className="h-8 text-xs cursor-pointer"
-                          >
-                            Abaikan Laporan
-                          </Button>
-                        </>
-                      ) : (
-                        <span className="text-xs text-muted-foreground font-medium">
-                          Kasus ini telah {mod.status.toLowerCase()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                {filteredModerations.length === 0 && (
-                  <div className="py-12 text-center text-muted-foreground text-sm rounded-2xl border border-dashed border-border">
-                    Tidak ada laporan moderasi yang sesuai dengan filter ini.
-                  </div>
-                )}
-              </div>
-            </div>
+            <ModerationTab
+              filteredModerations={moderations}
+              onResolveModeration={handleResolveModeration}
+            />
           )}
 
-          {/* ================= TAB 4: BILLING & LANGGANAN ================= */}
           {activeTab === "billing" && (
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">
-                  Langganan & Riwayat Transaksi
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Pantau pendapatan paket TumbuhKita Pro, pembayaran QRIS,
-                  Virtual Account, dan status tagihan.
-                </p>
-              </div>
-
-              {/* Transactions Table */}
-              <div className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
-                <div className="flex items-center justify-between p-5 border-b border-border">
-                  <h2 className="text-base font-bold">Transaksi Terbaru</h2>
-                  <div className="flex gap-2">
-                    {(["Semua", "Berhasil", "Menunggu"] as const).map(
-                      (status) => (
-                        <Button
-                          key={status}
-                          size="sm"
-                          variant={trxFilter === status ? "default" : "outline"}
-                          onClick={() => setTrxFilter(status)}
-                          className="text-xs h-8 rounded-lg cursor-pointer"
-                        >
-                          {status}
-                        </Button>
-                      ),
-                    )}
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-secondary/50 text-muted-foreground uppercase font-bold border-b border-border">
-                      <tr>
-                        <th className="px-5 py-3.5">ID Transaksi</th>
-                        <th className="px-5 py-3.5">Pelanggan</th>
-                        <th className="px-5 py-3.5">Paket</th>
-                        <th className="px-5 py-3.5">Metode</th>
-                        <th className="px-5 py-3.5">Nominal</th>
-                        <th className="px-5 py-3.5">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {filteredTransactions.map((trx) => (
-                        <tr
-                          key={trx.id}
-                          className="hover:bg-secondary/30 transition-colors"
-                        >
-                          <td className="px-5 py-3.5 font-mono font-bold">
-                            {trx.id}
-                          </td>
-                          <td className="px-5 py-3.5">
-                            <p className="font-bold text-foreground">
-                              {trx.userName}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {trx.userEmail}
-                            </p>
-                          </td>
-                          <td className="px-5 py-3.5 font-medium">
-                            {trx.plan}
-                          </td>
-                          <td className="px-5 py-3.5 text-muted-foreground">
-                            {trx.method}
-                          </td>
-                          <td className="px-5 py-3.5 font-bold text-foreground">
-                            Rp {trx.amount.toLocaleString("id-ID")}
-                          </td>
-                          <td className="px-5 py-3.5">
-                            <Badge
-                              variant={
-                                trx.status === "Berhasil"
-                                  ? "default"
-                                  : "secondary"
-                              }
-                              className={
-                                trx.status === "Berhasil"
-                                  ? "bg-emerald-600"
-                                  : ""
-                              }
-                            >
-                              {trx.status}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <BillingTab
+              trxFilter={trxFilter}
+              setTrxFilter={setTrxFilter}
+              filteredTransactions={filteredTransactions}
+            />
           )}
 
-          {/* ================= TAB 5: PENGATURAN SISTEM ================= */}
           {activeTab === "settings" && (
-            <div className="space-y-6 max-w-3xl">
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">
-                  Pengaturan Sistem Admin
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Konfigurasi parameter operasional platform, pengumuman publik,
-                  dan kontrol akses.
-                </p>
-              </div>
-
-              {/* Broadcast Announcement */}
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-4">
-                <h3 className="text-base font-bold text-foreground">
-                  Siarkan Pengumuman ke Pengguna (Broadcast)
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Pesan pengumuman akan ditampilkan pada banner atas beranda
-                  seluruh pengguna aplikasi.
-                </p>
-                <form onSubmit={handleSendBroadcast} className="flex gap-3">
-                  <Input
-                    placeholder="Tulis pengumuman penting (misal: Maintenance malam ini pukul 23:00 WIB)..."
-                    value={broadcastMessage}
-                    onChange={(e) => setBroadcastMessage(e.target.value)}
-                    disabled={isSubmittingBroadcast}
-                    className="bg-card rounded-xl text-xs flex-1"
-                  />
-                  <Button type="submit" size="sm" disabled={isSubmittingBroadcast} className="cursor-pointer">
-                    <Send className="mr-1.5 h-3.5 w-3.5" />
-                    {isSubmittingBroadcast ? "Mengirim..." : "Kirim Banner"}
-                  </Button>
-                </form>
-              </div>
-
-              {/* Access Controls */}
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-6">
-                <h3 className="text-base font-bold text-foreground">
-                  Kontrol Akses Platform
-                </h3>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-bold text-foreground">
-                      Pendaftaran Pengguna Baru
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Bila dinonaktifkan, pendaftaran akun baru akan ditutup
-                      sementara.
-                    </p>
-                  </div>
-                  <Button
-                    variant={allowRegistration ? "default" : "outline"}
-                    size="sm"
-                    className="cursor-pointer"
-                    onClick={() => {
-                      handleUpdateSettings({ allowRegistration: !allowRegistration });
-                    }}
-                  >
-                    {allowRegistration ? "Diizinkan" : "Ditutup"}
-                  </Button>
-                </div>
-
-                <div className="pt-4 border-t border-border flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-bold text-destructive">
-                      Mode Pemeliharaan (Maintenance Mode)
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Hanya administrator yang dapat mengakses website bila
-                      diaktifkan.
-                    </p>
-                  </div>
-                  <Button
-                    variant={maintenanceMode ? "destructive" : "outline"}
-                    size="sm"
-                    className="cursor-pointer"
-                    onClick={() => {
-                      handleUpdateSettings({ maintenanceMode: !maintenanceMode });
-                    }}
-                  >
-                    {maintenanceMode ? "Sedang Aktif" : "Non-Aktif"}
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <SettingsTab
+              broadcastMessage={broadcastMessage}
+              setBroadcastMessage={setBroadcastMessage}
+              isSubmittingBroadcast={isSubmittingBroadcast}
+              onSendBroadcast={handleSendBroadcast}
+              allowRegistration={allowRegistration}
+              maintenanceMode={maintenanceMode}
+              onUpdateSettings={handleUpdateSettings}
+            />
           )}
         </main>
       </div>
