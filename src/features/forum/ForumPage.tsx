@@ -41,12 +41,14 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
   useEffect(() => {
     const tagParam = searchParams.get('tag');
     const qParam = searchParams.get('q');
-    if (tagParam) {
-      setSelectedTag(tagParam.replace(/^#/, '').toLowerCase());
-    }
-    if (qParam) {
-      setQuery(qParam);
-    }
+    requestAnimationFrame(() => {
+      if (tagParam) {
+        setSelectedTag(tagParam.replace(/^#/, '').toLowerCase());
+      }
+      if (qParam) {
+        setQuery(qParam);
+      }
+    });
   }, [searchParams]);
 
   useEffect(() => {

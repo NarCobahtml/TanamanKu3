@@ -147,10 +147,11 @@ export async function POST(
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error posting comment to database:', error);
+    const msg = error instanceof Error ? error.message : 'Gagal menambahkan komentar';
     return NextResponse.json(
-      { success: false, error: error?.message || 'Gagal menambahkan komentar' },
+      { success: false, error: msg },
       { status: 500 }
     );
   }

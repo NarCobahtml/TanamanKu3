@@ -54,15 +54,17 @@ export default function CreatePostPage() {
       if (draftRaw) {
         try {
           const parsed = JSON.parse(draftRaw);
-          if (parsed.title) setTitle(parsed.title);
-          if (parsed.content) setContent(parsed.content);
-          if (parsed.category) setCategory(parsed.category);
-          const img = parsed.photo || sessionStorage.getItem("scan-capture");
-          if (img) setPhotoPreview(img);
-          setIsFromScan(true);
-          toast.info(
-            "Data hasil scan otomatis dimasukkan ke draf postingan. Anda dapat mengedit judul, teks, atau foto sebelum memposting."
-          );
+          requestAnimationFrame(() => {
+            if (parsed.title) setTitle(parsed.title);
+            if (parsed.content) setContent(parsed.content);
+            if (parsed.category) setCategory(parsed.category);
+            const img = parsed.photo || sessionStorage.getItem("scan-capture");
+            if (img) setPhotoPreview(img);
+            setIsFromScan(true);
+            toast.info(
+              "Data hasil scan otomatis dimasukkan ke draf postingan. Anda dapat mengedit judul, teks, atau foto sebelum memposting."
+            );
+          });
         } catch (e) {
           console.warn("Failed to parse scan forum draft:", e);
         }

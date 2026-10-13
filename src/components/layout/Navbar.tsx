@@ -40,8 +40,10 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     let isMounted = true;
+    const frame = requestAnimationFrame(() => {
+      setMounted(true);
+    });
     fetch('/api/notifications')
       .then((r) => r.json())
       .then((j) => {
@@ -51,6 +53,7 @@ export default function Navbar() {
       })
       .catch(() => {});
     return () => {
+      cancelAnimationFrame(frame);
       isMounted = false;
     };
   }, []);

@@ -19,11 +19,7 @@ import { getContent } from './scan-content';
 import { useLocale } from '@/components/layout/LocaleProvider';
 import { useScanResult, useScanPhoto } from './use-scan-result';
 import { CommunityAskBanner, DiagnosisSummaryCard } from './components';
-
-interface ScanData {
-  class: string;
-  confidence: number;
-}
+import type { ScanData } from './types';
 
 export default function ScanResultPage() {
   const t = useTranslations('scanResult');
