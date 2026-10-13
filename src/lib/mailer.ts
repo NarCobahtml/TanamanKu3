@@ -132,6 +132,41 @@ export function sendOtpEmail(params: {
   });
 }
 
+export function sendPasswordResetEmail(params: {
+  to: string;
+  name: string;
+  otp: string;
+  ttlMinutes: number;
+  idempotencyKey?: string;
+}): Promise<MailResult> {
+  const { to, name, otp, ttlMinutes } = params;
+  const greeting = name.trim() || 'Pengguna';
+
+  const html = layout(`
+    <p style="margin:0 0 16px;">Halo <strong>${escapeHtml(greeting)}</strong>,</p>
+    <p style="margin:0 0 20px;">Kami menerima permintaan untuk mengatur ulang kata sandi akun TumbuhKita Anda. Gunakan kode verifikasi di bawah ini:</p>
+    <div style="margin:0 0 20px;padding:18px 0;text-align:center;background:#f0f5f2;border:1px solid #dfe6e1;border-radius:12px;">
+      <span style="font-size:32px;font-weight:700;letter-spacing:8px;color:#1b5e3f;font-family:'SFMono-Regular',Consolas,monospace;">${otp}</span>
+    </div>
+    <p style="margin:0 0 8px;font-size:14px;color:#59625d;">Kode berlaku selama <strong>${ttlMinutes} menit</strong> dan hanya bisa dipakai satu kali.</p>
+    <p style="margin:0;font-size:14px;color:#59625d;">Jika Anda tidak merasa meminta reset kata sandi, amankan akun Anda dan abaikan email ini.</p>
+  `);
+
+  const text =
+    `Halo ${greeting},\n\n` +
+    `Kode reset kata sandi TumbuhKita Anda: ${otp}\n\n` +
+    `Kode berlaku selama ${ttlMinutes} menit.\n` +
+    `Jika Anda tidak meminta reset kata sandi, abaikan email ini.`;
+
+  return sendMail({
+    to,
+    subject: `Kode Reset Kata Sandi TumbuhKita: ${otp}`,
+    html,
+    text,
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')

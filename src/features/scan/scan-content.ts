@@ -1,37 +1,15 @@
 // Konten edukatif per kelas output model Roboflow (resnet34-t1, 4 kelas).
 // Akurasi TIDAK di sini, datang dari response Roboflow di runtime.
 
-export type ScanClass =
-  | 'Apple___Black_rot'
-  | 'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot'
-  | 'Apple___healthy'
-  | 'Corn_(maize)___healthy';
+import type {
+  ScanClass,
+  Treatment,
+  ProductRec,
+  ClassContent,
+  ScanResultContent,
+} from './types';
 
-export interface Treatment {
-  title: string;
-  description: string;
-}
-
-export interface ProductRec {
-  name: string;
-  note: string;
-}
-
-export interface ClassContent {
-  label: string;
-  latin: string;
-  pathogen: string | null; // 'Jamur' | null untuk sehat
-  healthy: boolean;
-  crop: 'Apel' | 'Jagung';
-  headline: string; // kalimat peringatan/intro di bawah judul
-  aiAnalysis: string;
-  symptoms: string[];
-  affectedParts: string;
-  treatments: Treatment[];
-  products: ProductRec[];
-}
-
-export type ScanResultContent = ClassContent;
+export type { ScanClass, Treatment, ProductRec, ClassContent, ScanResultContent };
 
 const npk: ProductRec[] = [
   { name: 'Pupuk NPK Seimbang', note: 'Mendukung pertumbuhan optimal' },
