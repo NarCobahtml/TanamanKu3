@@ -54,7 +54,7 @@ export default function ScanDesktopView({
             autoPlay
             muted
             playsInline
-            poster="/figma-assets/plant-bananaleaf.jpg"
+            poster="/figma-assets/plant-bananaleaf.webp"
             className="h-full w-full object-cover"
             aria-label={t("pratinjau")}
           />

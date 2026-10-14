@@ -28,7 +28,7 @@ export default function Features() {
             <div className="md:col-span-2 relative rounded-md overflow-hidden min-h-[320px] md:min-h-[420px]">
               <div
                 className="absolute inset-0 bg-center bg-cover"
-                style={{ backgroundImage: "url('/figma-assets/scanned-leaf.png')" }}
+                style={{ backgroundImage: "url('/figma-assets/scanned-leaf.webp')" }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 flex flex-col items-start gap-3">

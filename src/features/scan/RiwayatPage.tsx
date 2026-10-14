@@ -44,7 +44,7 @@ const initialScans: ScanItem[] = [
     date: "01.09.2026",
     accuracy: 94,
     status: "terinfeksi",
-    photo: "/figma-assets/plant-chili.jpg",
+    photo: "/figma-assets/plant-chili.webp",
   },
   {
     id: 2,
@@ -62,7 +62,7 @@ const initialScans: ScanItem[] = [
     date: "27.08.2026",
     accuracy: 96,
     status: "sehat",
-    photo: "/figma-assets/plant-monstera.png",
+    photo: "/figma-assets/plant-monstera.webp",
   },
   {
     id: 4,
@@ -71,7 +71,7 @@ const initialScans: ScanItem[] = [
     date: "25.08.2026",
     accuracy: 91,
     status: "terinfeksi",
-    photo: "/figma-assets/plant-lidahmertua.jpg",
+    photo: "/figma-assets/plant-lidahmertua.webp",
   },
   {
     id: 5,
@@ -80,7 +80,7 @@ const initialScans: ScanItem[] = [
     date: "22.08.2026",
     accuracy: 97,
     status: "sehat",
-    photo: "/figma-assets/plant-calathea-figma.jpg",
+    photo: "/figma-assets/plant-calathea-figma.webp",
   },
 ];
 

@@ -27,7 +27,7 @@ export function DiagnosisSummaryCard({
         <div className="relative">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={photo || "/figma-assets/scanned-leaf.png"}
+            src={photo || "/figma-assets/scanned-leaf.webp"}
             alt={altText}
             className="aspect-[4/3] h-full w-full object-cover md:aspect-auto"
           />

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { issueOtp, isResendBlocked } from '@/lib/otp';
+import { issuePasswordResetToken, isResendBlocked } from '@/lib/otp';
 import { sendPasswordResetEmail } from '@/lib/mailer';
 
 export async function POST(request: Request) {
@@ -36,34 +36,42 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: `Tunggu ${resendCheck.retryAfterSeconds} detik sebelum meminta kode baru.`,
+          error: `Tunggu ${resendCheck.retryAfterSeconds} detik sebelum meminta tautan baru.`,
           cooldownSeconds: resendCheck.retryAfterSeconds,
         },
         { status: 429 }
       );
     }
 
-    // Terbitkan OTP reset password
-    const { otp, expiresAt } = await issueOtp(user.id, user.email);
+    // Terbitkan Magic Reset Token
+    const { token, expiresAt } = await issuePasswordResetToken(user.id, user.email);
+
+    // Ambil base URL host
+    const origin =
+      request.headers.get('origin') ||
+      request.headers.get('x-forwarded-host') ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'http://localhost:3000';
+    const baseUrl = origin.startsWith('http') ? origin : `https://${origin}`;
+    const resetUrl = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
 
     // Kirim email via Resend
     const mailRes = await sendPasswordResetEmail({
       to: user.email,
       name: user.name || 'Pengguna',
-      otp,
-      ttlMinutes: 10,
+      resetUrl,
+      ttlMinutes: 15,
     });
 
     const isDev = process.env.NODE_ENV !== 'production' || !process.env.RESEND_API_KEY;
 
     return NextResponse.json({
       success: true,
-      message: 'Kode reset kata sandi telah dikirimkan ke email Anda.',
+      message: 'Tautan untuk mengatur ulang kata sandi telah dikirim ke email Anda.',
       data: {
         email: user.email,
-        userId: user.id,
         expiresAt,
-        devOtp: isDev ? otp : undefined,
+        devResetUrl: isDev ? resetUrl : undefined,
         mailDelivered: mailRes.sent,
       },
     });

@@ -46,4 +46,8 @@ repomix*
 test.js
 scripts/
 
+# public assets
+public/
+
+
 

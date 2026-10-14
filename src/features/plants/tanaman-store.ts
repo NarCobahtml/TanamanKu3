@@ -7,13 +7,13 @@ export type { KategoriTanaman, StatusSiram, Tanaman };
 
 export const initialTanamanList: Tanaman[] = [
   { id: '1', nama: 'Monstera Deliciosa', jenis: 'hias', kategori: 'Indoor', status: 'hari-ini', nextWater: 'nw.hariIniSore', photo: '/figma-assets/monstera.avif' },
-  { id: '2', nama: 'Lidah Mertua', jenis: 'hias', kategori: 'Indoor', status: 'terjadwal', nextWater: 'nw.berikutnya3', photo: '/figma-assets/plant-lidahmertua.jpg' },
-  { id: '3', nama: 'Pisang', jenis: 'buah', kategori: 'Outdoor', status: 'terlambat', nextWater: 'nw.terlewat1', photo: '/figma-assets/plant-bananaleaf.jpg' },
-  { id: '4', nama: 'Ceri', jenis: 'buah', kategori: 'Outdoor', status: 'terjadwal', nextWater: 'nw.berikutnya2', photo: '/figma-assets/plant-cherryleaf.jpg' },
-  { id: '5', nama: 'Calathea', jenis: 'hias', kategori: 'Indoor', status: 'hari-ini', nextWater: 'nw.hariIniPagi', photo: '/figma-assets/plant-calathea-figma.jpg' },
-  { id: '6', nama: 'Tomat Ceri', jenis: 'sayuran', kategori: 'Kebun', status: 'terlambat', nextWater: 'nw.terlewat2', photo: '/figma-assets/plant-tomat-chery.jpg' },
-  { id: '7', nama: 'Cabai Rawit', jenis: 'sayuran', kategori: 'Kebun', status: 'terjadwal', nextWater: 'nw.berikutnyaBesok', photo: '/figma-assets/plant-chili.jpg' },
-  { id: '8', nama: 'Melati', jenis: 'hias', kategori: 'Outdoor', status: 'hari-ini', nextWater: 'nw.hariIniPagi', photo: '/figma-assets/plant-melati.jpg' },
+  { id: '2', nama: 'Lidah Mertua', jenis: 'hias', kategori: 'Indoor', status: 'terjadwal', nextWater: 'nw.berikutnya3', photo: '/figma-assets/plant-lidahmertua.webp' },
+  { id: '3', nama: 'Pisang', jenis: 'buah', kategori: 'Outdoor', status: 'terlambat', nextWater: 'nw.terlewat1', photo: '/figma-assets/plant-bananaleaf.webp' },
+  { id: '4', nama: 'Ceri', jenis: 'buah', kategori: 'Outdoor', status: 'terjadwal', nextWater: 'nw.berikutnya2', photo: '/figma-assets/plant-cherryleaf.webp' },
+  { id: '5', nama: 'Calathea', jenis: 'hias', kategori: 'Indoor', status: 'hari-ini', nextWater: 'nw.hariIniPagi', photo: '/figma-assets/plant-calathea-figma.webp' },
+  { id: '6', nama: 'Tomat Ceri', jenis: 'sayuran', kategori: 'Kebun', status: 'terlambat', nextWater: 'nw.terlewat2', photo: '/figma-assets/plant-tomat-chery.webp' },
+  { id: '7', nama: 'Cabai Rawit', jenis: 'sayuran', kategori: 'Kebun', status: 'terjadwal', nextWater: 'nw.berikutnyaBesok', photo: '/figma-assets/plant-chili.webp' },
+  { id: '8', nama: 'Melati', jenis: 'hias', kategori: 'Outdoor', status: 'hari-ini', nextWater: 'nw.hariIniPagi', photo: '/figma-assets/plant-melati.webp' },
 ];
 
 const STORAGE_KEY = 'tanamanku_plants_v3';

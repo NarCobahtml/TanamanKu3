@@ -48,7 +48,7 @@ export default function HowItWorks() {
                 <span className="text-sm text-muted-foreground">{t("hasil")}</span>
               </div>
               <img
-                src="/figma-assets/scanned-leaf.png"
+                src="/figma-assets/scanned-leaf.webp"
                 alt={t("alt")}
                 className="w-full aspect-[4/3] object-cover"
               />

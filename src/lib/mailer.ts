@@ -135,32 +135,39 @@ export function sendOtpEmail(params: {
 export function sendPasswordResetEmail(params: {
   to: string;
   name: string;
-  otp: string;
+  resetUrl: string;
   ttlMinutes: number;
   idempotencyKey?: string;
 }): Promise<MailResult> {
-  const { to, name, otp, ttlMinutes } = params;
+  const { to, name, resetUrl, ttlMinutes } = params;
   const greeting = name.trim() || 'Pengguna';
 
   const html = layout(`
     <p style="margin:0 0 16px;">Halo <strong>${escapeHtml(greeting)}</strong>,</p>
-    <p style="margin:0 0 20px;">Kami menerima permintaan untuk mengatur ulang kata sandi akun TumbuhKita Anda. Gunakan kode verifikasi di bawah ini:</p>
-    <div style="margin:0 0 20px;padding:18px 0;text-align:center;background:#f0f5f2;border:1px solid #dfe6e1;border-radius:12px;">
-      <span style="font-size:32px;font-weight:700;letter-spacing:8px;color:#1b5e3f;font-family:'SFMono-Regular',Consolas,monospace;">${otp}</span>
+    <p style="margin:0 0 20px;">Kami menerima permintaan untuk mengatur ulang kata sandi akun TanamanKu Anda. Klik tombol di bawah ini untuk membuat kata sandi baru:</p>
+    <div style="margin:24px 0 24px;text-align:center;">
+      <a href="${escapeHtml(resetUrl)}" style="display:inline-block;background:#1b5e3f;color:#ffffff;font-size:15px;font-weight:600;padding:12px 28px;text-decoration:none;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
+        Atur Ulang Kata Sandi
+      </a>
     </div>
-    <p style="margin:0 0 8px;font-size:14px;color:#59625d;">Kode berlaku selama <strong>${ttlMinutes} menit</strong> dan hanya bisa dipakai satu kali.</p>
-    <p style="margin:0;font-size:14px;color:#59625d;">Jika Anda tidak merasa meminta reset kata sandi, amankan akun Anda dan abaikan email ini.</p>
+    <p style="margin:0 0 8px;font-size:14px;color:#59625d;">Tautan ini berlaku selama <strong>${ttlMinutes} menit</strong> dan hanya dapat digunakan satu kali.</p>
+    <p style="margin:0 0 16px;font-size:12px;color:#8a948e;word-break:break-all;">
+      Jika tombol di atas tidak berfungsi, salin dan buka tautan berikut di browser Anda:<br />
+      <a href="${escapeHtml(resetUrl)}" style="color:#1b5e3f;">${escapeHtml(resetUrl)}</a>
+    </p>
+    <p style="margin:0;font-size:13px;color:#59625d;">Jika Anda tidak meminta pengaturan ulang kata sandi, abaikan email ini. Akun Anda tetap aman.</p>
   `);
 
   const text =
     `Halo ${greeting},\n\n` +
-    `Kode reset kata sandi TumbuhKita Anda: ${otp}\n\n` +
-    `Kode berlaku selama ${ttlMinutes} menit.\n` +
-    `Jika Anda tidak meminta reset kata sandi, abaikan email ini.`;
+    `Kami menerima permintaan untuk mengatur ulang kata sandi akun TanamanKu Anda.\n\n` +
+    `Buka tautan berikut untuk membuat kata sandi baru:\n${resetUrl}\n\n` +
+    `Tautan berlaku selama ${ttlMinutes} menit dan hanya dapat digunakan satu kali.\n` +
+    `Jika Anda tidak meminta pengaturan ulang kata sandi, abaikan email ini.`;
 
   return sendMail({
     to,
-    subject: `Kode Reset Kata Sandi TumbuhKita: ${otp}`,
+    subject: `Atur Ulang Kata Sandi Akun TanamanKu`,
     html,
     text,
     idempotencyKey: params.idempotencyKey,

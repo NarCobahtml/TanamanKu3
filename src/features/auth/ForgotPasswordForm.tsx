@@ -2,37 +2,26 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  KeyRound,
   Mail,
   Loader2,
   AlertCircle,
   CheckCircle2,
-  Eye,
-  EyeOff,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AuthTestimonialPanel } from "./components";
 
-type Step = "request" | "verify";
-
 export default function ForgotPasswordForm() {
-  const router = useRouter();
-  const [step, setStep] = useState<Step>("request");
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [devOtp, setDevOtp] = useState<string | undefined>(undefined);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [devResetUrl, setDevResetUrl] = useState<string | undefined>(undefined);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // 1. Kirim permintaan kode reset OTP ke email
-  const handleRequestOtp = async (e: React.FormEvent) => {
+  // Kirim permintaan tautan reset kata sandi ke email
+  const handleRequestResetLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
 
@@ -49,63 +38,15 @@ export default function ForgotPasswordForm() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "Gagal mengirim kode reset kata sandi");
+        throw new Error(data.error || "Gagal mengirim tautan reset kata sandi");
       }
 
-      if (data.data?.devOtp) {
-        setDevOtp(data.data.devOtp);
+      if (data.data?.devResetUrl) {
+        setDevResetUrl(data.data.devResetUrl);
       }
 
-      toast.success(data.message || "Kode reset telah dikirim ke email Anda.");
-      setStep("verify");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Terjadi kesalahan";
-      setErrorMessage(msg);
-    } finally {
-      setPending(false);
-    }
-  };
-
-  // 2. Submit verifikasi OTP dan simpan password baru
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!otp.trim() || !newPassword.trim()) return;
-
-    if (newPassword !== confirmPassword) {
-      setErrorMessage("Konfirmasi kata sandi tidak cocok");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setErrorMessage("Kata sandi baru minimal harus 6 karakter");
-      return;
-    }
-
-    setPending(true);
-    setErrorMessage(null);
-
-    try {
-      const res = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          otp: otp.trim(),
-          newPassword,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Gagal mengatur ulang kata sandi");
-      }
-
-      setIsSuccess(true);
-      toast.success("Kata sandi berhasil diatur ulang! Silakan masuk kembali.");
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      setIsSubmitted(true);
+      toast.success("Tautan reset kata sandi telah dikirim ke email Anda.");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Terjadi kesalahan";
       setErrorMessage(msg);
@@ -135,40 +76,68 @@ export default function ForgotPasswordForm() {
             </Link>
           </div>
 
-          {isSuccess ? (
-            <div className="py-8 text-center space-y-4">
+          {isSubmitted ? (
+            <div className="py-6 space-y-5 text-center">
               <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
                 <CheckCircle2 className="size-8" />
               </div>
 
-              <div className="space-y-1">
-                <h2 className="text-xl font-bold tracking-tight text-foreground">
-                  Kata Sandi Berhasil Diubah!
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                  Periksa Email Anda
                 </h2>
-                <p className="text-sm text-muted-foreground">
-                  Akun Anda sudah diperbarui. Mengalihkan ke halaman masuk...
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Kami telah mengirimkan tautan reset kata sandi ke{" "}
+                  <strong className="text-foreground font-medium">{email}</strong>.
+                  Tautan berlaku selama 15 menit.
                 </p>
               </div>
 
-              <div className="pt-2">
-                <Link
-                  href="/login"
+              {/* Banner Dev Shortcut (jika di local development) */}
+              {devResetUrl && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3.5 text-left text-xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-primary">Mode Dev Link:</span>
+                    <a
+                      href={devResetUrl}
+                      className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+                    >
+                      Buka Tautan Langsung
+                      <ExternalLink className="size-3" />
+                    </a>
+                  </div>
+                  <p className="font-mono text-muted-foreground break-all">{devResetUrl}</p>
+                </div>
+              )}
+
+              <div className="pt-2 flex flex-col gap-2.5">
+                <a
+                  href={`mailto:${email}`}
                   className="flex h-11 w-full items-center justify-center rounded-lg bg-ink text-sm font-semibold text-white transition-opacity hover:opacity-90"
                 >
-                  Masuk Sekarang
-                </Link>
+                  Buka Aplikasi Email
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSubmitted(false);
+                    setDevResetUrl(undefined);
+                  }}
+                  className="text-xs text-muted-foreground hover:text-foreground cursor-pointer py-1"
+                >
+                  Gunakan alamat email lain atau kirim ulang
+                </button>
               </div>
             </div>
           ) : (
             <>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-                  {step === "request" ? "Lupa Kata Sandi?" : "Atur Ulang Kata Sandi"}
+                  Lupa Kata Sandi?
                 </h1>
                 <p className="text-sm text-muted-foreground mt-2">
-                  {step === "request"
-                    ? "Masukkan alamat email Anda untuk menerima kode verifikasi."
-                    : `Masukkan 6 digit kode yang dikirim ke ${email} dan kata sandi baru Anda.`}
+                  Masukkan alamat email akun Anda. Kami akan mengirimkan tautan ajaib (magic link) untuk mengatur ulang kata sandi.
                 </p>
               </div>
 
@@ -179,147 +148,37 @@ export default function ForgotPasswordForm() {
                 </div>
               )}
 
-              {step === "request" ? (
-                /* Form Request Email */
-                <form onSubmit={handleRequestOtp} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
-                  Alamat Email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                  <input
-                    id="email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="nama@email.com"
-                    className="h-11 w-full rounded-lg border border-border bg-background pl-10 pr-3.5 text-sm transition-colors focus:border-primary focus:outline-none"
-                    disabled={pending}
-                  />
+              <form onSubmit={handleRequestResetLink} className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-medium">
+                    Alamat Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <input
+                      id="email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="nama@email.com"
+                      className="h-11 w-full rounded-lg border border-border bg-background pl-10 pr-3.5 text-sm transition-colors focus:border-primary focus:outline-none"
+                      disabled={pending}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <button
-                type="submit"
-                disabled={pending || !email}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-              >
-                {pending && <Loader2 className="size-4 animate-spin" />}
-                {pending ? "Mengirim Kode..." : "Kirim Kode Verifikasi"}
-              </button>
-            </form>
-          ) : (
-            /* Form Masukkan OTP & Password Baru */
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              {devOtp && (
-                <div className="flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-200">
-                  <span className="flex items-center gap-1.5 font-mono">
-                    <KeyRound className="size-3.5" />
-                    Kode Dev: <strong>{devOtp}</strong>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setOtp(devOtp)}
-                    className="font-semibold text-primary hover:underline cursor-pointer"
-                  >
-                    Pakai Kode
-                  </button>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <label htmlFor="otp" className="text-sm font-medium">
-                  Kode 6 Digit OTP
-                </label>
-                <input
-                  id="otp"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="\d{6}"
-                  maxLength={6}
-                  required
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  placeholder="000000"
-                  className="h-11 w-full text-center font-mono text-lg tracking-widest rounded-lg border border-border bg-background transition-colors focus:border-primary focus:outline-none"
-                  disabled={pending}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="newPassword" className="text-sm font-medium">
-                  Kata Sandi Baru
-                </label>
-                <div className="relative">
-                  <input
-                    id="newPassword"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    minLength={6}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Minimal 6 karakter"
-                    className="h-11 w-full rounded-lg border border-border bg-background px-3.5 pr-10 text-sm transition-colors focus:border-primary focus:outline-none"
-                    disabled={pending}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="size-4" />
-                    ) : (
-                      <Eye className="size-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="confirmPassword" className="text-sm font-medium">
-                  Ulangi Kata Sandi Baru
-                </label>
-                <input
-                  id="confirmPassword"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  minLength={6}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Ulangi kata sandi baru"
-                  className="h-11 w-full rounded-lg border border-border bg-background px-3.5 text-sm transition-colors focus:border-primary focus:outline-none"
-                  disabled={pending}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={pending || otp.length !== 6 || !newPassword}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-              >
-                {pending && <Loader2 className="size-4 animate-spin" />}
-                {pending ? "Memperbarui Kata Sandi..." : "Simpan Kata Sandi Baru"}
-              </button>
-
-              <div className="text-center pt-2">
                 <button
-                  type="button"
-                  onClick={() => {
-                    setStep("request");
-                    setErrorMessage(null);
-                  }}
-                  className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                  type="submit"
+                  disabled={pending || !email}
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                 >
-                  Ubah email tujuan
+                  {pending && <Loader2 className="size-4 animate-spin" />}
+                  {pending ? "Mengirim Tautan..." : "Kirim Tautan Reset"}
                 </button>
-              </div>
-            </form>
+              </form>
+            </>
           )}
-        </>
-      )}
         </div>
       </div>
     </div>
