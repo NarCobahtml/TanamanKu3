@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     });
 
     // 3. Handle photo upload if base64
-    let imageUrl = '/figma-assets/plant-monstera.png';
+    let imageUrl = '/figma-assets/plant-monstera.webp';
     if (typeof photo === 'string' && photo.startsWith('data:image/')) {
       try {
         const matches = photo.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);

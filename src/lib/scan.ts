@@ -103,7 +103,7 @@ const INITIAL_MOCK_SCANS = [
   {
     id: 'scan-1',
     diseaseId: 'disease-chili-phytophthora',
-    imageUrl: '/figma-assets/plant-chili.jpg',
+    imageUrl: '/figma-assets/plant-chili.webp',
     confidence: 0.94,
     status: 'BERHASIL' as const,
     createdAt: new Date('2026-09-01T10:00:00Z'),
@@ -111,7 +111,7 @@ const INITIAL_MOCK_SCANS = [
   {
     id: 'scan-2',
     diseaseId: 'disease-tomat-sehat',
-    imageUrl: '/figma-assets/plant-tomat-chery.jpg',
+    imageUrl: '/figma-assets/plant-tomat-chery.webp',
     confidence: 0.98,
     status: 'BERHASIL' as const,
     createdAt: new Date('2026-08-30T14:30:00Z'),
@@ -119,7 +119,7 @@ const INITIAL_MOCK_SCANS = [
   {
     id: 'scan-3',
     diseaseId: 'disease-monstera-sehat',
-    imageUrl: '/figma-assets/plant-monstera.png',
+    imageUrl: '/figma-assets/plant-monstera.webp',
     confidence: 0.96,
     status: 'BERHASIL' as const,
     createdAt: new Date('2026-08-27T09:15:00Z'),
@@ -127,7 +127,7 @@ const INITIAL_MOCK_SCANS = [
   {
     id: 'scan-4',
     diseaseId: 'disease-lidahmertua-xanthomonas',
-    imageUrl: '/figma-assets/plant-lidahmertua.jpg',
+    imageUrl: '/figma-assets/plant-lidahmertua.webp',
     confidence: 0.91,
     status: 'BERHASIL' as const,
     createdAt: new Date('2026-08-25T16:45:00Z'),
@@ -135,7 +135,7 @@ const INITIAL_MOCK_SCANS = [
   {
     id: 'scan-5',
     diseaseId: 'disease-calathea-sehat',
-    imageUrl: '/figma-assets/plant-calathea-figma.jpg',
+    imageUrl: '/figma-assets/plant-calathea-figma.webp',
     confidence: 0.97,
     status: 'BERHASIL' as const,
     createdAt: new Date('2026-08-22T11:20:00Z'),

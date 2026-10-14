@@ -6,7 +6,7 @@ import TkRevealClient from '@/components/shared/tk-reveal-client';
 
 const POSTS = [
   {
-    avatar: '/figma-assets/profile-2.jpg',
+    avatar: '/figma-assets/profile-2.webp',
     name: 'Rani Pratiwi',
     role: 'Pemilik 23 tanaman',
     title: 'Daun cabai saya berbintik kuning, ini penyakit apa?',
@@ -14,7 +14,7 @@ const POSTS = [
     replies: '12 balasan',
   },
   {
-    avatar: '/figma-assets/plant-chili.jpg',
+    avatar: '/figma-assets/plant-chili.webp',
     name: 'Bagus Setiawan',
     role: 'Anggota sejak 2025',
     title: 'Tanah gambut cocok untuk apa ya?',
@@ -22,7 +22,7 @@ const POSTS = [
     replies: '5 balasan',
   },
   {
-    avatar: '/figma-assets/profile-3.jpg',
+    avatar: '/figma-assets/profile-3.webp',
     name: 'Reza Mahendra',
     role: 'Ahli hortikultura',
     title: 'Panduan: jarak penyiraman musim kemarau',

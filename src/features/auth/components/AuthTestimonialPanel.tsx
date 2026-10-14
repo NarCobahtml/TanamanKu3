@@ -5,7 +5,7 @@ export function AuthTestimonialPanel() {
     <div className="relative hidden overflow-hidden lg:block">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/figma-assets/hero-plant.jpg"
+        src="/figma-assets/hero-plant.webp"
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
       />

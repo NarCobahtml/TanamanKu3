@@ -210,7 +210,7 @@ export default function ProfilPage() {
               <div className="flex items-center gap-3.5">
                 <div className="h-11 w-11 rounded-xl bg-[#123526] p-2 flex items-center justify-center shrink-0 shadow-xs">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icons/icon-192x192.png" alt="TanamanKu" className="h-full w-full object-contain" />
+                  <img src="/icons/logo-only.svg" alt="TanamanKu" className="h-full w-full object-contain" />
                 </div>
                 <div>
                   <h3 className="font-bold text-sm sm:text-base text-foreground">Pasang Aplikasi TanamanKu</h3>

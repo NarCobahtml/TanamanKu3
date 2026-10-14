@@ -117,6 +117,74 @@ export async function verifyOtp(userId: string, otp: string): Promise<VerifyResu
 }
 
 /**
+ * Issue Magic Reset Token (32 bytes hex, aman di URL) dengan masa aktif 15 menit.
+ */
+export async function issuePasswordResetToken(
+  userId: string,
+  email: string
+): Promise<{ token: string; expiresAt: Date }> {
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 menit
+
+  // Bersihkan riwayat token yang sudah lebih dari 1 jam
+  const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  await prisma.verificationToken.deleteMany({
+    where: { userId, createdAt: { lt: hourAgo } },
+  });
+
+  // Nonaktifkan token aktif sebelumnya
+  await prisma.verificationToken.updateMany({
+    where: { userId, expiresAt: { gt: new Date() } },
+    data: { expiresAt: new Date(0) },
+  });
+
+  await prisma.verificationToken.create({
+    data: {
+      userId,
+      email,
+      tokenHash: tokenHash(token, userId),
+      expiresAt,
+    },
+  });
+
+  return { token, expiresAt };
+}
+
+/**
+ * Verifikasi Magic Reset Token.
+ * Mengembalikan user record jika token valid dan belum expired.
+ */
+export async function verifyPasswordResetToken(token: string): Promise<
+  | { ok: true; userId: string; email: string }
+  | { ok: false; reason: VerifyFailure }
+> {
+  if (!token || token.length < 32) {
+    return { ok: false, reason: 'NO_TOKEN' };
+  }
+
+  // Cari semua token aktif yang belum expired
+  const activeTokens = await prisma.verificationToken.findMany({
+    where: { expiresAt: { gt: new Date() } },
+    select: { id: true, userId: true, email: true, tokenHash: true },
+  });
+
+  for (const record of activeTokens) {
+    if (hashEquals(record.tokenHash, tokenHash(token, record.userId))) {
+      return { ok: true, userId: record.userId, email: record.email };
+    }
+  }
+
+  return { ok: false, reason: 'EXPIRED' };
+}
+
+/**
+ * Hapus token reset setelah berhasil digunakan untuk ganti kata sandi.
+ */
+export async function consumePasswordResetToken(userId: string): Promise<void> {
+  await prisma.verificationToken.deleteMany({ where: { userId } });
+}
+
+/**
  * True kalau user masih dalam cooldown resend. Dihitung dari createdAt token terakhir.
  */
 export async function isResendBlocked(
