@@ -135,41 +135,53 @@ export default function ForgotPasswordForm() {
             </Link>
           </div>
 
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">
-              {isSuccess
-                ? "Kata Sandi Diperbarui"
-                : step === "request"
-                  ? "Lupa Kata Sandi?"
-                  : "Atur Ulang Kata Sandi"}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-2">
-              {isSuccess
-                ? "Kata sandi Anda telah berhasil diubah. Mengalihkan ke halaman masuk..."
-                : step === "request"
-                  ? "Masukkan alamat email Anda untuk menerima 6 digit kode verifikasi reset kata sandi."
-                  : `Masukkan 6 digit kode yang dikirim ke ${email} dan kata sandi baru Anda.`}
-            </p>
-          </div>
-
-          {errorMessage && (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive flex items-center gap-2">
-              <AlertCircle className="size-4 shrink-0" />
-              <span>{errorMessage}</span>
-            </div>
-          )}
-
           {isSuccess ? (
-            <div className="rounded-xl border border-primary/30 bg-primary/10 p-6 text-center space-y-3">
-              <CheckCircle2 className="size-10 text-primary mx-auto" />
-              <p className="text-sm font-medium text-primary">
-                Berhasil mengatur ulang kata sandi!
-              </p>
-              <ButtonLink href="/login">Masuk Sekarang</ButtonLink>
+            <div className="py-8 text-center space-y-4">
+              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                <CheckCircle2 className="size-8" />
+              </div>
+
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold tracking-tight text-foreground">
+                  Kata Sandi Berhasil Diubah!
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Akun Anda sudah diperbarui. Mengalihkan ke halaman masuk...
+                </p>
+              </div>
+
+              <div className="pt-2">
+                <Link
+                  href="/login"
+                  className="flex h-11 w-full items-center justify-center rounded-lg bg-ink text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                >
+                  Masuk Sekarang
+                </Link>
+              </div>
             </div>
-          ) : step === "request" ? (
-            /* Form Request Email */
-            <form onSubmit={handleRequestOtp} className="space-y-4">
+          ) : (
+            <>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                  {step === "request" ? "Lupa Kata Sandi?" : "Atur Ulang Kata Sandi"}
+                </h1>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {step === "request"
+                    ? "Masukkan alamat email Anda untuk menerima kode verifikasi."
+                    : `Masukkan 6 digit kode yang dikirim ke ${email} dan kata sandi baru Anda.`}
+                </p>
+              </div>
+
+              {errorMessage && (
+                <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive flex items-center gap-2">
+                  <AlertCircle className="size-4 shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {step === "request" ? (
+                /* Form Request Email */
+                <form onSubmit={handleRequestOtp} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
                   Alamat Email
@@ -306,25 +318,10 @@ export default function ForgotPasswordForm() {
               </div>
             </form>
           )}
+        </>
+      )}
         </div>
       </div>
     </div>
-  );
-}
-
-function ButtonLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-    >
-      {children}
-    </Link>
   );
 }
