@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Pencil, Search, SearchX, Trash2 } from 'lucide-react';
+import { ChevronRight, Pencil, Search, SearchX, Trash2, Bell, BellRing } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,18 @@ import { ActionButton } from '@/components/ui/action-button';
 import { PageCtaBand } from '@/components/shared/PageCtaBand';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import {
+  isWateringNotificationEnabled,
+  setWateringNotificationEnabled,
+  requestWateringNotificationPermission,
+  checkAndTriggerWateringReminders,
+} from '@/lib/watering-notifications';
+import {
+  registerServerWebPush,
+  unsubscribeServerWebPush,
+} from '@/lib/web-push-client';
 import { useTanamanList, type Tanaman, type KategoriTanaman as Kategori } from './tanaman-store';
 import EditTanamanDialog from './EditTanamanDialog';
 import HapusTanamanDialog from './HapusTanamanDialog';
@@ -31,6 +43,48 @@ export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
   const [kategori, setKategori] = useState<'Semua' | Kategori>('Semua');
   const [editingPlant, setEditingPlant] = useState<Tanaman | null>(null);
   const [deletingPlant, setDeletingPlant] = useState<Tanaman | null>(null);
+  const [notifEnabled, setNotifEnabled] = useState(false);
+
+  useEffect(() => {
+    setNotifEnabled(isWateringNotificationEnabled());
+    const handlePrefChange = () => setNotifEnabled(isWateringNotificationEnabled());
+    window.addEventListener('tanamanku-notif-pref-changed', handlePrefChange);
+    return () => window.removeEventListener('tanamanku-notif-pref-changed', handlePrefChange);
+  }, []);
+
+  const handleToggleNotif = async () => {
+    if (!notifEnabled) {
+      // 1. Coba daftarkan Server Web Push
+      const pushRes = await registerServerWebPush();
+      if (pushRes.success) {
+        setNotifEnabled(true);
+        setWateringNotificationEnabled(true);
+        toast.success('Pengingat Siram Server Web Push Aktif!', {
+          description: 'Anda akan diingatkan otomatis saat jadwal siram tiba, bahkan saat aplikasi ditutup.',
+        });
+        await checkAndTriggerWateringReminders(tanamanList, { force: true });
+      } else {
+        // Fallback ke izin lokal
+        const { granted, status } = await requestWateringNotificationPermission();
+        if (granted) {
+          setNotifEnabled(true);
+          toast.success('Pengingat siram lokal diaktifkan!');
+          await checkAndTriggerWateringReminders(tanamanList, { force: true });
+        } else if (status === 'denied') {
+          toast.error('Izin notifikasi diblokir browser', {
+            description: 'Silakan buka pengaturan browser / info situs untuk mengizinkan notifikasi.',
+          });
+        } else {
+          toast.error(pushRes.error || 'Gagal mengaktifkan Web Push.');
+        }
+      }
+    } else {
+      await unsubscribeServerWebPush();
+      setWateringNotificationEnabled(false);
+      setNotifEnabled(false);
+      toast.info('Pengingat siram dinonaktifkan.');
+    }
+  };
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -69,6 +123,30 @@ export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
                 <strong className="tnum text-sm font-bold text-destructive">{counts.terlambat}</strong> {ts("terlambat")}
               </span>
             </span>
+
+            {/* Tombol Pengingat Notifikasi Siram PWA */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleToggleNotif}
+              className={cn(
+                "rounded-xl gap-2 text-xs font-semibold cursor-pointer border transition-colors",
+                notifEnabled
+                  ? "border-emerald-500/40 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50"
+                  : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+              title={notifEnabled ? "Pengingat siram aktif. Klik untuk menonaktifkan." : "Aktifkan notifikasi pengingat siram"}
+            >
+              {notifEnabled ? (
+                <BellRing className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+              ) : (
+                <Bell className="size-3.5" />
+              )}
+              <span className="hidden sm:inline">
+                {notifEnabled ? "Pengingat Siram Aktif" : "Aktifkan Pengingat"}
+              </span>
+            </Button>
+
             <ActionButton onClick={onTambah}>
               {ts("tambah")}
             </ActionButton>

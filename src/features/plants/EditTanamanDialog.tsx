@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,24 @@ import {
 } from '@/components/ui/select';
 import { tanamanStore, type Tanaman, type KategoriTanaman, type StatusSiram } from './tanaman-store';
 
+interface PlantTypeOption {
+  slug: string;
+  name: string;
+}
+
+const FALLBACK_TYPES: PlantTypeOption[] = [
+  { slug: 'monstera', name: 'Monstera Deliciosa' },
+  { slug: 'mangga', name: 'Mangga' },
+  { slug: 'lidah-mertua', name: 'Lidah Mertua' },
+  { slug: 'cabai-rawit', name: 'Cabai Rawit' },
+  { slug: 'tomat-ceri', name: 'Tomat Ceri' },
+  { slug: 'calathea', name: 'Calathea' },
+  { slug: 'aglaonema', name: 'Aglaonema' },
+  { slug: 'hias', name: 'Tanaman Hias Lainnya' },
+  { slug: 'buah', name: 'Tanaman Buah Lainnya' },
+  { slug: 'sayuran', name: 'Tanaman Sayuran Lainnya' },
+];
+
 function EditTanamanForm({
   plant,
   onClose,
@@ -34,12 +52,34 @@ function EditTanamanForm({
   const tc = useTranslations('common');
   const td = useTranslations('tanamanDetail');
 
+  const [types, setTypes] = useState<PlantTypeOption[]>(FALLBACK_TYPES);
   const [form, setForm] = useState({
     nama: plant.nama,
+    jenis: plant.jenis || 'monstera',
     kategori: plant.kategori,
     status: plant.status,
   });
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/plant-types')
+      .then((res) => res.json())
+      .then((json) => {
+        if (isMounted && json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setTypes(
+            json.data.map((t: { slug: string; name: string }) => ({
+              slug: t.slug,
+              name: t.name,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +89,7 @@ function EditTanamanForm({
     try {
       await tanamanStore.editAsync(plant.id, {
         nama: form.nama.trim(),
+        jenis: form.jenis,
         kategori: form.kategori,
         status: form.status,
       });
@@ -86,9 +127,28 @@ function EditTanamanForm({
           />
         </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="edit-plant-jenis">{ts('jenisTanaman') || 'Jenis Tanaman (Spesies)'}</Label>
+          <Select
+            value={form.jenis}
+            onValueChange={(val) => setForm({ ...form, jenis: val })}
+          >
+            <SelectTrigger id="edit-plant-jenis" className="w-full">
+              <SelectValue placeholder="Pilih Jenis Tanaman" />
+            </SelectTrigger>
+            <SelectContent>
+              {types.map((j) => (
+                <SelectItem key={j.slug} value={j.slug}>
+                  {j.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
-            <Label htmlFor="edit-plant-kategori">{td('kategori') || 'Kategori'}</Label>
+            <Label htmlFor="edit-plant-kategori">Penempatan</Label>
             <Select
               value={form.kategori}
               onValueChange={(val: KategoriTanaman) => setForm({ ...form, kategori: val })}
@@ -97,9 +157,9 @@ function EditTanamanForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Indoor">Indoor</SelectItem>
-                <SelectItem value="Outdoor">Outdoor</SelectItem>
-                <SelectItem value="Kebun">Kebun</SelectItem>
+                <SelectItem value="Indoor">Indoor (Dalam Ruangan)</SelectItem>
+                <SelectItem value="Outdoor">Outdoor (Luar Ruangan)</SelectItem>
+                <SelectItem value="Kebun">Kebun / Pekarangan</SelectItem>
               </SelectContent>
             </Select>
           </div>

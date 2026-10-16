@@ -57,6 +57,11 @@ export type VerificationToken = Prisma.VerificationTokenModel
  */
 export type Plant = Prisma.PlantModel
 /**
+ * Model PlantType
+ * 
+ */
+export type PlantType = Prisma.PlantTypeModel
+/**
  * Model Disease
  * 
  */
@@ -91,3 +96,8 @@ export type Comment = Prisma.CommentModel
  * 
  */
 export type Notification = Prisma.NotificationModel
+/**
+ * Model PushSubscription
+ * 
+ */
+export type PushSubscription = Prisma.PushSubscriptionModel

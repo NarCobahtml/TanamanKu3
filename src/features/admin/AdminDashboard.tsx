@@ -13,6 +13,7 @@ import {
   Sun,
   Moon,
   Bell,
+  Sprout,
 } from "lucide-react";
 import {
   adminStats as defaultStats,
@@ -27,6 +28,7 @@ import type {
   UserItem,
   ModerationItem,
   TransactionItem,
+  PlantTypeItem,
 } from "./types";
 import {
   OverviewTab,
@@ -34,12 +36,13 @@ import {
   ModerationTab,
   BillingTab,
   SettingsTab,
+  PlantTypesTab,
 } from "./components";
 
 export default function AdminDashboard() {
   const { setTheme, resolvedTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<
-    "overview" | "users" | "moderation" | "billing" | "settings"
+    "overview" | "users" | "plant-types" | "moderation" | "billing" | "settings"
   >("overview");
 
   // Interactive local & live database states
@@ -54,6 +57,7 @@ export default function AdminDashboard() {
   >("Semua");
   const [moderations, setModerations] = useState<ModerationItem[]>(initialModeration);
   const [transactions, setTransactions] = useState<TransactionItem[]>(initialTransactions);
+  const [plantTypes, setPlantTypes] = useState<PlantTypeItem[]>([]);
 
   // Settings states
   const [maintenanceMode, setMaintenanceMode] = useState(false);
@@ -87,6 +91,17 @@ export default function AdminDashboard() {
       })
       .catch((err) => {
         console.warn('Failed to fetch admin stats:', err);
+      });
+
+    fetch('/api/admin/plant-types')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data)) {
+          setPlantTypes(json.data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to fetch plant types:', err);
       });
   };
 
@@ -392,6 +407,25 @@ export default function AdminDashboard() {
           </button>
 
           <button
+            onClick={() => setActiveTab("plant-types")}
+            className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+              activeTab === "plant-types"
+                ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Sprout className="h-4 w-4" />
+              <span>Jenis Tanaman</span>
+            </div>
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full ${activeTab === "plant-types" ? "bg-white/20 text-white font-bold" : "bg-secondary text-muted-foreground"}`}
+            >
+              {plantTypes.length}
+            </span>
+          </button>
+
+          <button
             onClick={() => setActiveTab("moderation")}
             className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === "moderation"
@@ -490,11 +524,13 @@ export default function AdminDashboard() {
                   ? "Ringkasan"
                   : activeTab === "users"
                     ? "Manajemen Pengguna"
-                    : activeTab === "moderation"
-                      ? "Moderasi Forum"
-                      : activeTab === "billing"
-                        ? "Langganan & Transaksi"
-                        : "Pengaturan Sistem"}
+                    : activeTab === "plant-types"
+                      ? "Katalog Jenis Tanaman"
+                      : activeTab === "moderation"
+                        ? "Moderasi Forum"
+                        : activeTab === "billing"
+                          ? "Langganan & Transaksi"
+                          : "Pengaturan Sistem"}
               </span>
             </div>
           </div>
@@ -506,6 +542,7 @@ export default function AdminDashboard() {
                 [
                   "overview",
                   "users",
+                  "plant-types",
                   "moderation",
                   "billing",
                   "settings",
@@ -524,11 +561,13 @@ export default function AdminDashboard() {
                     ? "Ringkasan"
                     : tab === "users"
                       ? "Pengguna"
-                      : tab === "moderation"
-                        ? "Moderasi"
-                        : tab === "billing"
-                          ? "Billing"
-                          : "Pengaturan"}
+                      : tab === "plant-types"
+                        ? "Jenis Tanaman"
+                        : tab === "moderation"
+                          ? "Moderasi"
+                          : tab === "billing"
+                            ? "Billing"
+                            : "Pengaturan"}
                 </button>
               ))}
             </div>
@@ -577,6 +616,13 @@ export default function AdminDashboard() {
               onToggleUserStatus={handleToggleUserStatus}
               onToggleUserPlan={handleToggleUserPlan}
               onDeleteUser={handleDeleteUser}
+            />
+          )}
+
+          {activeTab === "plant-types" && (
+            <PlantTypesTab
+              plantTypes={plantTypes}
+              onRefresh={fetchAdminData}
             />
           )}
 

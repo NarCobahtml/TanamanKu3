@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -24,9 +24,23 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const jenisList = ['hias', 'sayuran', 'buah', 'obat', 'umbi'] as const;
+interface PlantTypeOption {
+  slug: string;
+  name: string;
+  scientificName?: string;
+}
 
-/** Form tambah tanaman, dipakai desktop (toolbar) & mobile (FAB). Submit masih mock. */
+const defaultJenisList: PlantTypeOption[] = [
+  { slug: 'monstera', name: 'Monstera Deliciosa' },
+  { slug: 'mangga', name: 'Mangga' },
+  { slug: 'lidah-mertua', name: 'Lidah Mertua (Sansevieria)' },
+  { slug: 'cabai-rawit', name: 'Cabai Rawit' },
+  { slug: 'tomat-ceri', name: 'Tomat Ceri' },
+  { slug: 'calathea', name: 'Calathea' },
+  { slug: 'aglaonema', name: 'Aglaonema (Sri Rejeki)' },
+];
+
+/** Form tambah tanaman, dipakai desktop (toolbar) & mobile (FAB). */
 export default function TambahTanamanDialog({
   open,
   onOpenChange,
@@ -36,14 +50,36 @@ export default function TambahTanamanDialog({
 }) {
   const ts = useTranslations('siram');
   const tc = useTranslations('common');
+  const [types, setTypes] = useState<PlantTypeOption[]>(defaultJenisList);
   const [form, setForm] = useState({
     nama: '',
-    jenis: 'hias',
+    jenis: 'monstera',
     kategori: 'Indoor' as 'Indoor' | 'Outdoor' | 'Kebun',
     foto: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const fotoRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/plant-types')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data) && json.data.length > 0 && isMounted) {
+          setTypes(
+            json.data.map((item: { slug: string; name: string; scientificName?: string }) => ({
+              slug: item.slug,
+              name: item.name,
+              scientificName: item.scientificName,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const submitTambah = async () => {
     if (!form.nama.trim() || submitting) return;
@@ -102,14 +138,17 @@ export default function TambahTanamanDialog({
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="jenis-tanaman">{ts("jenisTanaman")}</Label>
-                <Select value={form.jenis} onValueChange={(v) => setForm({ ...form, jenis: v })}>
+                <Select
+                  value={form.jenis}
+                  onValueChange={(v) => setForm((prev) => ({ ...prev, jenis: v }))}
+                >
                   <SelectTrigger id="jenis-tanaman" className="w-full">
                     <SelectValue placeholder={ts("pilihJenis")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {jenisList.map((j) => (
-                      <SelectItem key={j} value={j}>
-                        {ts(j)}
+                    {types.map((j) => (
+                      <SelectItem key={j.slug} value={j.slug}>
+                        {j.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -83,12 +83,7 @@ export async function POST(request: Request) {
     // Use pure numeric ID (either passed in or generated from Date.now())
     const plantId = customId && /^\d+$/.test(customId) ? customId : Date.now().toString();
 
-    let resolvedKategori = kategori;
-    if (!resolvedKategori) {
-      if (jenis === 'hias') resolvedKategori = 'Indoor';
-      else if (jenis === 'sayuran' || jenis === 'buah') resolvedKategori = 'Kebun';
-      else resolvedKategori = 'Outdoor';
-    }
+    const resolvedKategori = kategori && ['Indoor', 'Outdoor', 'Kebun'].includes(kategori) ? kategori : 'Indoor';
 
     const newPlant = await prisma.plant.create({
       data: {
