@@ -40,7 +40,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
+    let normalizedEmail = email.trim().toLowerCase();
+
+    // Mendukung login menggunakan username maupun email
+    if (!normalizedEmail.includes('@')) {
+      const userByName = await prisma.user.findFirst({
+        where: { name: { equals: email.trim(), mode: 'insensitive' } },
+        select: { email: true },
+      });
+      if (userByName?.email) {
+        normalizedEmail = userByName.email.toLowerCase();
+      }
+    }
 
     // 0. Gate verifikasi email: akun dari /register (passwordHash scrypt) baru bisa
     //    login setelah OTP benar. User legacy & social login lolos — keduanya sudah

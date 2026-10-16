@@ -17,8 +17,13 @@ export default async function AdminPage() {
     redirect('/login?next=/admin');
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
+  const dbUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { id: user.id },
+        ...(user.email ? [{ email: user.email.toLowerCase() }] : []),
+      ],
+    },
     select: { role: true },
   });
 

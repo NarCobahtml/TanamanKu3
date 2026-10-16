@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -20,6 +20,7 @@ export interface RegisterFormProps {
 
 export function RegisterForm({ onSubmit, pending }: RegisterFormProps) {
   const t = useTranslations("auth");
+  const [mounted, setMounted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [formData, setFormData] = useState({
@@ -28,6 +29,10 @@ export function RegisterForm({ onSubmit, pending }: RegisterFormProps) {
     password: "",
     confirm: "",
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -47,8 +52,30 @@ export function RegisterForm({ onSubmit, pending }: RegisterFormProps) {
     onSubmit({ name, email, password, confirm, agreed: true });
   };
 
+  if (!mounted) {
+    return (
+      <div className="space-y-4" aria-hidden="true">
+        <div className="flex h-12 w-full items-center rounded-lg border border-border bg-background px-4 text-sm text-muted-foreground/60 select-none">
+          {t("namaLengkap")}
+        </div>
+        <div className="flex h-12 w-full items-center rounded-lg border border-border bg-background px-4 text-sm text-muted-foreground/60 select-none">
+          {t("email")}
+        </div>
+        <div className="flex h-12 w-full items-center rounded-lg border border-border bg-background px-4 text-sm text-muted-foreground/60 select-none">
+          {t("password")}
+        </div>
+        <div className="flex h-12 w-full items-center rounded-lg border border-border bg-background px-4 text-sm text-muted-foreground/60 select-none">
+          {t("konfirmasiPassword")}
+        </div>
+        <div className="flex h-12 w-full items-center justify-center rounded-lg bg-ink text-sm font-semibold text-white select-none">
+          {t("buatAkun")}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
       <input
         type="text"
         name="name"
@@ -58,6 +85,7 @@ export function RegisterForm({ onSubmit, pending }: RegisterFormProps) {
         autoComplete="name"
         className={inputClass}
         required
+        suppressHydrationWarning
       />
 
       <input
@@ -69,6 +97,7 @@ export function RegisterForm({ onSubmit, pending }: RegisterFormProps) {
         autoComplete="email"
         className={inputClass}
         required
+        suppressHydrationWarning
       />
 
       <div className="relative">
@@ -81,12 +110,14 @@ export function RegisterForm({ onSubmit, pending }: RegisterFormProps) {
           autoComplete="new-password"
           className={`${inputClass} pr-12`}
           required
+          suppressHydrationWarning
         />
         <button
           type="button"
           onClick={() => setShowPassword((v) => !v)}
           aria-label={showPassword ? t("sembunyikan") : t("tampilkan")}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          suppressHydrationWarning
         >
           {showPassword ? (
             <EyeOff className="size-5" aria-hidden="true" />
@@ -106,12 +137,14 @@ export function RegisterForm({ onSubmit, pending }: RegisterFormProps) {
           autoComplete="new-password"
           className={`${inputClass} pr-12`}
           required
+          suppressHydrationWarning
         />
         <button
           type="button"
           onClick={() => setShowConfirm((v) => !v)}
           aria-label={showConfirm ? t("sembunyikan") : t("tampilkan")}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          suppressHydrationWarning
         >
           {showConfirm ? (
             <EyeOff className="size-5" aria-hidden="true" />
@@ -125,6 +158,7 @@ export function RegisterForm({ onSubmit, pending }: RegisterFormProps) {
         type="submit"
         disabled={pending}
         className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-ink text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+        suppressHydrationWarning
       >
         {pending && (
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
