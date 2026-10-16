@@ -6,6 +6,7 @@ import {
   isWateringNotificationEnabled,
   checkAndTriggerWateringReminders,
 } from '@/lib/watering-notifications';
+import { registerServerWebPush } from '@/lib/web-push-client';
 
 const CHECK_INTERVAL_MS = 20 * 60 * 1000; // Cek setiap 20 menit saat aplikasi aktif
 
@@ -15,6 +16,15 @@ export default function WateringNotificationWatcher() {
   plantsRef.current = plants;
 
   useEffect(() => {
+    // 0. Auto-sync token Server Web Push jika perangkat sudah pernah mengizinkan notifikasi
+    if (
+      typeof window !== 'undefined' &&
+      'Notification' in window &&
+      Notification.permission === 'granted'
+    ) {
+      registerServerWebPush().catch(() => {});
+    }
+
     // 1. Cek saat komponen di-mount pertama kali (setelah sedikit jeda agar app render siap)
     const initialTimer = setTimeout(() => {
       if (isWateringNotificationEnabled() && plantsRef.current.length > 0) {

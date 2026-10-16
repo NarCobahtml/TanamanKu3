@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -15,11 +15,16 @@ export interface LoginFormProps {
 
 export function LoginForm({ onSubmit, pending }: LoginFormProps) {
   const t = useTranslations("auth");
+  const [mounted, setMounted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -36,17 +41,39 @@ export function LoginForm({ onSubmit, pending }: LoginFormProps) {
     onSubmit({ email, password });
   };
 
+  if (!mounted) {
+    return (
+      <div className="space-y-4" aria-hidden="true">
+        <div className="flex h-12 w-full items-center rounded-lg border border-border bg-background px-4 text-sm text-muted-foreground/60 select-none">
+          {t("email")}
+        </div>
+        <div className="flex h-12 w-full items-center rounded-lg border border-border bg-background px-4 text-sm text-muted-foreground/60 select-none">
+          {t("password")}
+        </div>
+        <div className="text-right">
+          <span className="text-xs font-medium text-primary">
+            {t("lupaPassword")}
+          </span>
+        </div>
+        <div className="flex h-12 w-full items-center justify-center rounded-lg bg-ink text-sm font-semibold text-white select-none">
+          {t("masuk")}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
       <input
-        type="email"
+        type="text"
         name="email"
         value={formData.email}
         onChange={handleChange}
         placeholder={t("email")}
-        autoComplete="email"
+        autoComplete="username email"
         className={inputClass}
         required
+        suppressHydrationWarning
       />
 
       <div className="relative">
@@ -59,12 +86,14 @@ export function LoginForm({ onSubmit, pending }: LoginFormProps) {
           autoComplete="current-password"
           className={`${inputClass} pr-12`}
           required
+          suppressHydrationWarning
         />
         <button
           type="button"
           onClick={() => setShowPassword((v) => !v)}
           aria-label={showPassword ? t("sembunyikan") : t("tampilkan")}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          suppressHydrationWarning
         >
           {showPassword ? (
             <EyeOff className="size-5" aria-hidden="true" />
@@ -87,6 +116,7 @@ export function LoginForm({ onSubmit, pending }: LoginFormProps) {
         type="submit"
         disabled={pending}
         className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-ink text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+        suppressHydrationWarning
       >
         {pending && (
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
