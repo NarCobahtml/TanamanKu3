@@ -59,3 +59,20 @@ export interface ActivityLogItem {
   time: string;
   type: "user" | "mod" | "system" | "payment";
 }
+
+export interface PlantTypeItem {
+  id: string;
+  name: string;
+  slug: string;
+  scientificName?: string | null;
+  description?: string | null;
+  imageUrl?: string | null;
+  icon?: string | null;
+  defaultIntervalDays: number;
+  waterNeed?: string | null;
+  plantsCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+

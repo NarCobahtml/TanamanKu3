@@ -54,13 +54,15 @@ export const ModelName = {
   User: 'User',
   VerificationToken: 'VerificationToken',
   Plant: 'Plant',
+  PlantType: 'PlantType',
   Disease: 'Disease',
   ScanRecord: 'ScanRecord',
   WateringSchedule: 'WateringSchedule',
   Post: 'Post',
   PostLike: 'PostLike',
   Comment: 'Comment',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  PushSubscription: 'PushSubscription'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -128,6 +130,23 @@ export const PlantScalarFieldEnum = {
 } as const
 
 export type PlantScalarFieldEnum = (typeof PlantScalarFieldEnum)[keyof typeof PlantScalarFieldEnum]
+
+
+export const PlantTypeScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  scientificName: 'scientificName',
+  description: 'description',
+  imageUrl: 'imageUrl',
+  icon: 'icon',
+  defaultIntervalDays: 'defaultIntervalDays',
+  waterNeed: 'waterNeed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlantTypeScalarFieldEnum = (typeof PlantTypeScalarFieldEnum)[keyof typeof PlantTypeScalarFieldEnum]
 
 
 export const DiseaseScalarFieldEnum = {
@@ -230,6 +249,20 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const PushSubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  endpoint: 'endpoint',
+  p256dh: 'p256dh',
+  auth: 'auth',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum]
 
 
 export const SortOrder = {

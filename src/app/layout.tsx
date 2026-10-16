@@ -4,6 +4,7 @@ import { AuthProvider } from "@/lib/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import PwaPrompt from "@/components/shared/PwaPrompt";
+import WateringNotificationWatcher from "@/components/shared/WateringNotificationWatcher";
 import "./globals.css";
 import "./fonts.css";
 
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </LocaleProvider>
           <Toaster position="bottom-left" />
           <PwaPrompt />
+          <WateringNotificationWatcher />
         </ThemeProvider>
       </body>
     </html>
