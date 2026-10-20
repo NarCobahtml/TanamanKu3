@@ -1,8 +1,9 @@
 'use client';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const clean = base64String.replace(/["'\s]/g, '');
+  const padding = '='.repeat((4 - (clean.length % 4)) % 4);
+  const base64 = (clean + padding).replace(/-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
   for (let i = 0; i < rawData.length; ++i) {
@@ -42,13 +43,15 @@ export async function registerServerWebPush(): Promise<{
     };
   }
 
-  const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  if (!vapidPublicKey) {
+  const rawVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  if (!rawVapidKey) {
     return {
       success: false,
       error: 'NEXT_PUBLIC_VAPID_PUBLIC_KEY belum dikonfigurasi di lingkungan aplikasi.',
     };
   }
+
+  const vapidPublicKey = rawVapidKey.replace(/["'\s]/g, '');
 
   try {
     // 1. Minta izin notifikasi browser
@@ -67,10 +70,24 @@ export async function registerServerWebPush(): Promise<{
     let subscription = await registration.pushManager.getSubscription();
     if (!subscription) {
       const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: convertedVapidKey as unknown as BufferSource,
-      });
+      try {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedVapidKey as unknown as BufferSource,
+        });
+      } catch (firstErr) {
+        // Coba unsubscribe jika ada stale token dari key berbeda, lalu coba sekali lagi
+        const stale = await registration.pushManager.getSubscription();
+        if (stale) {
+          await stale.unsubscribe().catch(() => {});
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidKey as unknown as BufferSource,
+          });
+        } else {
+          throw firstErr;
+        }
+      }
     }
 
     // 4. Kirim data subscription ke server
@@ -95,9 +112,32 @@ export async function registerServerWebPush(): Promise<{
   } catch (error: unknown) {
     console.error('Error registering for Web Push:', error);
     const err = error as { message?: string };
+    const rawMsg = err.message || '';
+
+    // Deteksi jika penyebabnya adalah pemblokiran FCM oleh browser Brave
+    const isBrave =
+      typeof navigator !== 'undefined' &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (Boolean((navigator as any).brave) || navigator.userAgent.includes('Brave'));
+
+    if (rawMsg.includes('push service error') || rawMsg.includes('AbortError')) {
+      if (isBrave) {
+        return {
+          success: false,
+          error:
+            'Brave memblokir Google Push Service. Buka brave://settings/privacy lalu aktifkan "Use Google services for push messaging", atau coba di browser Chrome / Edge.',
+        };
+      }
+      return {
+        success: false,
+        error:
+          'Push service browser menolak registrasi. Pastikan tidak dalam mode Incognito/Private, dan koneksi internet stabil.',
+      };
+    }
+
     return {
       success: false,
-      error: err.message || 'Terjadi kesalahan saat mengaktifkan Web Push.',
+      error: rawMsg || 'Terjadi kesalahan saat mengaktifkan Web Push.',
     };
   }
 }
