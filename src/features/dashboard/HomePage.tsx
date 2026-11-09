@@ -14,7 +14,7 @@ import {
   HomeWateringSchedule,
   HomePlantCollection,
 } from './components';
-import { healthById, recentScans as defaultScans, wateringToday as defaultWatering } from './mock';
+import { healthById, getPlantHealth, recentScans as defaultScans, wateringToday as defaultWatering } from './mock';
 
 export default function HomePage() {
   const t = useTranslations("home");
@@ -22,7 +22,7 @@ export default function HomePage() {
   const { user } = useAuth();
   const tanamanList = useTanamanList();
   const heroPlant = tanamanList[0] || initialTanamanList[0];
-  const heroHealth = healthById[heroPlant.id] ?? { level: (heroPlant.status === 'terlambat' ? 'penyakit' : 'sehat') as HealthLevel, lastScan: '-' };
+  const heroHealth = getPlantHealth(heroPlant);
 
   const [liveScans, setLiveScans] = useState<typeof defaultScans>(defaultScans);
   const [scansLoading, setScansLoading] = useState(true);

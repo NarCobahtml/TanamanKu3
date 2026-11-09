@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Heart, Share2, ArrowLeft, MessageSquare, Reply, X, Trash2 } from 'lucide-react';
+import { Heart, Share2, ArrowLeft, MessageSquare, Reply, X, Trash2, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +13,7 @@ import type { ForumPost } from './types';
 import { CategoryText } from './components/CategoryText';
 import { ExpertBadge } from './components/ExpertBadge';
 import { HapusPostDialog } from './components/HapusPostDialog';
+import { ReportPostDialog } from './components/ReportPostDialog';
 import { getPostById, getAllPosts, fetchForumPostById, submitForumComment, toggleForumLike, isPostOwner } from './forum-storage';
 import { useAuth } from '@/lib/use-auth';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
@@ -54,6 +55,7 @@ export default function ForumDetailPage({
     return initialPost ?? forumPosts.find((p) => p.id === id) ?? forumPosts[0];
   });
   const [openHapusDialog, setOpenHapusDialog] = useState(false);
+  const [openReportDialog, setOpenReportDialog] = useState(false);
 
   const post = currentPost;
   const isOwner = isPostOwner(post, user);
@@ -226,7 +228,7 @@ export default function ForumDetailPage({
                   {post.time} · <CategoryText category={post.category} />
                 </p>
               </div>
-              {isOwner && (
+              {isOwner ? (
                 <Button
                   variant="outline"
                   size="sm"
@@ -236,6 +238,17 @@ export default function ForumDetailPage({
                 >
                   <Trash2 className="h-4 w-4" />
                   <span>Hapus Postingan</span>
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setOpenReportDialog(true)}
+                  className="text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 gap-1.5 cursor-pointer ml-auto sm:ml-2 text-xs"
+                  title="Laporkan postingan ini"
+                >
+                  <Flag className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Laporkan</span>
                 </Button>
               )}
             </div>
@@ -300,6 +313,19 @@ export default function ForumDetailPage({
                 <Share2 className="h-4 w-4" aria-hidden="true" />
                 {t("bagikan")}
               </Button>
+
+              {!isOwner && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setOpenReportDialog(true)}
+                  className="rounded-full bg-card hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-500/30 text-muted-foreground gap-1.5 cursor-pointer"
+                  title="Laporkan postingan ini"
+                >
+                  <Flag className="h-4 w-4" aria-hidden="true" />
+                  <span>Laporkan</span>
+                </Button>
+              )}
 
               {isOwner && (
                 <Button
@@ -558,6 +584,11 @@ export default function ForumDetailPage({
         onDeleted={() => {
           router.push('/forum');
         }}
+      />
+      <ReportPostDialog
+        open={openReportDialog}
+        onOpenChange={setOpenReportDialog}
+        post={post}
       />
     </div>
   );

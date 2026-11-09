@@ -10,6 +10,7 @@ import { CurrentPlanCard } from "@/components/shared/subscription/CurrentPlanCar
 import { ScanUsageCard } from "@/components/shared/subscription/ScanUsageCard";
 import TkRevealClient from "@/components/shared/tk-reveal-client";
 import { toast } from "sonner";
+import type { SubscriptionPlanItem, ScanQuotaData } from "./types";
 
 declare global {
   interface Window {
@@ -38,7 +39,7 @@ export default function LanggananPage() {
     let isMounted = true;
     fetch("/api/scan")
       .then((r) => r.json())
-      .then((j) => {
+      .then((j: { success: boolean; data?: ScanQuotaData }) => {
         if (j.success && j.data && isMounted) {
           setScanCount(j.data.used ?? 0);
           setUserTier(j.data.tier ?? "FREE");
@@ -50,7 +51,7 @@ export default function LanggananPage() {
     };
   }, []);
 
-  const plans = [
+  const plans: SubscriptionPlanItem[] = [
     {
       id: "gratis",
       name: t("paketGratis"),
@@ -78,7 +79,7 @@ export default function LanggananPage() {
     },
   ];
 
-  const handleSubscribe = async (plan: (typeof plans)[0]) => {
+  const handleSubscribe = async (plan: SubscriptionPlanItem) => {
     if (plan.isCurrent) return;
 
     setLoadingPlan(plan.id);

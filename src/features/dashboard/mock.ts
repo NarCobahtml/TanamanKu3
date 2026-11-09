@@ -1,11 +1,22 @@
 import type { HealthLevel } from '@/components/shared/HealthStatus';
-import { initialTanamanList as tanamanList } from '@/features/plants';
+import { initialTanamanList as tanamanList, type Tanaman } from '@/features/plants';
 
 /* ---- placeholder data (frontend-only, no backend) ---- */
 
 export type PlantHealth = { level: HealthLevel; lastScan: string };
 
 export const healthById: Record<string, PlantHealth> = {
+  // Numeric IDs matching initialTanamanList
+  '1': { level: 'sehat', lastScan: '27.08.2026' },
+  '2': { level: 'penyakit', lastScan: '25.08.2026' },
+  '3': { level: 'sehat', lastScan: '02.09.2026' },
+  '4': { level: 'sehat', lastScan: '01.09.2026' },
+  '5': { level: 'sehat', lastScan: '22.08.2026' },
+  '6': { level: 'penyakit', lastScan: '01.09.2026' },
+  '7': { level: 'sehat', lastScan: '30.08.2026' },
+  '8': { level: 'sehat', lastScan: '28.08.2026' },
+
+  // Slugs matching plant names
   monstera: { level: 'sehat', lastScan: '27.08.2026' },
   'lidah-mertua': { level: 'penyakit', lastScan: '25.08.2026' },
   pisang: { level: 'sehat', lastScan: '02.09.2026' },
@@ -15,6 +26,26 @@ export const healthById: Record<string, PlantHealth> = {
   cabai: { level: 'sehat', lastScan: '30.08.2026' },
   melati: { level: 'sehat', lastScan: '28.08.2026' },
 };
+
+/**
+ * Resilient lookup helper: looks up by plant ID, slug, or derives from status.
+ */
+export function getPlantHealth(plant?: Tanaman | { id?: string; nama?: string; status?: string | null } | null): PlantHealth {
+  if (!plant) return { level: 'sehat', lastScan: '-' };
+  if (plant.id && healthById[plant.id]) return healthById[plant.id];
+
+  const slug = (plant.nama || '').toLowerCase().trim().replace(/\s+/g, '-');
+  if (healthById[slug]) return healthById[slug];
+
+  for (const [k, v] of Object.entries(healthById)) {
+    if (slug.includes(k) || k.includes(slug)) return v;
+  }
+
+  return {
+    level: (plant.status === 'terlambat' ? 'penyakit' : 'sehat') as HealthLevel,
+    lastScan: '-',
+  };
+}
 
 export const recentScans = [
   { id: 1, plant: 'Tomat Ceri', disease: 'Early Blight (Alternaria solani)', confidence: 94, date: '01.09.2026', level: 'penyakit' as HealthLevel, photo: '/figma-assets/plant-tomat-chery.webp' },
