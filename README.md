@@ -15,7 +15,7 @@ Platform deteksi penyakit tanaman cerdas berbasis AI, pemantauan kesehatan tanam
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: [Next.js 16 (App Router)](https://nextjs.org/) dengan Turbopack
 - **UI Library**: [React 19](https://react.dev/), [Tailwind CSS v4](https://tailwindcss.com/), Radix UI Primitives, Lucide Icons
@@ -88,7 +88,3 @@ npm run start
 ```
 
 ---
-
-## 📖 Dokumentasi API
-
-Seluruh arsitektur, kontrak request/response, dan spesifikasi 32 endpoint backend didokumentasikan secara rinci pada [`API_ROUTES.md`](./API_ROUTES.md).
