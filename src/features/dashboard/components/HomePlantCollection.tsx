@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
 import type { Tanaman } from '@/features/plants';
 import type { PlantHealth } from '../mock';
+import { getPlantHealth } from '../mock';
 
 export interface HomePlantCollectionProps {
   plants: Tanaman[];
@@ -37,7 +38,7 @@ export function HomePlantCollection({ plants, healthById }: HomePlantCollectionP
       <TkRevealClient>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {plants.slice(0, 8).map((plant) => {
-            const h = healthById[plant.id] ?? { level: 'sehat', lastScan: '-' };
+            const h = healthById[plant.id] ?? getPlantHealth(plant);
             return (
               <Link
                 key={plant.id}

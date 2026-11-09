@@ -18,6 +18,7 @@ import type { ForumPost } from './types';
 import { useAuth } from '@/lib/use-auth';
 import { getAllPosts, fetchForumPosts, toggleForumLike, isPostOwner } from './forum-storage';
 import { HapusPostDialog } from './components/HapusPostDialog';
+import { ReportPostDialog } from './components/ReportPostDialog';
 import { extractHashtags } from '@/lib/forum-utils';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +37,8 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
   const [allPosts, setAllPosts] = useState<ForumPost[]>(() => forumPosts);
   const [postToDelete, setPostToDelete] = useState<ForumPost | null>(null);
   const [openHapusDialog, setOpenHapusDialog] = useState(false);
+  const [postToReport, setPostToReport] = useState<ForumPost | null>(null);
+  const [openReportDialog, setOpenReportDialog] = useState(false);
 
   // Sync with URL query parameters (?tag=... or ?q=...)
   useEffect(() => {
@@ -289,6 +292,10 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
                     setPostToDelete(post);
                     setOpenHapusDialog(true);
                   }}
+                  onReport={() => {
+                    setPostToReport(post);
+                    setOpenReportDialog(true);
+                  }}
                 />
               ))}
             </div>
@@ -358,6 +365,14 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
         post={postToDelete}
         onDeleted={() => {
           setPostToDelete(null);
+        }}
+      />
+      <ReportPostDialog
+        open={openReportDialog}
+        onOpenChange={setOpenReportDialog}
+        post={postToReport}
+        onReportSubmitted={() => {
+          setPostToReport(null);
         }}
       />
     </div>

@@ -13,25 +13,21 @@ import {
   VerifyOtpForm,
 } from "./components";
 import { createClient } from "@/lib/supabase/client";
+import type { AuthFormProps, AuthStep } from "./types";
 
 const PENDING_USER_KEY = 'tumbuhkita_pending_user';
-
-type Step = 'credentials' | 'verify';
 
 export default function AuthForm({
   mode,
   verified,
-}: {
-  mode: "login" | "register";
-  verified?: boolean;
-}) {
+}: AuthFormProps) {
   const router = useRouter();
   const t = useTranslations("auth");
   const tc = useTranslations("common");
   const isLogin = mode === "login";
   const [pending, setPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [step, setStep] = useState<Step>('credentials');
+  const [step, setStep] = useState<AuthStep>('credentials');
   const [pendingEmail, setPendingEmail] = useState('');
   const [devOtp, setDevOtp] = useState<string | undefined>(undefined);
 

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, MessageSquare, Trash2 } from 'lucide-react';
+import { Heart, MessageSquare, Trash2, Flag } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,7 @@ export interface ForumPostCardProps {
   onToggleLike: () => void;
   isOwner?: boolean;
   onDelete?: () => void;
+  onReport?: () => void;
   onSelectTag?: (tag: string) => void;
 }
 
@@ -25,6 +26,7 @@ export function ForumPostCard({
   onToggleLike,
   isOwner,
   onDelete,
+  onReport,
   onSelectTag,
 }: ForumPostCardProps) {
   const t = useTranslations('forum');
@@ -47,22 +49,39 @@ export function ForumPostCard({
             <span className="text-xs text-muted-foreground">{post.time}</span>
           </div>
 
-          {isOwner && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onDelete?.();
-              }}
-              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
-              title="Hapus postingan"
-              aria-label="Hapus postingan"
-            >
-              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Hapus</span>
-            </button>
-          )}
+          <div className="flex items-center gap-1">
+            {isOwner ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete?.();
+                }}
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                title="Hapus postingan"
+                aria-label="Hapus postingan"
+              >
+                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Hapus</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onReport?.();
+                }}
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
+                title="Laporkan postingan ini"
+                aria-label="Laporkan postingan"
+              >
+                <Flag className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="hidden sm:inline">Laporkan</span>
+              </button>
+            )}
+          </div>
         </div>
 
         <h2 className="mt-1.5 text-lg font-bold leading-snug tracking-tight">

@@ -1,12 +1,14 @@
-export type SubscriptionPlanId = "monthly" | "yearly";
+export type SubscriptionPlanId = "gratis" | "premium" | "annual";
 
-export interface SubscriptionPlan {
-  id: SubscriptionPlanId;
+export interface SubscriptionPlanItem {
+  id: string;
   name: string;
   price: string;
+  amount: number;
   period: string;
-  description: string;
   features: string[];
+  buttonLabel: string;
+  isCurrent: boolean;
   popular?: boolean;
 }
 
