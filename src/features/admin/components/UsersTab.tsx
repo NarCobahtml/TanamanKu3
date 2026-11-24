@@ -35,7 +35,7 @@ export function UsersTab({
 }: UsersTabProps) {
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/50">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
             Manajemen Pengguna
@@ -45,7 +45,7 @@ export function UsersTab({
           </p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-xs font-semibold tabular-nums text-muted-foreground bg-muted px-2.5 py-1 rounded-md border border-border/60">
+          <span className="text-xs text-muted-foreground font-medium">
             Total {filteredUsers.length} Pengguna
           </span>
         </div>
@@ -59,23 +59,20 @@ export function UsersTab({
             placeholder="Cari nama atau email..."
             value={userSearch}
             onChange={(e) => setUserSearch(e.target.value)}
-            className="pl-9 h-9 bg-card rounded-lg text-xs border-border/70 focus-visible:ring-1"
+            className="pl-9 h-9 bg-card rounded-xl text-xs border-border/60 focus-visible:ring-1"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Plan Filter Segment */}
-          <div className="flex items-center p-1 bg-muted/60 border border-border/60 rounded-lg">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-2">
-              Paket
-            </span>
+          <div className="flex items-center p-1 bg-muted/40 rounded-xl">
             {(["Semua", "Gratis", "Pro"] as const).map((plan) => (
               <button
                 key={plan}
                 onClick={() => setUserPlanFilter(plan)}
-                className={`px-2.5 py-1 text-xs rounded-md font-medium transition-all cursor-pointer ${
+                className={`px-3 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer ${
                   userPlanFilter === plan
-                    ? "bg-card text-foreground font-semibold shadow-2xs border border-border/60"
+                    ? "bg-foreground text-background font-semibold shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -85,17 +82,14 @@ export function UsersTab({
           </div>
 
           {/* Status Filter Segment */}
-          <div className="flex items-center p-1 bg-muted/60 border border-border/60 rounded-lg">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-2">
-              Status
-            </span>
+          <div className="flex items-center p-1 bg-muted/40 rounded-xl">
             {(["Semua", "Aktif", "Ditangguhkan"] as const).map((status) => (
               <button
                 key={status}
                 onClick={() => setUserStatusFilter(status)}
-                className={`px-2.5 py-1 text-xs rounded-md font-medium transition-all cursor-pointer ${
+                className={`px-3 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer ${
                   userStatusFilter === status
-                    ? "bg-card text-foreground font-semibold shadow-2xs border border-border/60"
+                    ? "bg-foreground text-background font-semibold shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -107,25 +101,25 @@ export function UsersTab({
       </div>
 
       {/* Users Table */}
-      <div className="rounded-xl border border-border/70 bg-card shadow-2xs overflow-hidden">
+      <div className="rounded-2xl border border-border/60 bg-card shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-muted/40 text-muted-foreground uppercase text-[10px] font-semibold tracking-wider border-b border-border/70">
+            <thead className="bg-muted/30 text-muted-foreground uppercase text-[10px] font-semibold tracking-wider border-b border-border/40">
               <tr>
                 <th className="px-5 py-3">Pengguna</th>
                 <th className="px-4 py-3">Paket</th>
                 <th className="px-4 py-3">Aktivitas Forum</th>
                 <th className="px-4 py-3">Tanggal Bergabung</th>
-                <th className="px-4 py-3">Status Akun</th>
-                <th className="px-5 py-3 text-right">Aksi Moderator</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-5 py-3 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/50">
+            <tbody className="divide-y divide-border/30">
               {filteredUsers.map((u) => (
-                <tr key={u.id} className="hover:bg-muted/30 transition-colors">
+                <tr key={u.id} className="hover:bg-muted/20 transition-colors">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2.5">
-                      <div className="h-7 w-7 rounded-md bg-primary/10 text-primary border border-primary/20 font-bold flex items-center justify-center text-[10px] shrink-0">
+                      <div className="h-7 w-7 rounded-lg bg-muted text-foreground font-semibold flex items-center justify-center text-[10px] shrink-0">
                         {u.name.slice(0, 2).toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -137,31 +131,18 @@ export function UsersTab({
                     </div>
                   </td>
                   <td className="px-4 py-3.5">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border ${
-                        u.plan === "Pro"
-                          ? "bg-primary/10 border-primary/30 text-primary font-semibold"
-                          : "bg-muted/60 border-border text-muted-foreground"
-                      }`}
-                    >
+                    <span className="text-xs font-medium text-foreground">
                       {u.plan}
                     </span>
                   </td>
-                  <td className="px-4 py-3.5 text-foreground tabular-nums">
+                  <td className="px-4 py-3.5 text-muted-foreground tabular-nums">
                     {u.postsCount} postingan
                   </td>
                   <td className="px-4 py-3.5 text-muted-foreground tabular-nums">
                     {u.joinDate}
                   </td>
                   <td className="px-4 py-3.5">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium ${
-                        u.status === "Aktif"
-                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                          : "bg-destructive/10 text-destructive border border-destructive/20"
-                      }`}
-                    >
-                      <span className={`h-1.5 w-1.5 rounded-full ${u.status === "Aktif" ? "bg-emerald-500" : "bg-destructive"}`} />
+                    <span className={`text-xs font-medium ${u.status === "Aktif" ? "text-foreground" : "text-muted-foreground"}`}>
                       {u.status}
                     </span>
                   </td>
@@ -172,7 +153,7 @@ export function UsersTab({
                         variant="outline"
                         disabled={updatingUserId === u.id}
                         onClick={() => onToggleUserPlan(u)}
-                        className="h-7 text-xs px-2.5 rounded-md cursor-pointer border-border hover:bg-muted font-medium"
+                        className="h-7 text-xs px-2.5 rounded-lg cursor-pointer border-border/70 hover:bg-muted font-medium"
                         title="Ubah paket langganan"
                       >
                         {u.plan === "Pro" ? "Ubah ke Gratis" : "Jadikan Pro"}
@@ -183,10 +164,10 @@ export function UsersTab({
                         variant={u.status === "Aktif" ? "outline" : "default"}
                         disabled={updatingUserId === u.id}
                         onClick={() => onToggleUserStatus(u)}
-                        className={`h-7 text-xs px-2.5 rounded-md cursor-pointer font-medium ${
+                        className={`h-7 text-xs px-2.5 rounded-lg cursor-pointer font-medium ${
                           u.status === "Aktif"
-                            ? "border-border hover:bg-muted"
-                            : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                            ? "border-border/70 hover:bg-muted"
+                            : "bg-foreground text-background hover:bg-foreground/90"
                         }`}
                       >
                         {u.status === "Aktif" ? (
@@ -207,7 +188,7 @@ export function UsersTab({
                         variant="ghost"
                         disabled={updatingUserId === u.id}
                         onClick={() => onDeleteUser(u)}
-                        className="h-7 w-7 p-0 rounded-md cursor-pointer text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        className="h-7 w-7 p-0 rounded-lg cursor-pointer text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         title="Hapus pengguna permanen"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
