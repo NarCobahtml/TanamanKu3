@@ -242,13 +242,13 @@ export default function ForumDetailPage({
               ) : (
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={() => setOpenReportDialog(true)}
-                  className="text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 gap-1.5 cursor-pointer ml-auto sm:ml-2 text-xs"
+                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 cursor-pointer ml-auto transition-colors"
                   title="Laporkan postingan ini"
+                  aria-label="Laporkan postingan ini"
                 >
-                  <Flag className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Laporkan</span>
+                  <Flag className="h-4 w-4" />
                 </Button>
               )}
             </div>
@@ -313,19 +313,6 @@ export default function ForumDetailPage({
                 <Share2 className="h-4 w-4" aria-hidden="true" />
                 {t("bagikan")}
               </Button>
-
-              {!isOwner && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setOpenReportDialog(true)}
-                  className="rounded-full bg-card hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-500/30 text-muted-foreground gap-1.5 cursor-pointer"
-                  title="Laporkan postingan ini"
-                >
-                  <Flag className="h-4 w-4" aria-hidden="true" />
-                  <span>Laporkan</span>
-                </Button>
-              )}
 
               {isOwner && (
                 <Button

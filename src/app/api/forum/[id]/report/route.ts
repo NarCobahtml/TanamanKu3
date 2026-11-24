@@ -33,14 +33,18 @@ export async function POST(
       );
     }
 
-    const { id: postId } = await params;
-    let post = await prisma.post.findUnique({
-      where: { id: postId },
+    const { id: rawPostId } = await params;
+    const postId = decodeURIComponent(rawPostId);
+
+    let post = await prisma.post.findFirst({
+      where: {
+        OR: [{ id: postId }, { id: rawPostId }],
+      },
     });
 
     // Jika post belum tersinkron di DB namun ada di mock default, sinkronkan ke DB sekarang
     if (!post) {
-      const mockPost = initialMockPosts.find((p) => p.id === postId);
+      const mockPost = initialMockPosts.find((p) => p.id === postId || p.id === rawPostId);
       if (mockPost) {
         post = await prisma.post.create({
           data: {
@@ -133,18 +137,6 @@ export async function POST(
 
       if (dbUser) {
         userId = dbUser.id;
-
-        // Cek laporan ganda pengguna pada postingan yang sama
-        const existingReport = await prisma.postReport.findFirst({
-          where: { postId: post.id, userId: dbUser.id },
-        });
-
-        if (existingReport) {
-          return NextResponse.json({
-            success: true,
-            message: 'Laporan Anda untuk postingan ini sudah tersimpan.',
-          });
-        }
       }
     }
 
