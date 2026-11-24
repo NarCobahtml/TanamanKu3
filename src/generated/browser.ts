@@ -77,3 +77,8 @@ export type Notification = Prisma.NotificationModel
  * 
  */
 export type PushSubscription = Prisma.PushSubscriptionModel
+/**
+ * Model PostReport
+ * 
+ */
+export type PostReport = Prisma.PostReportModel

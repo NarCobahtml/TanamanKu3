@@ -5,7 +5,7 @@ import { seedScanDataIfEmpty, formatScanRecord } from '@/lib/scan';
 
 export async function GET() {
   try {
-    // Ensure initial disease & scan entries are present in PostgreSQL
+    // Seed data scan awal
     await seedScanDataIfEmpty();
 
     let userId: string | null = null;
@@ -21,7 +21,7 @@ export async function GET() {
       // Unauthenticated / guest mode
     }
 
-    // Fetch user scans if logged in, or only initial sample scans (scan-1 to scan-5) for demo
+    // Ambil riwayat scan pengguna
     const demoScanIds = ['scan-1', 'scan-2', 'scan-3', 'scan-4', 'scan-5'];
     const records = await prisma.scanRecord.findMany({
       where: userId

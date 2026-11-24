@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     if (!targetSub) {
-      // Ambil langganan push terbaru jika tidak ditentukan
+      // Ambil push subscription terbaru
       targetSub = await prisma.pushSubscription.findFirst({
         orderBy: { updatedAt: 'desc' },
       });

@@ -51,7 +51,7 @@ export default function SiramDetailView() {
     if (!plant) return;
 
     if (!notifOn) {
-      // 1. Daftarkan ke Server Web Push
+      // 1. Daftarkan Server Web Push
       const pushRes = await registerServerWebPush();
       if (pushRes.success) {
         setPlantNotificationEnabled(plant.id, true);

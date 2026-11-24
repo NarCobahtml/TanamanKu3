@@ -11,15 +11,11 @@ export interface VerifyOtpFormProps {
   email: string;
   onVerified: () => void;
   onBack: () => void;
-  /** OTP dev-only dari server (dev tanpa RESEND_API_KEY) — dipakai biar bisa dites. */
+  // Kode OTP mode dev
   devOtp?: string;
 }
 
-/**
- * Step 2 dari register: input 6 digit OTP.
- * Auto-submit saat 6 digit terisi, plus countdown resend yang nilainya dikirim
- * server (server = sumber kebenaran; client cuma display).
- */
+// Form verifikasi input OTP
 export function VerifyOtpForm({ email, onVerified, onBack, devOtp }: VerifyOtpFormProps) {
   const t = useTranslations('auth');
   const [code, setCode] = useState('');
@@ -41,7 +37,7 @@ export function VerifyOtpForm({ email, onVerified, onBack, devOtp }: VerifyOtpFo
     return () => clearTimeout(id);
   }, [cooldown]);
 
-  // Cross-tab auto-detection: jika user memverifikasi lewat tab lain, otomatis redirect
+  // Deteksi verifikasi lintas tab
   useEffect(() => {
     const checkStatus = async () => {
       const userId = sessionStorage.getItem('tumbuhkita_pending_user');

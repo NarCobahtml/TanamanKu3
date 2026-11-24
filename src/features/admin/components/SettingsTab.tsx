@@ -186,7 +186,7 @@ export function SettingsTab({
         </div>
       </div>
 
-      {/* Server Web Push Diagnostics & Testing */}
+      {/* Diagnostik Web Push */}
       <div className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-6">
         <div>
           <div className="flex items-center gap-2">
@@ -201,7 +201,7 @@ export function SettingsTab({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Card 1: Tes ke Perangkat Admin */}
+          {/* Kartu tes perangkat admin */}
           <div className="rounded-xl border border-border/80 bg-muted/30 p-4 space-y-3 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
@@ -245,7 +245,7 @@ export function SettingsTab({
             </div>
           </div>
 
-          {/* Card 2: Broadcast Jadwal Siram (Simulasi Cron) */}
+          {/* Kartu broadcast simulasi cron */}
           <div className="rounded-xl border border-border/80 bg-muted/30 p-4 space-y-3 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">

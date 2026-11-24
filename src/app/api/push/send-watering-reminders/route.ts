@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
-    // 1. Verifikasi Otorisasi: CRON_SECRET atau Admin Session
+    // 1. Verifikasi otorisasi cron/admin
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET || 'tumbuhkita-watering-cron-secret-2026';
     const isCronAuthorized = authHeader === `Bearer ${cronSecret}`;
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Ambil seluruh tanaman yang masuk jadwal siram ('hari-ini' atau 'terlambat')
+    // 2. Ambil tanaman jatuh-tempo
     const duePlants = await prisma.plant.findMany({
       where: {
         OR: [{ status: 'hari-ini' }, { status: 'terlambat' }],
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // 3. Ambil seluruh langganan push yang aktif
+    // 3. Ambil langganan push
     const allSubscriptions = await prisma.pushSubscription.findMany();
 
     if (allSubscriptions.length === 0) {
@@ -77,10 +77,10 @@ export async function POST(request: Request) {
     let removedStaleCount = 0;
 
     for (const sub of allSubscriptions) {
-      // Tentukan tanaman yang ditujukan untuk perangkat ini
+      // Tentukan tanaman perangkat ini
       let userPlants = sub.userId ? plantsByUser.get(sub.userId) : null;
 
-      // Jika subscription guest atau user tidak punya tanaman spesifik di DB tapi ada tanaman umum
+      // Fallback tanaman guest/umum
       if (!userPlants && duePlants.length > 0) {
         userPlants = duePlants.slice(0, 3);
       }
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
       } catch (err: unknown) {
         failedCount++;
         const pushErr = err as { statusCode?: number };
-        // Status 410 (Gone) atau 404 (Not Found) menandakan perangkat sudah mencabut izin atau uninstall
+        // Hapus langganan tidak valid
         if (pushErr.statusCode === 410 || pushErr.statusCode === 404) {
           try {
             await prisma.pushSubscription.delete({ where: { id: sub.id } });

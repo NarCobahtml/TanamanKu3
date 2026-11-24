@@ -40,7 +40,7 @@ const defaultJenisList: PlantTypeOption[] = [
   { slug: 'aglaonema', name: 'Aglaonema (Sri Rejeki)' },
 ];
 
-/** Form tambah tanaman, dipakai desktop (toolbar) & mobile (FAB). */
+// Dialog form tambah tanaman
 export default function TambahTanamanDialog({
   open,
   onOpenChange,

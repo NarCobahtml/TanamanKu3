@@ -7,8 +7,13 @@ async function verifyAdmin() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
+  const dbUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { id: user.id },
+        ...(user.email ? [{ email: user.email.toLowerCase() }] : []),
+      ],
+    },
     select: { role: true },
   });
 
@@ -30,7 +35,7 @@ export async function PATCH(
 
   try {
     const { id } = await params;
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { action = 'approve' } = body;
 
     const existingPost = await prisma.post.findUnique({
@@ -47,8 +52,14 @@ export async function PATCH(
     const updated = await prisma.post.update({
       where: { id },
       data: {
-        isApproved: action === 'approve' || action === 'Abaikan',
+        isApproved: true,
       },
+    });
+
+    // Tandai status laporan selesai
+    await prisma.postReport.updateMany({
+      where: { postId: id },
+      data: { status: 'DISMISSED' },
     });
 
     return NextResponse.json({
@@ -90,6 +101,8 @@ export async function DELETE(
       );
     }
 
+    // Hapus data berelasi postingan
+    await prisma.postReport.deleteMany({ where: { postId: id } });
     await prisma.postLike.deleteMany({ where: { postId: id } });
     await prisma.comment.deleteMany({ where: { postId: id } });
     await prisma.post.delete({ where: { id } });

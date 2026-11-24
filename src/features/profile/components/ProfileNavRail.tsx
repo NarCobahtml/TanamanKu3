@@ -26,7 +26,7 @@ export function ProfileNavRail({ navItems, onNavigate }: ProfileNavRailProps) {
             <a
               href={item.href}
               onClick={(e) => {
-                if (item.href.startsWith('#')) return; // anchor: default
+                if (item.href.startsWith('#')) return; // Abaikan tautan anchor
                 e.preventDefault();
                 onNavigate(item.href);
               }}

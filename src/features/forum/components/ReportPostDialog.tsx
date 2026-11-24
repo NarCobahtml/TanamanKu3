@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Flag, AlertTriangle, CheckCircle2, ShieldAlert, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -62,6 +62,15 @@ export function ReportPostDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  useEffect(() => {
+    if (open) {
+      setSelectedReason('');
+      setAdditionalDetails('');
+      setIsSubmitting(false);
+      setIsSubmitted(false);
+    }
+  }, [open]);
+
   const handleReset = () => {
     setSelectedReason('');
     setAdditionalDetails('');
@@ -71,23 +80,42 @@ export function ReportPostDialog({
 
   const handleClose = () => {
     onOpenChange(false);
-    // Delay reset so animation finishes smoothly
+    // Jeda reset animasi dialog
     setTimeout(handleReset, 300);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedReason || !post) return;
 
     setIsSubmitting(true);
 
-    // Front-end only simulation
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Kirim laporan ke server
+      const res = await fetch(`/api/forum/${post.id}/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reason: selectedReason,
+          details: additionalDetails.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Gagal mengirim laporan');
+      }
+
       setIsSubmitted(true);
-      toast.success('Laporan berhasil dikirim ke moderator TanamanKu.');
+      toast.success(data.message || 'Laporan berhasil dikirim ke moderator TanamanKu.');
       onReportSubmitted?.(post.id, selectedReason, additionalDetails.trim());
-    }, 600);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Terjadi kesalahan saat mengirim laporan.';
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

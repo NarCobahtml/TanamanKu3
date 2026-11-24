@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ChevronRight, Pencil, Search, SearchX, Trash2, Bell, BellRing } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -17,6 +17,7 @@ import TkRevealClient from '@/components/shared/tk-reveal-client';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { Pagination } from '@/components/ui/pagination';
 import {
   isWateringNotificationEnabled,
   setWateringNotificationEnabled,
@@ -54,7 +55,7 @@ export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
 
   const handleToggleNotif = async () => {
     if (!notifEnabled) {
-      // 1. Coba daftarkan Server Web Push
+      // 1. Daftarkan Server Web Push
       const pushRes = await registerServerWebPush();
       if (pushRes.success) {
         setNotifEnabled(true);
@@ -104,6 +105,23 @@ export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
     [tanamanList],
   );
 
+  const listTopRef = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  // Reset nomor halaman pencarian
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, kategori, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+
+  const paginatedList = useMemo(() => {
+    const startIndex = (safePage - 1) * pageSize;
+    return filtered.slice(startIndex, startIndex + pageSize);
+  }, [filtered, safePage, pageSize]);
+
   return (
     <div>
       <PageHeader
@@ -113,7 +131,7 @@ export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
         description={ts("deskripsi")}
         actions={
           <>
-            {/* Watering ledger inline in the header, actionable summary */}
+            {/* Ringkasan jadwal siram header */}
             <span className="hidden items-center gap-4 text-xs text-muted-foreground md:flex">
               <span>
                 <strong className="tnum text-sm font-bold text-foreground">{counts.hariIni}</strong> {ts("siramHariIni")} {ts("ini")}
@@ -124,7 +142,7 @@ export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
               </span>
             </span>
 
-            {/* Tombol Pengingat Notifikasi Siram PWA */}
+            {/* Tombol notifikasi pengingat siram */}
             <Button
               variant="outline"
               size="sm"
@@ -154,8 +172,8 @@ export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
         }
       />
 
-      <div className="mx-auto w-full max-w-7xl space-y-12 px-4 pt-12 pb-24 sm:px-6">
-      {/* Toolbar: search + filter kategori + view switch */}
+      <div ref={listTopRef} className="mx-auto w-full max-w-7xl space-y-12 px-4 pt-12 pb-24 sm:px-6">
+      {/* Toolbar filter dan tampilan */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative w-full sm:max-w-xs">
@@ -181,7 +199,13 @@ export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          {ts("menampilkan", { count: filtered.length, total: counts.total })}
+          {filtered.length > 0
+            ? ts("menampilkanRentang", {
+                start: (safePage - 1) * pageSize + 1,
+                end: Math.min(safePage * pageSize, filtered.length),
+                total: filtered.length,
+              })
+            : ts("menampilkan", { count: 0, total: counts.total })}
         </p>
       </div>
 
@@ -214,7 +238,7 @@ export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
 
           <TabsContent value="grid">
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filtered.map((t) => (
+              {paginatedList.map((t) => (
                 <div key={t.id}>
                   <PlantCard
                     plant={t}
@@ -243,7 +267,7 @@ export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filtered.map((t) => (
+                    {paginatedList.map((t) => (
                       <TableRow key={t.id} className="border-border transition-colors hover:bg-secondary">
                         <TableCell className="py-4 pl-5">
                           <span className="flex items-center gap-3">
@@ -298,10 +322,52 @@ export default function TanamanPage({ onTambah }: { onTambah: () => void }) {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Navigasi pagination halaman siram */}
+        <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-t border-border pt-6">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+            <span>
+              {ts("halaman")}{" "}
+              <strong className="font-semibold text-foreground">{safePage}</strong>{" "}
+              {ts("dari")}{" "}
+              <strong className="font-semibold text-foreground">{totalPages}</strong>
+            </span>
+            <span className="hidden sm:inline" aria-hidden="true">•</span>
+            <div className="flex items-center gap-1.5">
+              <span>{ts("perHalaman")}:</span>
+              {[6, 12, 24].map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setPageSize(size)}
+                  className={cn(
+                    "rounded-md px-2 py-0.5 text-xs font-medium transition-colors cursor-pointer",
+                    pageSize === size
+                      ? "bg-primary text-primary-foreground font-semibold"
+                      : "border border-border bg-card hover:bg-secondary text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Pagination
+            currentPage={safePage}
+            totalPages={totalPages}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            prevLabel={ts("sebelumnya")}
+            nextLabel={ts("berikutnya")}
+          />
+        </div>
         </TkRevealClient>
       )}
 
-      {/* Edit and Delete Dialogs */}
+      {/* Dialog edit dan hapus */}
       <EditTanamanDialog
         plant={editingPlant}
         open={!!editingPlant}

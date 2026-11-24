@@ -2,7 +2,7 @@ import { AlertTriangle, Check, Cloud, CloudRain, CloudSun, Sun, X } from 'lucide
 import type { LucideIcon } from 'lucide-react';
 import type { SlotStatus } from './types';
 
-/* Data bersama, konten SAMA untuk desktop & mobile (sumber: tumbuhkita #1) */
+/* Data bersama jadwal siram */
 export const weatherNum = { temp: '27°C', tempRange: '27°C / 26°C', sunset: '17:30', humidity: '53%' };
 
 export const timeSlots: Array<{ time: string; status: SlotStatus }> = [

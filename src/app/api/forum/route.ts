@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     const query = searchParams.get('q');
     const tag = searchParams.get('tag');
 
-    // Ensure database has initial community posts if freshly started
+    // Seed postingan komunitas awal
     await seedForumPostsIfEmpty();
 
     const posts = await prisma.post.findMany({
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
 
     let finalImageUrl: string | null = null;
 
-    // Handle base64 image upload to Supabase Storage if provided
+    // Unggah gambar ke Supabase
     if (typeof image === 'string' && image.startsWith('data:image/')) {
       try {
         const matches = image.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);

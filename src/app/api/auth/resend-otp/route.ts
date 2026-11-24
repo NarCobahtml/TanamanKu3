@@ -3,12 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { issueOtp, isResendBlocked, OTP_POLICY } from '@/lib/otp';
 import { sendOtpEmail } from '@/lib/mailer';
 
-/**
- * POST /api/auth/resend-otp
- * Kirim ulang OTP untuk user yang belum verifikasi.
- * Cooldown 1 menit per token, limit 5 send per jam per user (DB, bukan in-memory,
- * supaya tetap berlaku lintas restart dan lintas instance).
- */
+// Kirim ulang OTP verifikasi
 export async function POST(request: Request) {
   try {
     const { userId } = await request.json();
@@ -56,10 +51,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Limit per jam memakai VerificationToken.createdAt. Token yang kadaluarsa atau
-    // sudah dipakai terhapus, jadi hitungan ini bisa under-count — itu sebabnya
-    // maxAttempts + cooldown jadi lapisan kedua. // ponytail: tabel EmailSendLog
-    // yang bisa diaudit adalah upgrade path kalau kuota per jam harus tegas.
+    // Batasi permintaan per jam
     const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
     const recentCount = await prisma.verificationToken.count({
       where: { userId: user.id, createdAt: { gte: hourAgo } },

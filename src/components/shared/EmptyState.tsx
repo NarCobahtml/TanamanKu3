@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-/** Reusable empty state: icon + title + message + optional action. */
+// Komponen empty state
 export function EmptyState({
   icon,
   title,

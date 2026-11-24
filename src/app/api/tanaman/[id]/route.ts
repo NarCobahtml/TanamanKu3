@@ -81,7 +81,7 @@ export async function PUT(
       );
     }
 
-    // Verify ownership: only the owner or an ADMIN can modify the plant
+    // Verifikasi kepemilikan tanaman
     if (existing.userId && existing.userId !== userId) {
       return NextResponse.json(
         { success: false, error: 'Anda tidak memiliki hak akses untuk mengubah tanaman ini' },
@@ -103,7 +103,7 @@ export async function PUT(
       },
     });
 
-    // Sync to WateringSchedule table if plant is being watered
+    // Sinkronisasi jadwal penyiraman
     if (status === 'terjadwal') {
       try {
         const { resolvePlantProfile } = await import('@/features/watering/plant-rules');
@@ -185,7 +185,7 @@ export async function DELETE(
       );
     }
 
-    // Verify ownership: only the owner can delete the plant
+    // Verifikasi izin hapus tanaman
     if (existing.userId && existing.userId !== userId) {
       return NextResponse.json(
         { success: false, error: 'Anda tidak memiliki hak akses untuk menghapus tanaman ini' },

@@ -1,8 +1,6 @@
 'use client';
 
-// Baca sessionStorage tanpa effect (react-hooks/set-state-in-effect):
-// useSyncExternalStore = pola kanonik untuk external store, aman SSR.
-// Nilai scan tidak berubah setelah ditulis, jadi subscribe no-op cukup.
+// Baca sessionStorage aman SSR
 
 import { useMemo, useSyncExternalStore } from 'react';
 

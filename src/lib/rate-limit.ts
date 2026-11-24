@@ -1,10 +1,4 @@
-/**
- * Production-ready Rate Limiter
- * 
- * Mendukung 2 mode:
- * 1. Distributed Redis (Upstash REST API via fetch, zero dependencies) saat UPSTASH_REDIS_REST_URL & UPSTASH_REDIS_REST_TOKEN ada.
- * 2. In-Memory Store dengan sliding window, auto-pruning (garbage collection tiap 60 detik), dan memory cap 10.000 entri untuk mencegah DoS / kebocoran memori.
- */
+// Modul rate limiter
 
 interface RateLimitEntry {
   attempts: number;
@@ -16,11 +10,11 @@ interface RateLimitEntry {
 const memoryStore = new Map<string, RateLimitEntry>();
 const MAX_MEMORY_ENTRIES = 10_000;
 
-// Periodic cleanup untuk menghapus data usang dan mencegah memory leak
+// Pembersihan berkala data usang
 let lastCleanup = Date.now();
 function cleanupExpired(windowMs: number) {
   const now = Date.now();
-  if (now - lastCleanup < 60_000) return; // Hanya jalankan maks 1x per menit
+  if (now - lastCleanup < 60_000) return; // Maksimal sekali per menit
   lastCleanup = now;
 
   for (const [key, entry] of memoryStore.entries()) {
@@ -31,7 +25,7 @@ function cleanupExpired(windowMs: number) {
     }
   }
 
-  // Jika memori melebihi batas ekstrem, bersihkan entri tertua
+  // Bersihkan entri berlebih
   if (memoryStore.size > MAX_MEMORY_ENTRIES) {
     const entriesToDelete = memoryStore.size - MAX_MEMORY_ENTRIES;
     const iterator = memoryStore.keys();
@@ -52,19 +46,17 @@ const DEFAULT_MAX_ATTEMPTS = 5;
 const DEFAULT_BLOCK_DURATION_MS = 5 * 60 * 1000; // 5 menit
 const DEFAULT_WINDOW_MS = 10 * 60 * 1000; // 10 menit
 
-/**
- * Ekstraksi IP Client yang aman dari header reverse proxy
- */
+// Ambil IP client
 export function getClientIp(request: Request): string {
   // Cloudflare
   const cfIp = request.headers.get('cf-connecting-ip');
   if (cfIp && cfIp.trim()) return cfIp.trim();
 
-  // Nginx / Traefik / GCP load balancer
+  // Header proxy load balancer
   const realIp = request.headers.get('x-real-ip');
   if (realIp && realIp.trim()) return realIp.trim();
 
-  // Standar X-Forwarded-For: ambil IP pertama yang valid
+  // Ambil IP valid pertama
   const forwarded = request.headers.get('x-forwarded-for');
   if (forwarded) {
     const parts = forwarded.split(',').map((p) => p.trim()).filter(Boolean);
@@ -74,9 +66,7 @@ export function getClientIp(request: Request): string {
   return '127.0.0.1';
 }
 
-/**
- * Periksa apakah IP / key saat ini sedang terblokir
- */
+// Cek limit percobaan
 export async function checkRateLimit(
   key: string,
   options: RateLimitOptions = {}
@@ -122,9 +112,7 @@ export async function checkRateLimit(
   return { isBlocked: false, remainingSeconds: 0 };
 }
 
-/**
- * Catat percobaan gagal dan kembalikan status batas percobaan
- */
+// Catat percobaan gagal
 export async function recordFailedAttempt(
   key: string,
   options: RateLimitOptions = {}
@@ -199,9 +187,7 @@ export async function recordFailedAttempt(
   };
 }
 
-/**
- * Bersihkan riwayat percobaan gagal setelah login berhasil
- */
+// Reset riwayat limit
 export async function resetRateLimit(key: string): Promise<void> {
   const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
   const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;

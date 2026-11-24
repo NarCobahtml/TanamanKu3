@@ -22,7 +22,7 @@ export default function Nav() {
 
   const isDark = mounted && resolvedTheme === "dark";
 
-  // scroll-spy: highlight mengikuti section yang terlihat
+  // Scroll spy sorot menu
   useEffect(() => {
     const ids = NAV_LINKS.map((l) => l.href.slice(1));
     const onScroll = () => {

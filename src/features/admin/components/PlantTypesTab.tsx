@@ -178,7 +178,7 @@ export function PlantTypesTab({ plantTypes, onRefresh }: PlantTypesTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Top Header Card & Actions */}
+      {/* Header dan aksi utama */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
@@ -201,7 +201,7 @@ export function PlantTypesTab({ plantTypes, onRefresh }: PlantTypesTabProps) {
         </Button>
       </div>
 
-      {/* Filter and Search Bar */}
+      {/* Kolom filter dan pencarian */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -229,7 +229,7 @@ export function PlantTypesTab({ plantTypes, onRefresh }: PlantTypesTabProps) {
         </div>
       </div>
 
-      {/* Table List of Plant Species */}
+      {/* Tabel jenis tanaman */}
       <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -335,7 +335,7 @@ export function PlantTypesTab({ plantTypes, onRefresh }: PlantTypesTabProps) {
         </div>
       </div>
 
-      {/* Modal Dialog: Tambah / Edit Jenis Tanaman */}
+      {/* Modal jenis tanaman */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-lg rounded-2xl">
           <DialogHeader>
@@ -460,7 +460,7 @@ export function PlantTypesTab({ plantTypes, onRefresh }: PlantTypesTabProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Modal Dialog: Konfirmasi Hapus */}
+      {/* Modal konfirmasi hapus */}
       <Dialog
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(null)}

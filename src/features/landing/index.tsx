@@ -7,7 +7,7 @@ import Community from './community';
 import CtaBand from './cta-band';
 import Footer from './footer';
 
-/** Landing page utuh - dirakit dari section Figma. */
+// Halaman landing page utama
 export default function Landing() {
   return (
     <div className="min-h-dvh bg-background text-foreground">

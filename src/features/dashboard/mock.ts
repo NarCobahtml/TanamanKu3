@@ -1,7 +1,7 @@
 import type { HealthLevel } from '@/components/shared/HealthStatus';
 import { initialTanamanList as tanamanList, type Tanaman } from '@/features/plants';
 
-/* ---- placeholder data (frontend-only, no backend) ---- */
+/* Data tiruan frontend */
 
 export type PlantHealth = { level: HealthLevel; lastScan: string };
 
@@ -27,9 +27,7 @@ export const healthById: Record<string, PlantHealth> = {
   melati: { level: 'sehat', lastScan: '28.08.2026' },
 };
 
-/**
- * Resilient lookup helper: looks up by plant ID, slug, or derives from status.
- */
+// Helper pencarian tanaman
 export function getPlantHealth(plant?: Tanaman | { id?: string; nama?: string; status?: string | null } | null): PlantHealth {
   if (!plant) return { level: 'sehat', lastScan: '-' };
   if (plant.id && healthById[plant.id]) return healthById[plant.id];
@@ -61,7 +59,7 @@ export const wateringToday = [
   { time: '16:00', plant: 'Cabai Rawit', state: 'overdue' as const },
 ];
 
-/* ---- derived health counts ---- */
+/* Hitung status kesehatan */
 
 export const total = tanamanList.length;
 export const sehat = Object.values(healthById).filter((h) => h.level === 'sehat').length;

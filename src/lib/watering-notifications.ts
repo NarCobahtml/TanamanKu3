@@ -5,7 +5,7 @@ import type { Tanaman } from '@/features/plants/types';
 const GLOBAL_NOTIF_KEY = 'tanamanku_watering_notif_enabled';
 const LAST_NOTIF_TIME_KEY = 'tanamanku_last_watering_notif_time';
 const PLANT_NOTIF_PREFIX = 'tanamanku_plant_notif_';
-const NOTIF_COOLDOWN_MS = 3 * 60 * 60 * 1000; // 3 jam cooldown antar pengingat otomatis
+const NOTIF_COOLDOWN_MS = 3 * 60 * 60 * 1000; // Cooldown notifikasi 3 jam
 
 export function isNotificationSupported(): boolean {
   return typeof window !== 'undefined' && 'Notification' in window;
@@ -90,7 +90,7 @@ export async function showLocalNotification(
     ...options,
   };
 
-  // 1. Coba melalui Service Worker Registration (standar PWA untuk background & lock screen)
+  // 1. Lewat Service Worker
   if ('serviceWorker' in navigator) {
     try {
       const registration = await navigator.serviceWorker.ready;
@@ -99,11 +99,11 @@ export async function showLocalNotification(
         return true;
       }
     } catch {
-      // fallback ke new Notification jika service worker belum siap
+      // Fallback notifikasi browser
     }
   }
 
-  // 2. Fallback ke Web Notification API biasa
+  // 2. Fallback Notification API
   try {
     const notif = new Notification(title, notificationOptions as NotificationOptions);
     notif.onclick = () => {
@@ -132,12 +132,12 @@ export async function checkAndTriggerWateringReminders(
     return { notified: false, count: 0, message: 'Notifikasi belum diaktifkan.' };
   }
 
-  // Cek apakah ada tanaman yang spesifik atau seluruh tanaman
+  // Filter tanaman target notifikasi
   const targetPlants = options?.plantId
     ? plants.filter((p) => p.id === options.plantId)
     : plants.filter((p) => isPlantNotificationEnabled(p.id));
 
-  // Tanaman yang butuh disiram: status 'hari-ini' atau 'terlambat'
+  // Filter status jadwal siram
   const duePlants = targetPlants.filter(
     (p) => p.status === 'hari-ini' || p.status === 'terlambat'
   );
@@ -150,7 +150,7 @@ export async function checkAndTriggerWateringReminders(
     };
   }
 
-  // Cek cooldown kecuali jika dipicu secara paksa / tes manual
+  // Cek cooldown pengingat otomatis
   if (!options?.force && typeof window !== 'undefined') {
     const lastNotif = localStorage.getItem(LAST_NOTIF_TIME_KEY);
     const now = Date.now();

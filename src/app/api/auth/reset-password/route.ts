@@ -8,9 +8,7 @@ import {
 import { hashPassword } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 
-/**
- * GET: Cek validitas token sebelum menampilkan form reset password
- */
+// Cek validitas token reset
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -67,7 +65,7 @@ export async function POST(request: Request) {
 
     let targetUserId: string | null = null;
 
-    // Alur 1: Menggunakan Magic Reset Token (Prioritas Utama)
+    // Alur 1: Reset token
     if (token) {
       const tokenVerification = await verifyPasswordResetToken(token);
       if (!tokenVerification.ok) {
@@ -84,7 +82,7 @@ export async function POST(request: Request) {
       }
       targetUserId = tokenVerification.userId;
     } else if (email && otp) {
-      // Alur 2: Fallback OTP jika masih ada request berbasis OTP
+      // Alur 2: Fallback OTP
       const user = await prisma.user.findUnique({
         where: { email },
         select: { id: true },
@@ -114,7 +112,7 @@ export async function POST(request: Request) {
 
     const userId = targetUserId;
 
-    // 1. Update password di Supabase Auth
+    // 1. Perbarui password Supabase
     try {
       const supabaseAdmin = createAdminClient();
       await supabaseAdmin.auth.admin.updateUserById(userId, {
@@ -124,7 +122,7 @@ export async function POST(request: Request) {
       console.warn('Failed to update Supabase Auth password directly:', sbError);
     }
 
-    // 2. Update password hash di database Prisma
+    // 2. Perbarui hash Prisma
     const newPasswordHash = await hashPassword(newPassword);
     await prisma.user.update({
       where: { id: userId },
@@ -134,7 +132,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // 3. Bersihkan token reset yang telah dipakai
+    // 3. Hapus token terpakai
     await consumePasswordResetToken(userId);
 
     return NextResponse.json({

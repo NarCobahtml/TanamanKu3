@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let ignore = false;
 
-    // 1. Initial server session validation asynchronously
+    // 1. Validasi sesi awal
     fetch('/api/auth/me')
       .then(async (res) => {
         if (res.ok) {
@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
-    // 2. Subscribe to Supabase auth state changes (OAuth, sign in, sign out)
+    // 2. Listener sesi Supabase
     let unsubscribeFn: (() => void) | null = null;
     try {
       const supabase = createClient();
@@ -141,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.warn('Supabase auth state listener not available:', err);
     }
 
-    // 3. Listen to local broadcast events
+    // 3. Listener event lokal
     const onAuthChanged = () => {
       const updated = readLocalUser();
       if (updated) setUser(updated);

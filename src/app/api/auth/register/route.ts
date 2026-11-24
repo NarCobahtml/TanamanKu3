@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Check if user already exists in Prisma
+    // Cek duplikasi akun Prisma
     const existingPrisma = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
@@ -70,9 +70,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Create user in Supabase Auth. email_confirm: true di Supabase karena kita
-    //    yang memegang otorisasi login — verifikasi email ditegakkan lewat gate
-    //    emailVerified di /api/auth/login (lihat file tersebut).
+    // 1. Buat user Supabase
     const admin = createAdminClient();
     const { data: createData, error: createError } = await admin.auth.admin.createUser({
       email: normalizedEmail,
@@ -99,11 +97,7 @@ export async function POST(request: Request) {
 
     const authUser = createData.user;
 
-    // 2. Create public.User profile row in Prisma.
-    //    passwordHash diisi dengan scrypt hash asli (bukan '') karena login gate
-    //    memakai passwordHash === '' sebagai penanda "akun ini milik Supabase
-    //    (social/OAuth), email-nya sudah terverifikasi di sana" — akun yang daftar
-    //    lewat form wajib lewat OTP, jadi harus punya hash.
+    // 2. Buat profil Prisma
     const user = await prisma.user.create({
       data: {
         id: authUser.id,
@@ -115,8 +109,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // 3. Issue OTP + kirim email. Sengaja TIDAK ada signInWithPassword di sini:
-    //    session cookie baru dibuat setelah OTP terverifikasi, saat user login.
+    // 3. Terbitkan OTP verifikasi
     const { otp, expiresAt } = await issueOtp(user.id, user.email);
     const mail = await sendOtpEmail({
       to: user.email,
@@ -126,8 +119,7 @@ export async function POST(request: Request) {
       idempotencyKey: `otp-register/${user.id}/${Date.now()}`,
     });
 
-    // ponytail: OTP dikembalikan ke client hanya di development tanpa RESEND_API_KEY,
-    // supaya flow bisa dites tanpa setup email. Hilangkan blok ini saat prod punya key.
+    // Output dev mode lokal
     const devOtp =
       process.env.NODE_ENV === 'development' && !process.env.RESEND_API_KEY ? otp : undefined;
     if (devOtp) {

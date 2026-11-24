@@ -45,7 +45,7 @@ export default function AdminDashboard() {
     "overview" | "users" | "plant-types" | "moderation" | "billing" | "settings"
   >("overview");
 
-  // Interactive local & live database states
+  // State interaktif database
   const [stats, setStats] = useState<AdminStat[]>(defaultStats);
   const [users, setUsers] = useState<UserItem[]>(initialUsers);
   const [userSearch, setUserSearch] = useState("");
@@ -262,6 +262,7 @@ export default function AdminDashboard() {
           ),
         );
         toast.success(`Postingan berhasil dihapus dari forum dan laporan diselesaikan.`);
+        fetchAdminData();
       } else {
         const res = await fetch(`/api/admin/moderation/${id}`, {
           method: "PATCH",
@@ -277,6 +278,7 @@ export default function AdminDashboard() {
           ),
         );
         toast.info(`Laporan telah disetujui/diabaikan (postingan tetap tayang).`);
+        fetchAdminData();
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Terjadi kesalahan";

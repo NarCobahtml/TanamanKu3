@@ -55,7 +55,7 @@ export async function PUT(
       );
     }
 
-    // Cek duplikasi jika nama atau slug diubah
+    // Cek duplikasi nama/slug
     if (name && name.trim() !== existing.name) {
       const duplicateName = await prisma.plantType.findFirst({
         where: { name: name.trim(), NOT: { id } },
@@ -146,7 +146,7 @@ export async function DELETE(
       );
     }
 
-    // Cek apakah ada tanaman yang terhubung dengan jenis tanaman ini
+    // Cek relasi data tanaman
     const plantsUsingType = await prisma.plant.count({
       where: {
         OR: [{ type: existing.slug }, { type: existing.name }],

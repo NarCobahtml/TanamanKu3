@@ -3,7 +3,7 @@ import type { SlotStatus } from './types';
 export interface PlantBotanyProfile {
   category: 'Indoor' | 'Outdoor' | 'Kebun';
   waterNeed: 'low' | 'moderate' | 'high';
-  kc: number; // Crop coefficient factor (0.2 - 1.2)
+  kc: number; // Koefisien penguapan tanaman
   intervalDays: number;
   bestWateringWindow: 'morning' | 'late-afternoon' | 'any-cool';
   rainTolerance: boolean;
@@ -11,14 +11,14 @@ export interface PlantBotanyProfile {
 }
 
 export const KNOWN_PLANT_PROFILES: Record<string, Partial<PlantBotanyProfile>> = {
-  // Sukulen & Kaktus (Air Sangat Rendah)
+  // Profil kaktus dan sukulen
   'kaktus': { waterNeed: 'low', kc: 0.25, intervalDays: 10, bestWateringWindow: 'morning', rainTolerance: false },
   'lidah mertua': { waterNeed: 'low', kc: 0.3, intervalDays: 7, bestWateringWindow: 'morning', rainTolerance: false },
   'sansiviera': { waterNeed: 'low', kc: 0.3, intervalDays: 7, bestWateringWindow: 'morning', rainTolerance: false },
   'lidah buaya': { waterNeed: 'low', kc: 0.3, intervalDays: 7, bestWateringWindow: 'morning', rainTolerance: false },
   'sukulen': { waterNeed: 'low', kc: 0.25, intervalDays: 10, bestWateringWindow: 'morning', rainTolerance: false },
 
-  // Tanaman Hias Berdaun Tropis (Air Sedang)
+  // Profil tanaman hias tropis
   'monstera': { waterNeed: 'moderate', kc: 0.7, intervalDays: 3, bestWateringWindow: 'morning', rainTolerance: false },
   'calathea': { waterNeed: 'moderate', kc: 0.75, intervalDays: 2, bestWateringWindow: 'morning', rainTolerance: false },
   'aglaonema': { waterNeed: 'moderate', kc: 0.65, intervalDays: 3, bestWateringWindow: 'morning', rainTolerance: false },
@@ -26,7 +26,7 @@ export const KNOWN_PLANT_PROFILES: Record<string, Partial<PlantBotanyProfile>> =
   'sirih gading': { waterNeed: 'moderate', kc: 0.65, intervalDays: 3, bestWateringWindow: 'any-cool', rainTolerance: true },
   'melati': { waterNeed: 'moderate', kc: 0.75, intervalDays: 2, bestWateringWindow: 'late-afternoon', rainTolerance: true },
 
-  // Sayuran & Buah Kebun (Air Tinggi, Penguapan Cepat)
+  // Profil sayuran buah kebun
   'tomat': { waterNeed: 'high', kc: 1.1, intervalDays: 1, bestWateringWindow: 'morning', rainTolerance: true },
   'cabai': { waterNeed: 'high', kc: 1.0, intervalDays: 1, bestWateringWindow: 'morning', rainTolerance: true },
   'cabe': { waterNeed: 'high', kc: 1.0, intervalDays: 1, bestWateringWindow: 'morning', rainTolerance: true },
@@ -41,7 +41,7 @@ export function resolvePlantProfile(name?: string, category?: string, type?: str
   const normName = (name || '').toLowerCase().trim();
   const cat = (category === 'Outdoor' || category === 'Kebun') ? category : 'Indoor';
 
-  // Check matching profile by substring in name
+  // Cocokkan nama jenis tanaman
   let matched: Partial<PlantBotanyProfile> | undefined;
   for (const [key, prof] of Object.entries(KNOWN_PLANT_PROFILES)) {
     if (normName.includes(key)) {
@@ -50,7 +50,7 @@ export function resolvePlantProfile(name?: string, category?: string, type?: str
     }
   }
 
-  // Fallback defaults based on type or category
+  // Profil default kategori tanaman
   if (!matched) {
     if (type === 'sayuran' || cat === 'Kebun') {
       matched = { waterNeed: 'high', kc: 1.05, intervalDays: 1, bestWateringWindow: 'morning', rainTolerance: true };
@@ -85,9 +85,7 @@ export interface HourlySlotEvaluation {
   reason: string;
 }
 
-/**
- * Evaluates whether an hourly slot is optimal, moderate, or unfavourable for a specific plant.
- */
+// Evaluasi kelayakan jam penyiraman
 export function evaluatePlantHourlySlot(
   hour: number,
   temp: number,
@@ -98,7 +96,7 @@ export function evaluatePlantHourlySlot(
   const isRaining = code >= 51;
   const isOutdoor = plant.category === 'Outdoor' || plant.category === 'Kebun';
 
-  // 1. Extreme Weather Conditions: Rain for outdoor plants
+  // 1. Kondisi hujan luar
   if (isRaining && isOutdoor) {
     return {
       status: 'unfavourable',
@@ -106,7 +104,7 @@ export function evaluatePlantHourlySlot(
     };
   }
 
-  // 2. High noon scorching heat (11:00 - 14:30 or temp > 31°C)
+  // 2. Panas terik siang
   if (hour >= 11 && hour <= 14) {
     return {
       status: 'unfavourable',
@@ -121,7 +119,7 @@ export function evaluatePlantHourlySlot(
     };
   }
 
-  // 3. Late night (after 20:00) for indoor plants (high risk of root rot & fungal mildew)
+  // 3. Waktu larut malam
   if (hour >= 20 || hour < 5) {
     if (plant.category === 'Indoor' || plant.waterNeed === 'low') {
       return {
@@ -131,7 +129,7 @@ export function evaluatePlantHourlySlot(
     }
   }
 
-  // 4. Low water need plants (Cactus / Succulent) under high humidity
+  // 4. Kelembapan tinggi sukulen
   if (plant.waterNeed === 'low' && humidity > 80) {
     return {
       status: 'unfavourable',
@@ -139,8 +137,7 @@ export function evaluatePlantHourlySlot(
     };
   }
 
-  // 5. Golden Hours (Optimal)
-  // Morning: 06:00 - 08:30
+  // 5. Waktu pagi optimal
   if (hour >= 6 && hour <= 8) {
     return {
       status: 'optimal',
@@ -148,7 +145,7 @@ export function evaluatePlantHourlySlot(
     };
   }
 
-  // Late Afternoon: 16:30 - 18:30 (especially for outdoor/kebun)
+  // Jam sore tanaman kebun
   if (hour >= 16 && hour <= 18) {
     if (temp <= 30) {
       return {
@@ -162,7 +159,7 @@ export function evaluatePlantHourlySlot(
     };
   }
 
-  // 6. Moderate Hours (Mid morning 09:00 - 10:00 or cloudy cool weather)
+  // 6. Jam cuaca sejuk
   if (hour >= 9 && hour <= 10) {
     if (temp < 29) {
       return {
@@ -176,7 +173,7 @@ export function evaluatePlantHourlySlot(
     };
   }
 
-  // Default moderate for cool indoor environment
+  // Kondisi tanaman ruangan moderat
   if (plant.category === 'Indoor' && temp <= 28) {
     return {
       status: 'moderate',

@@ -1,10 +1,6 @@
 import crypto from 'node:crypto';
 
-/**
- * Legacy Password Migration Helpers
- * Used exclusively by /api/auth/login to transparently upgrade existing
- * scrypt password hashes to Supabase Auth managed passwords.
- */
+// Migrasi password legacy
 export async function hashPassword(password: string): Promise<string> {
   const salt = crypto.randomBytes(16).toString('hex');
   const derivedKey = crypto.scryptSync(password, salt, 64);

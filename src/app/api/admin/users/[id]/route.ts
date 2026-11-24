@@ -144,7 +144,7 @@ export async function DELETE(
       );
     }
 
-    // Do not allow admin to delete themselves
+    // Larang admin menghapus diri
     if (targetUser.id === admin.id) {
       return NextResponse.json(
         { success: false, error: 'Anda tidak dapat menghapus akun Anda sendiri.' },
@@ -165,7 +165,7 @@ export async function DELETE(
     // 2. Delete User from Prisma
     await prisma.user.delete({ where: { id: targetUser.id } });
 
-    // 3. Delete from Supabase Auth admin
+    // 3. Hapus dari Supabase Auth
     try {
       const supabaseAdmin = createAdminClient();
       await supabaseAdmin.auth.admin.deleteUser(targetUser.id);

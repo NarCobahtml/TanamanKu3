@@ -68,7 +68,7 @@ export async function POST(
       );
     }
 
-    // Verify or ensure user exists in database
+    // Verifikasi pengguna di database
     const userRes = await pool.query(
       'SELECT id, name, "photoUrl" FROM "User" WHERE id = $1',
       [authUser.id]
@@ -101,7 +101,7 @@ export async function POST(
       }
     }
 
-    // Validate parentId against existing Comment in database to protect FK constraint
+    // Validasi relasi komentar parentId
     let validParentId: string | null = null;
     if (parentId && typeof parentId === 'string') {
       const parentCheck = await pool.query(

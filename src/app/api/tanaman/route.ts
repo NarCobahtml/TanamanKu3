@@ -17,7 +17,7 @@ export async function GET() {
   try {
     const userId = await getCurrentUserId();
 
-    // Guest users have no server-side plants
+    // Tanaman tamu tidak disimpan
     if (!userId) {
       return NextResponse.json({
         success: true,
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Use pure numeric ID (either passed in or generated from Date.now())
+    // Gunakan ID numerik
     const plantId = customId && /^\d+$/.test(customId) ? customId : Date.now().toString();
 
     const resolvedKategori = kategori && ['Indoor', 'Outdoor', 'Kebun'].includes(kategori) ? kategori : 'Indoor';
