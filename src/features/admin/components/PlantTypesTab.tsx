@@ -179,22 +179,20 @@ export function PlantTypesTab({ plantTypes, onRefresh }: PlantTypesTabProps) {
   return (
     <div className="space-y-6">
       {/* Header dan aksi utama */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-2 border-b border-border/50">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Sprout className="h-5 w-5" />
-            </span>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Sprout className="h-5 w-5 text-primary" />
             Katalog Master Jenis Tanaman
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Kelola daftar spesies tanaman (seperti Monstera, Mangga, Lidah Mertua, Cabai) beserta panduan ilmiah dan kebutuhan airnya.
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+            Kelola taksonomi spesies tanaman, profil kebutuhan penyiraman, dan panduan perawatan bagi pekebun.
           </p>
         </div>
 
         <Button
           onClick={handleOpenCreate}
-          className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-medium shadow-xs gap-2 shrink-0 h-10 px-4"
+          className="rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-2xs gap-1.5 shrink-0 h-9 px-3.5 text-xs cursor-pointer self-start sm:self-auto"
         >
           <Plus className="h-4 w-4" />
           Tambah Spesies Baru
@@ -203,20 +201,20 @@ export function PlantTypesTab({ plantTypes, onRefresh }: PlantTypesTabProps) {
 
       {/* Kolom filter dan pencarian */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari nama (Mangga, Monstera...), nama ilmiah, atau slug..."
-            className="pl-10 h-10 rounded-xl bg-card border-border"
+            placeholder="Cari nama, nama latin, atau slug..."
+            className="pl-9 h-9 rounded-lg bg-card border-border/70 text-xs focus-visible:ring-1"
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <Label className="text-xs text-muted-foreground whitespace-nowrap">Kebutuhan Air:</Label>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Label className="text-xs text-muted-foreground font-medium whitespace-nowrap">Filter Kebutuhan Air:</Label>
           <Select value={waterNeedFilter} onValueChange={setWaterNeedFilter}>
-            <SelectTrigger className="w-[150px] h-10 rounded-xl bg-card border-border text-sm">
+            <SelectTrigger className="w-[160px] h-9 rounded-lg bg-card border-border/70 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -230,51 +228,51 @@ export function PlantTypesTab({ plantTypes, onRefresh }: PlantTypesTabProps) {
       </div>
 
       {/* Tabel jenis tanaman */}
-      <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs">
+      <div className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-2xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-border bg-muted/40 text-xs font-semibold uppercase text-muted-foreground tracking-wider">
+          <table className="w-full text-left text-xs">
+            <thead className="border-b border-border/70 bg-muted/40 text-[10px] font-semibold uppercase text-muted-foreground tracking-wider">
               <tr>
-                <th className="px-5 py-3.5">Spesies & Nama Ilmiah</th>
-                <th className="px-4 py-3.5">Kebutuhan Air</th>
-                <th className="px-4 py-3.5">Interval Siram Rekomendasi</th>
-                <th className="px-4 py-3.5">Tanaman Pekebun</th>
-                <th className="px-5 py-3.5">Deskripsi Karakteristik</th>
-                <th className="px-5 py-3.5 text-right">Aksi</th>
+                <th className="px-5 py-3">Spesies & Nama Ilmiah</th>
+                <th className="px-4 py-3">Kebutuhan Air</th>
+                <th className="px-4 py-3">Interval Siram</th>
+                <th className="px-4 py-3">Tanaman Terdaftar</th>
+                <th className="px-5 py-3">Karakteristik</th>
+                <th className="px-5 py-3 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60">
+            <tbody className="divide-y divide-border/50">
               {filteredTypes.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-muted-foreground">
-                    <Sprout className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
-                    <p className="font-medium">Tidak ada jenis tanaman yang cocok.</p>
-                    <p className="text-xs mt-1">Coba kata kunci lain atau daftarkan jenis tanaman baru.</p>
+                  <td colSpan={6} className="px-5 py-16 text-center text-muted-foreground">
+                    <Sprout className="mx-auto h-8 w-8 text-muted-foreground/30 mb-2" />
+                    <p className="font-semibold text-foreground text-sm">Tidak ada jenis tanaman yang cocok</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Coba kata kunci lain atau daftarkan spesies baru.</p>
                   </td>
                 </tr>
               ) : (
                 filteredTypes.map((type) => (
                   <tr key={type.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-5 py-4">
-                      <div className="font-semibold text-foreground flex items-center gap-2">
-                        <span>{type.name}</span>
+                    <td className="px-5 py-3.5">
+                      <div className="font-semibold text-foreground">
+                        {type.name}
                       </div>
-                      <div className="text-xs italic text-primary/80 mt-0.5">
-                        {type.scientificName || "Nama latin belum diisi"}
+                      <div className="text-[11px] italic text-primary/80 mt-0.5">
+                        {type.scientificName || "Belum ada nama ilmiah"}
                       </div>
-                      <div className="text-[11px] font-mono text-muted-foreground mt-0.5">
+                      <div className="text-[10px] font-mono text-muted-foreground mt-0.5">
                         slug: {type.slug}
                       </div>
                     </td>
 
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-3.5">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium border ${
                           type.waterNeed === "rendah"
-                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
                             : type.waterNeed === "tinggi"
-                            ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
-                            : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                            ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                            : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                         }`}
                       >
                         <Droplets className="h-3 w-3" />
@@ -286,31 +284,31 @@ export function PlantTypesTab({ plantTypes, onRefresh }: PlantTypesTabProps) {
                       </span>
                     </td>
 
-                    <td className="px-4 py-4 text-foreground whitespace-nowrap">
-                      <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                    <td className="px-4 py-3.5 text-foreground whitespace-nowrap">
+                      <span className="flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums">
                         <Calendar className="h-3.5 w-3.5 text-primary" />
-                        Tiap {type.defaultIntervalDays} hari sekali
+                        Tiap {type.defaultIntervalDays} hari
                       </span>
                     </td>
 
-                    <td className="px-4 py-4 text-foreground whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground">
-                        <Layers className="h-3 w-3 text-muted-foreground" />
+                    <td className="px-4 py-3.5 text-foreground whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md bg-muted text-muted-foreground tabular-nums">
+                        <Layers className="h-3 w-3" />
                         {type.plantsCount ?? 0} tanaman
                       </span>
                     </td>
 
-                    <td className="px-5 py-4 max-w-xs text-xs text-muted-foreground truncate">
+                    <td className="px-5 py-3.5 max-w-xs text-xs text-muted-foreground truncate">
                       {type.description || "-"}
                     </td>
 
-                    <td className="px-5 py-4 text-right whitespace-nowrap">
+                    <td className="px-5 py-3.5 text-right whitespace-nowrap">
                       <div className="inline-flex items-center gap-1">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleOpenEdit(type)}
-                          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                          className="h-7 w-7 p-0 rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
                           title="Ubah jenis tanaman"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
@@ -320,7 +318,7 @@ export function PlantTypesTab({ plantTypes, onRefresh }: PlantTypesTabProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => setDeleteTarget(type)}
-                          className="h-8 w-8 p-0 text-destructive/80 hover:text-destructive hover:bg-destructive/10"
+                          className="h-7 w-7 p-0 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                           title="Hapus jenis tanaman"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
