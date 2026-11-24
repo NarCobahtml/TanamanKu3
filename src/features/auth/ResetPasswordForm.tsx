@@ -32,7 +32,7 @@ export default function ResetPasswordForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Verifikasi token sesi dari URL saat halaman dimuat
+  // Verifikasi token sesi URL
   useEffect(() => {
     if (!token) {
       return;

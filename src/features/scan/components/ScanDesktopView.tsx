@@ -45,9 +45,9 @@ export default function ScanDesktopView({
         description={t("deskripsi")}
       />
 
-      {/* Workspace: viewfinder + control rail */}
+      {/* Area viewfinder dan kontrol */}
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 pt-12 sm:px-6 lg:grid-cols-[1fr_300px]">
-        {/* Viewfinder, core experience, dominant */}
+        {/* Area viewfinder kamera scan */}
         <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-secondary/60 transition-colors hover:border-primary/40 md:aspect-video">
           <video
             ref={videoRef}
@@ -103,7 +103,7 @@ export default function ScanDesktopView({
           )}
         </div>
 
-        {/* Control rail, quota + tools, stacked */}
+        {/* Panel kuota dan kontrol */}
         <aside className="flex flex-col gap-6">
           <div className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-accent/30">
             <p className="overline">{t("kuota")}</p>
@@ -137,7 +137,7 @@ export default function ScanDesktopView({
         </aside>
       </div>
 
-      {/* Step guide, full-width numbered rail below the workspace */}
+      {/* Panduan langkah pemindaian kamera */}
       <TkReveal className="mx-auto w-full max-w-7xl px-4 pt-16 sm:px-6">
         <ol className="grid divide-y divide-border rounded-xl border border-border bg-card transition-colors hover:border-primary/40 md:grid-cols-3 md:divide-y-0 md:divide-x" aria-label={t("caraKerja")}>
           {steps.map((step) => (

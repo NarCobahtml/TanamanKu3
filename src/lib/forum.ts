@@ -94,19 +94,16 @@ export function formatForumPost(p: PrismaPostWithRelations): ForumPost {
 
 let isDatabaseSeeded = false;
 
-/**
- * Automatically seed mock posts to PostgreSQL if database is empty
- */
+// Seed data forum awal (pastikan semua post default ada di database)
 export async function seedForumPostsIfEmpty() {
   if (isDatabaseSeeded) return;
   try {
-    const count = await prisma.post.count();
-    if (count > 0) {
-      isDatabaseSeeded = true;
-      return;
-    }
-
     for (const post of initialMockPosts) {
+      const existing = await prisma.post.findUnique({
+        where: { id: post.id },
+      });
+      if (existing) continue;
+
       const createdPost = await prisma.post.create({
         data: {
           id: post.id,
@@ -139,6 +136,7 @@ export async function seedForumPostsIfEmpty() {
         }
       }
     }
+    isDatabaseSeeded = true;
   } catch (error) {
     console.error('Error seeding initial forum posts:', error);
   }

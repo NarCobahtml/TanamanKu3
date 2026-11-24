@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const planName = selectedPlan.name;
     const verifiedPrice = selectedPlan.price;
 
-    // 1. Verifikasi Autentikasi Pengguna (Wajib Login untuk Berlangganan)
+    // 1. Verifikasi autentikasi pengguna
     const supabase = await createClient();
     const {
       data: { user: authUser },

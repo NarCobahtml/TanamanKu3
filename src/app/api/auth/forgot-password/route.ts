@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       select: { id: true, email: true, name: true },
     });
 
-    // Jika user tidak ditemukan, jangan ekspos keberadaan email (Timing & enumeration protection)
+    // Proteksi enumerasi email user
     if (!user) {
       return NextResponse.json({
         success: true,

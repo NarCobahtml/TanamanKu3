@@ -27,7 +27,7 @@ export function Logo({ className, dark, href = "/" }: { className?: string; dark
 
   return (
     <Link href={href} className={cn("flex items-center", className)} aria-label={`TanamanKu, ${t('beranda')}`}>
-      {/* wordmark resmi dari file Figma (leaf hijau + teks) */}
+      {/* Wordmark resmi brand */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={isDark ? '/figma-assets/logo-fix.svg' : '/figma-assets/logo-fix-ink.svg'}

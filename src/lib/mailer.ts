@@ -1,17 +1,6 @@
 import { Resend } from 'resend';
 
-/**
- * Mailer via Resend.
- *
- * Env (server-only, JANGAN prefix NEXT_PUBLIC_):
- *   RESEND_API_KEY          = re_xxxxxxxx  (Resend Dashboard → API Keys)
- *   RESEND_FROM_EMAIL       = "TumbuhKita <noreply@domainmu.co.id>"
- *                             default development: "TumbuhKita <onboarding@resend.dev>"
- *                             (onboarding@resend.dev hanya bisa kirim ke owner akun)
- *
- * Kalau RESEND_API_KEY kosong → mode dev: OTP ditulis ke server log, bukan dikirim.
- * Itu membuat seluruh alur tetap bisa dites end-to-end tanpa setup email.
- */
+// Mailer via Resend
 
 const isConfigured = () => Boolean(process.env.RESEND_API_KEY);
 
@@ -27,10 +16,7 @@ const fromAddress = () =>
 
 export type MailResult = { sent: true; id: string } | { sent: false; reason: string };
 
-/**
- * Kirim email. `idempotencyKey` mencegah terkirim dua kali kalau caller retry
- * (Resend dedupe 24 jam) — penting untuk tombol "kirim ulang OTP".
- */
+// Kirim email via Resend
 async function sendMail(params: {
   to: string;
   subject: string;

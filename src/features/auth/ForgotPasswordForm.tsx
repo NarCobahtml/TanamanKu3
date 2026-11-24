@@ -20,7 +20,7 @@ export default function ForgotPasswordForm() {
   const [devResetUrl, setDevResetUrl] = useState<string | undefined>(undefined);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Kirim permintaan tautan reset kata sandi ke email
+  // Kirim permintaan reset password
   const handleRequestResetLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
@@ -93,7 +93,7 @@ export default function ForgotPasswordForm() {
                 </p>
               </div>
 
-              {/* Banner Dev Shortcut (jika di local development) */}
+              {/* Banner dev shortcut lokal */}
               {devResetUrl && (
                 <div className="rounded-lg border border-primary/20 bg-primary/5 p-3.5 text-left text-xs space-y-2">
                   <div className="flex items-center justify-between">

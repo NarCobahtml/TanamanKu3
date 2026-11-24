@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   try {
     const ip = getClientIp(request);
 
-    // Cek apakah IP sedang diblokir karena brute-force
+    // Cek blokir IP brute-force
     const rateCheck = await checkRateLimit(ip);
     if (rateCheck.isBlocked) {
       return NextResponse.json(
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
     let normalizedEmail = email.trim().toLowerCase();
 
-    // Mendukung login menggunakan username maupun email
+    // Dukung login username/email
     if (!normalizedEmail.includes('@')) {
       const userByName = await prisma.user.findFirst({
         where: { name: { equals: email.trim(), mode: 'insensitive' } },
@@ -53,17 +53,12 @@ export async function POST(request: Request) {
       }
     }
 
-    // 0. Gate verifikasi email: akun dari /register (passwordHash scrypt) baru bisa
-    //    login setelah OTP benar. User legacy & social login lolos — keduanya sudah
-    //    punya passwordHash yang bukan scrypt hash kita, jadi Supabase yang pegang
-    //    otorisasi dan email-nya sudah terverifikasi di sana.
+    // Gate verifikasi email OTP
     const preAuthUser = await prisma.user.findUnique({
       where: { email: normalizedEmail },
       select: { id: true, emailVerified: true, passwordHash: true },
     });
-    // passwordHash === '' artinya akun dibuat lewat Supabase (social login) atau
-    // sudah dimigrasi dari legacy scrypt. Supabase sudah memverifikasi email-nya,
-    // jadi jangan dikunci oleh gate OTP.
+    // Abaikan akun social/migrasi
     const isSocialOrMigrated = preAuthUser?.passwordHash === '';
     if (preAuthUser && !preAuthUser.emailVerified && !isSocialOrMigrated) {
       return NextResponse.json(
@@ -82,14 +77,13 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
-    // 1. Authenticate with official Supabase Auth (sets HTTP-only cookie automatically)
+    // 1. Autentikasi Supabase Auth
     let { data, error } = await supabase.auth.signInWithPassword({
       email: normalizedEmail,
       password,
     });
 
-    // 2. Seamless Migration Fallback:
-    // If Supabase returns invalid credentials, check if user exists in Prisma with legacy scrypt hash
+    // 2. Fallback migrasi legacy
     if (error && (error.message.includes('Invalid login credentials') || error.status === 400)) {
       const legacyUser = await prisma.user.findUnique({
         where: { email: normalizedEmail },
@@ -98,7 +92,7 @@ export async function POST(request: Request) {
       if (legacyUser?.passwordHash && legacyUser.passwordHash.includes(':')) {
         const isMatch = await comparePassword(password, legacyUser.passwordHash);
         if (isMatch) {
-          // Upgrade user to Supabase Auth seamlessly!
+          // Upgrade ke Supabase Auth
           const admin = createAdminClient();
           const { data: existingAuth } = await admin.auth.admin.getUserById(legacyUser.id);
           if (existingAuth?.user) {
@@ -116,7 +110,7 @@ export async function POST(request: Request) {
             });
           }
 
-          // Retry sign in to establish official Supabase session cookies
+          // Login ulang pasca upgrade
           const reSignIn = await supabase.auth.signInWithPassword({
             email: normalizedEmail,
             password,
@@ -147,12 +141,12 @@ export async function POST(request: Request) {
       );
     }
 
-    // Berhasil login: bersihkan riwayat gagal untuk IP ini
+    // Bersihkan riwayat gagal IP
     await resetRateLimit(ip);
 
     const authUser = data.user;
 
-    // 3. Ensure profile in Prisma public.User is present and in sync
+    // 3. Sinkronisasi profil Prisma
     let user = await prisma.user.findUnique({
       where: { id: authUser.id },
     });
@@ -163,7 +157,7 @@ export async function POST(request: Request) {
       });
     }
 
-    // Blokir jika user sedang ditangguhkan (SUSPENDED) oleh admin
+    // Cek penangguhan akun admin
     if (user?.bio?.startsWith('[SUSPENDED]')) {
       return NextResponse.json(
         {
@@ -190,12 +184,12 @@ export async function POST(request: Request) {
           name: metaName,
           passwordHash: '',
           role: 'USER',
-          emailVerified: true, // social/OAuth: Supabase sudah verifikasi email
+          emailVerified: true, // Terverifikasi via OAuth
           emailVerifiedAt: new Date(),
         },
       });
     } else if (!user.emailVerified && user.passwordHash === '') {
-      // Backfill akun social yang dibuat sebelum fitur OTP ada.
+      // Backfill akun social legacy
       user = await prisma.user.update({
         where: { id: user.id },
         data: { emailVerified: true, emailVerifiedAt: new Date() },

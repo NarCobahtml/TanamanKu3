@@ -61,7 +61,7 @@ export default function ScanView() {
         try {
           await video.play();
         } catch {
-          /* autoplay policy: muted video akan play sendiri; abaikan */
+          /* Abaikan kebijakan putar otomatis */
         }
       }
       setCameraState('ready');
@@ -76,7 +76,7 @@ export default function ScanView() {
     }
   }, [stopCamera, t]);
 
-  // Kirim gambar ke /api/scan (proxy Roboflow), simpan hasil, pindah halaman.
+  // Jalankan pemindaian gambar Roboflow
   const analyze = async (dataUrl: string) => {
     setAnalyzing(true);
     try {
@@ -114,9 +114,9 @@ export default function ScanView() {
 
       sessionStorage.setItem('scan-result', JSON.stringify(data));
       try {
-        sessionStorage.setItem('scan-capture', dataUrl); // tampil di halaman hasil
+        sessionStorage.setItem('scan-capture', dataUrl); // Simpan tangkapan foto pratinjau
       } catch {
-        /* quota penuh: foto besar, hasil tetap jalan tanpa preview */
+        /* Simpan hasil tanpa pratinjau */
       }
       router.push('/scan/result');
     } catch (err) {
@@ -194,7 +194,7 @@ export default function ScanView() {
         onBack={() => router.push('/home')}
       />
 
-      {/* Hidden file input for gallery uploads */}
+      {/* Input berkas unggah galeri */}
       <input
         ref={fileInputRef}
         type="file"

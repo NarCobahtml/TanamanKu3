@@ -9,7 +9,7 @@ export const CATEGORY_KEY: Record<string, string> = {
   'Tanya Ahli': 'tanyaAhli',
 };
 
-/** Category text translated; fallback raw string. */
+// Terjemahan kategori forum
 export function CategoryText({ category }: { category: string }) {
   const t = useTranslations('forum');
   const tc = useTranslations('common');

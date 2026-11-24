@@ -30,7 +30,7 @@ export default function SiramClientPage() {
     <AppShell>
       <TanamanPage onTambah={handleTambah} />
 
-      {/* FAB thumb-friendly, hanya mobile (CSS) — buka dialog yang SAMA */}
+      {/* Tombol aksi siram FAB */}
       <button
         onClick={handleTambah}
         type="button"

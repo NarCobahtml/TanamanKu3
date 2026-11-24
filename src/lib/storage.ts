@@ -2,9 +2,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://chxnfvwdld
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET || 'tanamanku-uploads';
 
-/**
- * Upload binary buffer to Supabase Storage and return its public URL
- */
+// Unggah ke Supabase Storage
 export async function uploadToStorage({
   fileBuffer,
   filePath,
@@ -40,9 +38,7 @@ export async function uploadToStorage({
   return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${filePath}`;
 }
 
-/**
- * Delete a file from Supabase Storage by its public URL or relative path
- */
+// Hapus dari Supabase Storage
 export async function deleteFromStorage(publicUrlOrPath: string): Promise<boolean> {
   if (!publicUrlOrPath || !SUPABASE_KEY) return false;
 
@@ -53,7 +49,7 @@ export async function deleteFromStorage(publicUrlOrPath: string): Promise<boolea
     if (publicUrlOrPath.includes(publicPrefix)) {
       relativePath = publicUrlOrPath.split(publicPrefix)[1];
     } else if (publicUrlOrPath.startsWith('http')) {
-      // Not stored in this Supabase bucket, skip
+      // Lewati file luar bucket
       return false;
     }
 

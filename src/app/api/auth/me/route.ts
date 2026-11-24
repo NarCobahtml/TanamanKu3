@@ -122,7 +122,7 @@ export async function PUT(request: Request) {
 
     let finalPhotoUrl = photoUrl;
 
-    // Handle profile photo upload / replacement
+    // Tangani unggah foto profil
     if (photoUrl !== undefined) {
       const existingUser = await prisma.user.findUnique({
         where: { id: userId },
@@ -130,12 +130,12 @@ export async function PUT(request: Request) {
       });
 
       if (typeof photoUrl === 'string' && photoUrl.startsWith('data:image/')) {
-        // 1. Delete previous avatar in Supabase Storage if it exists
+        // 1. Hapus avatar lama
         if (existingUser?.photoUrl) {
           await deleteFromStorage(existingUser.photoUrl);
         }
 
-        // 2. Parse base64 and upload to Supabase bucket
+        // 2. Unggah avatar baru
         const matches = photoUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);
         if (matches) {
           const mimeType = matches[1];

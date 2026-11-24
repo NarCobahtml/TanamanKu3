@@ -33,7 +33,7 @@ export default function ForumClientPage() {
         <ForumPage onCreatePost={handleCreatePost} />
       </Suspense>
 
-      {/* FAB thumb-friendly, selalu ada di kanan di mobile seperti di /siram */}
+      {/* Tombol FAB mobile forum */}
       <button
         onClick={handleCreatePost}
         type="button"

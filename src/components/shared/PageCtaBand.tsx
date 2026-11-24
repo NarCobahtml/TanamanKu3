@@ -1,9 +1,6 @@
 import Link from 'next/link';
 
-/**
- * Ink CTA band closing long pages, pattern from landing cta-band.tsx.
- * Green identity band, Playfair accent heading, rounded-full buttons.
- */
+// Call to action band
 export function PageCtaBand({
   heading,
   accent,
@@ -12,7 +9,7 @@ export function PageCtaBand({
   secondary,
 }: {
   heading: string;
-  /** Phrase inside `heading` rendered as Playfair italic. */
+  // Frasa aksen heading
   accent?: string;
   description?: string;
   primary: { href: string; label: string };

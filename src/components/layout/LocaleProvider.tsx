@@ -20,13 +20,12 @@ const LocaleContext = createContext<LocaleContextValue | null>(null);
 const STORAGE_KEY = 'tanamanku-locale';
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  // SSR & hydration pertama SELALU 'id' (sama dengan server HTML);
-  // localStorage dibaca di effect -> re-render tanpa mismatch.
+  // Inisialisasi locale via storage
   const [locale, setLocaleState] = useState<Locale>('id');
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- baca storage eksternal sekali saat mount
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- baca storage mount
     if (saved === 'id' || saved === 'en') setLocaleState(saved);
   }, []);
 
@@ -58,7 +57,7 @@ export function useLocale() {
   return ctx;
 }
 
-/** Convenience: current locale getter for non-hook usage checks. */
+// Getter locale non-hook
 export function getStoredLocale(): Locale {
   if (typeof window === 'undefined') return 'id';
   const saved = window.localStorage.getItem(STORAGE_KEY);

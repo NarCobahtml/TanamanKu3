@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { SearchX } from 'lucide-react';
 
-/** Untuk halaman dinamis client ([id]): tampilkan 404 alih-alih fallback diam. */
+// Tampilan halaman 404
 export default function NotFoundView({ backHref = '/home' }: { backHref?: string }) {
   const t = useTranslations('notFound');
   return (

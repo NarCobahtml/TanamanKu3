@@ -157,7 +157,7 @@ export default function ScanResultPage() {
       </PageHeader>
 
       <div className="mx-auto w-full max-w-7xl space-y-16 px-4 pt-14 sm:px-6">
-        {/* Diagnosis Summary Card Component */}
+        {/* Kartu ringkasan hasil diagnosa */}
         <section aria-label={t("ringkasan")}>
           <DiagnosisSummaryCard
             photo={photo}
@@ -169,7 +169,7 @@ export default function ScanResultPage() {
           />
         </section>
 
-        {/* Banner Tanya Komunitas jika hasil tidak cocok Component */}
+        {/* Banner konsultasi komunitas forum */}
         <CommunityAskBanner
           onAskCommunity={handleAskCommunity}
           badgeLabel={t("bukanPenyakitIni")}

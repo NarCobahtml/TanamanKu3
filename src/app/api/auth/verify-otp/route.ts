@@ -2,25 +2,13 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyOtp } from '@/lib/otp';
 
-// Rate limit per IP (in-memory, OWASP A07) — OTP 6 digit = 1 juta kombinasi,
-// jadi tanpa limiter ini bisa di-brute-forceonline dengan request paralel.
+// Rate limit IP in-memory
 interface Bucket {
   attempts: number;
   blockedUntil: number | null;
   lastAttempt: number;
 }
-/**
- * POST /api/auth/verify-otp — body: { userId, otp }
- *
- * userId sengaja dipakai, bukan opaque challenge token: id itu sudah bukan rahasia
- * di model app ini (/api/auth/login dan /api/auth/me sama-sama mengirimnya ke
- * client, dan UI menyimpannya di localStorage). Yang melindungi akun adalah OTP
- * 6 digit + TTL + maxAttempts + rate limit IP, bukan kerahasiaan userId.
- *
- * known limit: pre-registration squatting — penyerang bisa mendaftarkan email
- * korban lebih dulu sehingga korban tidak bisa mendaftar. Mitigasi penuh butuh
- * OTP juga saat login (lalu hapus user unverified yang sudah tua). // ponytail
- */
+// Verifikasi kode OTP user
 const otpRateLimitMap = new Map<string, Bucket>();
 const MAX_IP_ATTEMPTS = 10;
 const BLOCK_MS = 10 * 60 * 1000;
@@ -84,7 +72,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Catat percobaan gagal di level IP
+    // Catat percobaan gagal IP
     const prev = otpRateLimitMap.get(ip);
     const attempts = prev && now - prev.lastAttempt < BLOCK_MS ? prev.attempts + 1 : 1;
     const blockedUntil = attempts >= MAX_IP_ATTEMPTS ? now + BLOCK_MS : null;
@@ -120,11 +108,7 @@ export async function POST(request: Request) {
   }
 }
 
-/**
- * GET /api/auth/verify-otp?userId=... — cek apakah user sudah terverifikasi,
- * dipakai halaman OTP untuk auto-redirect kalau user membuka tab lain yang
- * sudah menyelesaikan verifikasi.
- */
+// Cek status verifikasi user
 export async function GET(request: Request) {
   try {
     const userId = new URL(request.url).searchParams.get('userId');

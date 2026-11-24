@@ -5,11 +5,7 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { PageBand } from '@/components/shared/PageBand';
 
-/**
- * Page hero with a bottom rule and larger rhythm, full-width editorial
- * opening for content pages (kept for back-compat with tanaman detail).
- * `tone` and `accent` are passed through to the hero band.
- */
+// Header halaman editorial
 export function PageHeader({
   title,
   description,
@@ -47,7 +43,7 @@ export function PageHeader({
   );
 }
 
-/** Section heading with optional "see all" link. */
+// Heading dengan tautan
 export function SectionHeader({
   title,
   href,

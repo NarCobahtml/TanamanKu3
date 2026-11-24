@@ -74,7 +74,7 @@ export default function ForumDetailPage({
   useEffect(() => {
     let isMounted = true;
     const load = async () => {
-      // Sync related posts from cache or db
+      // Sinkronkan postingan terkait
       const cachedRelated = getAllPosts().filter((p) => p.id !== id).slice(0, 3);
       if (isMounted && cachedRelated.length > 0) {
         setRelated(cachedRelated);
@@ -184,7 +184,7 @@ export default function ForumDetailPage({
 
   return (
     <div>
-      {/* ============ SUB-HERO, breadcrumb overline + post title ============ */}
+      {/* Sub-hero judul postingan */}
       <header className="sage-wash border-b border-border">
         <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 md:py-16">
           <nav
@@ -256,7 +256,7 @@ export default function ForumDetailPage({
         </div>
       </header>
 
-      {/* ============ BODY, editorial two-column: article | sticky aside ============ */}
+      {/* Konten postingan dan aside */}
       <div className="mx-auto grid w-full max-w-7xl gap-16 px-4 py-14 sm:px-6 lg:grid-cols-[1.6fr_1fr]">
         {/* Article, reading column */}
         <article className="min-w-0">
@@ -350,31 +350,31 @@ export default function ForumDetailPage({
             </h2>
             <TkRevealClient>
               {(() => {
-                // Group comments: top-level comments and nested replies attached to parent comment
+                // Kelompokkan komentar hierarkis
                 const topLevelComments: Array<typeof comments[0] & { nestedReplies: typeof comments }> = [];
 
-                // 1. Index top-level comments (comments without parentId and without replyTo)
+                // 1. Indeks komentar utama
                 for (const c of comments) {
                   if (!c.parentId && !c.replyTo) {
                     topLevelComments.push({ ...c, nestedReplies: [] });
                   }
                 }
 
-                // If all comments have replyTo / parentId (legacy data), pick first as top-level
+                // Fallback data komentar legacy
                 if (topLevelComments.length === 0 && comments.length > 0) {
                   topLevelComments.push({ ...comments[0], nestedReplies: [] });
                 }
 
-                // 2. Attach replies to the appropriate top-level comment
+                // 2. Pasang balasan komentar
                 for (const c of comments) {
-                  // Skip if it is already one of the topLevelComments root items
+                  // Lewati komentar level utama
                   if (topLevelComments.some((tl) => (tl.id && tl.id === c.id) || (!tl.id && tl === c))) {
                     continue;
                   }
 
                   let attached = false;
 
-                  // 2a. Match by parentId to a top-level comment
+                  // Cocokkan via parentId
                   if (c.parentId) {
                     const parent = topLevelComments.find((p) => p.id === c.parentId);
                     if (parent) {
@@ -392,7 +392,7 @@ export default function ForumDetailPage({
                     }
                   }
 
-                  // 2c. Fallback if parent wasn't found: attach to latest top-level comment or make top-level
+                  // Fallback pasang komentar utama
                   if (!attached) {
                     if (topLevelComments.length > 0) {
                       topLevelComments[topLevelComments.length - 1].nestedReplies.push(c);
@@ -438,7 +438,7 @@ export default function ForumDetailPage({
                           </div>
                         </div>
 
-                        {/* Nested Replies specifically under THIS comment */}
+                        {/* Balasan komentar terkait */}
                         {parent.nestedReplies.length > 0 && (
                           <div className="ml-6 sm:ml-10 space-y-3 border-l-2 border-primary/30 pl-4 sm:pl-6">
                             {parent.nestedReplies.map((reply, rIdx) => (
@@ -535,7 +535,7 @@ export default function ForumDetailPage({
           </section>
         </article>
 
-        {/* Sidebar, sticky info cards hairline */}
+        {/* Sidebar info postingan */}
         <aside className="hidden lg:block">
           <div className="sticky top-24 space-y-6">
             <div className="overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">

@@ -8,7 +8,6 @@ import {
   ChevronDown,
   Loader2,
   Send,
-  Sparkles,
   User,
   X,
 } from "lucide-react";
@@ -42,10 +41,9 @@ export default function CreatePostPage() {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
-  const [isFromScan, setIsFromScan] = useState(false);
   const { checkAuth, AuthModal } = useAuthGuard();
 
-  // Load prefilled draft from scan if coming from /scan/result
+  // Ambil draft dari scan
   useEffect(() => {
     const fromScan = searchParams.get("fromScan") === "1";
     const draftRaw = typeof window !== "undefined" ? sessionStorage.getItem("scan_forum_draft") : null;
@@ -60,7 +58,6 @@ export default function CreatePostPage() {
             if (parsed.category) setCategory(parsed.category);
             const img = parsed.photo || sessionStorage.getItem("scan-capture");
             if (img) setPhotoPreview(img);
-            setIsFromScan(true);
             toast.info(
               "Data hasil scan otomatis dimasukkan ke draf postingan. Anda dapat mengedit judul, teks, atau foto sebelum memposting."
             );
@@ -73,14 +70,7 @@ export default function CreatePostPage() {
     }
   }, [searchParams]);
 
-  // useEffect(() => {
-  //   checkAuth({
-  //     title: "Login untuk Buat Postingan",
-  //     actionName: "Buat Postingan",
-  //     description:
-  //       "Anda perlu masuk ke akun terlebih dahulu untuk mempublikasikan postingan baru di forum komunitas.",
-  //   });
-  // }, []);
+  // Cek autentikasi buat postingan
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -183,7 +173,7 @@ export default function CreatePostPage() {
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-xl mx-auto px-4 sm:px-6 pt-5 pb-28 relative">
         <div className="flex gap-4">
-          {/* Left: Avatar + Vertical Thread Line */}
+          {/* Avatar dan garis thread */}
           <div className="flex flex-col items-center shrink-0">
             <div className="size-11 sm:size-12 rounded-full bg-[#E5EBE5] dark:bg-muted/80 flex items-center justify-center text-[#738273] dark:text-muted-foreground">
               <User className="size-6 stroke-[1.8]" aria-hidden="true" />
@@ -192,28 +182,8 @@ export default function CreatePostPage() {
             <div className="w-[1.5px] min-h-[140px] flex-1 bg-[#DEE5DE] dark:bg-border/60 mt-2 mb-2" />
           </div>
 
-          {/* Right: Form inputs and tool controls */}
+          {/* Input form dan kontrol */}
           <div className="flex-1 min-w-0 pt-0.5">
-            {isFromScan && (
-              <div className="mb-4 rounded-xl border border-primary/30 bg-primary/10 p-3.5 text-xs sm:text-sm text-foreground flex items-start gap-2.5">
-                <Sparkles className="size-4 text-primary shrink-0 mt-0.5" aria-hidden="true" />
-                <div className="flex-1">
-                  <p className="font-semibold text-primary">Draf Diisi Otomatis dari Hasil Scan AI</p>
-                  <p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
-                    Foto daun, judul, dan detail diagnosis Anda telah dimasukkan. Anda dapat mengedit judul, teks, atau foto sebelum mempublikasikannya ke forum.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsFromScan(false)}
-                  className="text-muted-foreground hover:text-foreground cursor-pointer p-1"
-                  aria-label="Tutup info"
-                >
-                  <X className="size-3.5" />
-                </button>
-              </div>
-            )}
-
             {/* Judul Postingan... */}
             <input
               type="text"
@@ -224,7 +194,7 @@ export default function CreatePostPage() {
               autoFocus
             />
 
-            {/* Apa yang ingin Anda bagikan hari ini? */}
+            {/* Area input teks postingan */}
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -276,7 +246,7 @@ export default function CreatePostPage() {
               </div>
             )}
 
-            {/* Tools Row: Category selector pill + Camera icon */}
+            {/* Baris kategori dan kamera */}
             <div className="flex items-center gap-2.5 mt-4 relative">
               {/* Category selector */}
               <div className="relative category-dropdown-container">
@@ -348,7 +318,7 @@ export default function CreatePostPage() {
           </div>
         </div>
 
-        {/* Floating "Posting" Action Button at bottom right */}
+        {/* Tombol aksi posting */}
         <ActionButton
           type="button"
           onClick={publish}

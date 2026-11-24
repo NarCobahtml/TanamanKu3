@@ -8,10 +8,10 @@ const projectRoot =
     : path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
-  // Matikan header X-Powered-By agar tidak mengekspos teknologi server (OWASP A02)
+  // Matikan header X-Powered-By
   poweredByHeader: false,
 
-  // Konfigurasi Security Headers (OWASP A02: Security Misconfiguration)
+  // Konfigurasi Security Headers
   async headers() {
     return [
       {
@@ -42,13 +42,11 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Force workspace root to THIS project — parent folder holds another
-  // project's package-lock.json which misleads Turbopack module resolution.
+  // Root workspace Turbopack
   turbopack: {
     root: projectRoot,
   },
-  // Cloudflare quick-tunnel origin changes every restart — allow any
-  // trycloudflare subdomain so dev chunks (/_next/*) don't 403 cross-origin.
+  // Origin tunnel Cloudflare dev
   allowedDevOrigins: ["*.trycloudflare.com"],
 };
 

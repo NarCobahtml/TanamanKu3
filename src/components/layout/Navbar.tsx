@@ -23,7 +23,7 @@ const defaultNotifications = [
   { id: "3", time: "2 hari lalu", text: "Pisang terlewat penyiraman 1 hari." },
 ];
 
-/** nama i18n untuk nav, fallback ke nama asli bila tidak ada mapping. */
+// Label i18n navigasi
 const NAV_KEY: Record<string, string> = {
   Beranda: "beranda",
   Scan: "scan",
@@ -172,7 +172,7 @@ export default function Navbar() {
             </DropdownMenu>
           </div>
 
-          {/* Notification (hidden on auth pages) */}
+          {/* Ikon notifikasi */}
           {!isAuth && (
             <div className="relative hidden md:block">
               <button
@@ -215,7 +215,7 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Avatar Profile (hidden on auth pages) */}
+          {/* Avatar profil */}
           {!isAuth && (
             <Link
               href="/profil"

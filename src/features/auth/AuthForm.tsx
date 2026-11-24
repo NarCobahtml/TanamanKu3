@@ -65,8 +65,7 @@ export default function AuthForm({
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        // Akun dibuat tapi belum verifikasi email → arahkan ke step OTP
-        // daripada menampilkan error biasa.
+        // Alihkan ke step OTP
         if (data.error?.code === "EMAIL_NOT_VERIFIED" && data.error?.data?.userId) {
           sessionStorage.setItem(PENDING_USER_KEY, data.error.data.userId);
           setPendingEmail(email);
@@ -81,7 +80,7 @@ export default function AuthForm({
         return;
       }
 
-      // Store user session info in localStorage for fast UI reflection
+      // Simpan info sesi user
       if (data.data?.user) {
         localStorage.setItem("tumbuhkita_user", JSON.stringify(data.data.user));
         window.dispatchEvent(new Event("auth-changed"));
@@ -138,9 +137,7 @@ export default function AuthForm({
         return;
       }
 
-      // Gate verifikasi email: akun baru wajib OTP sebelum bisa masuk.
-      // userId disimpan di sessionStorage (bukan localStorage) supaya hilang
-      // saat tab ditutup dan tidak bertahan setelah verifikasi.
+      // Simpan userId verifikasi OTP
       if (data.data?.requiresVerification && data.data?.userId) {
         sessionStorage.setItem(PENDING_USER_KEY, data.data.userId);
         setPendingEmail(data.data.email ?? email);
@@ -150,7 +147,7 @@ export default function AuthForm({
         return;
       }
 
-      // Store user session info in localStorage for fast UI reflection
+      // Simpan info sesi user
       if (data.data?.user) {
         localStorage.setItem("tumbuhkita_user", JSON.stringify(data.data.user));
         window.dispatchEvent(new Event("auth-changed"));
@@ -166,8 +163,7 @@ export default function AuthForm({
   };
 
   const handleOtpVerified = () => {
-    // Verifikasi sukses → akun aktif tapi belum punya session. Arahkan ke login
-    // supaya user bisa langsung masuk dengan email + password yang sama.
+    // Arahkan ke form login
     router.push("/login?verified=1");
     router.refresh();
   };

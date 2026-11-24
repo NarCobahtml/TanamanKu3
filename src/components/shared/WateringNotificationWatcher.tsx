@@ -8,7 +8,7 @@ import {
 } from '@/lib/watering-notifications';
 import { registerServerWebPush } from '@/lib/web-push-client';
 
-const CHECK_INTERVAL_MS = 20 * 60 * 1000; // Cek setiap 20 menit saat aplikasi aktif
+const CHECK_INTERVAL_MS = 20 * 60 * 1000; // Interval cek 20 menit
 
 export default function WateringNotificationWatcher() {
   const plants = useTanamanList();
@@ -16,7 +16,7 @@ export default function WateringNotificationWatcher() {
   plantsRef.current = plants;
 
   useEffect(() => {
-    // 0. Auto-sync token Server Web Push jika perangkat sudah pernah mengizinkan notifikasi
+    // 0. Sinkronisasi token push
     if (
       typeof window !== 'undefined' &&
       'Notification' in window &&
@@ -25,14 +25,14 @@ export default function WateringNotificationWatcher() {
       registerServerWebPush().catch(() => {});
     }
 
-    // 1. Cek saat komponen di-mount pertama kali (setelah sedikit jeda agar app render siap)
+    // 1. Cek saat mount
     const initialTimer = setTimeout(() => {
       if (isWateringNotificationEnabled() && plantsRef.current.length > 0) {
         checkAndTriggerWateringReminders(plantsRef.current).catch(console.error);
       }
     }, 3000);
 
-    // 2. Cek saat tab kembali aktif (visibility change dari background ke foreground)
+    // 2. Cek tab aktif
     const handleVisibilityChange = () => {
       if (
         document.visibilityState === 'visible' &&
@@ -43,7 +43,7 @@ export default function WateringNotificationWatcher() {
       }
     };
 
-    // 3. Listener untuk custom trigger (misal setelah user menyiram atau mengubah setting)
+    // 3. Listener trigger kustom
     const handleCustomTrigger = (event: Event) => {
       const customEvent = event as CustomEvent<{ force?: boolean; plantId?: string }>;
       if (plantsRef.current.length > 0) {
@@ -57,7 +57,7 @@ export default function WateringNotificationWatcher() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('tanamanku-check-watering-notifications', handleCustomTrigger);
 
-    // 4. Interval berkala saat web / PWA tetap terbuka
+    // 4. Interval berkala
     const interval = setInterval(() => {
       if (isWateringNotificationEnabled() && plantsRef.current.length > 0) {
         checkAndTriggerWateringReminders(plantsRef.current).catch(console.error);

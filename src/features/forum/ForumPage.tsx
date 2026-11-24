@@ -40,7 +40,7 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
   const [postToReport, setPostToReport] = useState<ForumPost | null>(null);
   const [openReportDialog, setOpenReportDialog] = useState(false);
 
-  // Sync with URL query parameters (?tag=... or ?q=...)
+  // Sinkronkan parameter query URL
   useEffect(() => {
     const tagParam = searchParams.get('tag');
     const qParam = searchParams.get('q');
@@ -74,11 +74,11 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
     };
   }, []);
 
-  // Compute dynamic popular topics from actual posts in database / mock
+  // Hitung topik populer dinamis
   const popularTopics = useMemo(() => {
     const tagCounts = new Map<string, number>();
 
-    // Initial curated tags to guarantee rich list even if DB is minimal
+    // Tag default kurasi awal
     const seedDefaults = [
       { tag: 'monstera', count: 0 },
       { tag: 'overwatering', count: 0 },
@@ -200,7 +200,7 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
       />
 
       <div className="mx-auto w-full max-w-7xl space-y-12 px-4 pt-12 pb-24 sm:px-6">
-      {/* Toolbar: search + filter kategori */}
+      {/* Toolbar pencarian filter */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative w-full sm:max-w-xs">
@@ -230,7 +230,7 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
         </p>
       </div>
 
-      {/* Active Hashtag Filter Badge */}
+      {/* Badge filter tag aktif */}
       {selectedTag && (
         <div className="flex items-center gap-2 -mt-6">
           <span className="text-xs font-medium text-muted-foreground">Topik aktif:</span>
@@ -251,7 +251,7 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
       )}
 
       <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr]">
-        {/* Feed, editorial divider list, not card stack */}
+        {/* Feed daftar postingan */}
         <div className="min-w-0">
           {filtered.length === 0 ? (
             <div className="rounded-xl border border-border">
@@ -302,7 +302,7 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
           )}
         </div>
 
-        {/* Sidebar, writer rail on sage wash */}
+        {/* Sidebar penulis komunitas */}
         <aside className="hidden lg:block">
           <div className="sticky top-24 space-y-6">
             <div className="overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">
@@ -369,11 +369,13 @@ export default function ForumPage({ onCreatePost }: { onCreatePost?: () => void 
       />
       <ReportPostDialog
         open={openReportDialog}
-        onOpenChange={setOpenReportDialog}
-        post={postToReport}
-        onReportSubmitted={() => {
-          setPostToReport(null);
+        onOpenChange={(isOpen) => {
+          setOpenReportDialog(isOpen);
+          if (!isOpen) {
+            setPostToReport(null);
+          }
         }}
+        post={postToReport}
       />
     </div>
   );

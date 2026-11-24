@@ -58,9 +58,7 @@ export function getPostById(id: string): ForumPost | undefined {
   return all.find((p) => p.id === id);
 }
 
-/**
- * Fetch all posts from database via /api/forum
- */
+// Ambil seluruh postingan forum
 export async function fetchForumPosts(
   category?: string,
   query?: string,
@@ -89,9 +87,7 @@ export async function fetchForumPosts(
   return getAllPosts();
 }
 
-/**
- * Fetch single post detail from database via /api/forum/[id]
- */
+// Ambil detail postingan forum
 export async function fetchForumPostById(id: string): Promise<ForumPost | null> {
   try {
     const res = await fetch(`/api/forum/${id}`);
@@ -107,9 +103,7 @@ export async function fetchForumPostById(id: string): Promise<ForumPost | null> 
   return getPostById(id) || null;
 }
 
-/**
- * Create a new post in the database
- */
+// Buat postingan forum baru
 export async function createForumPost(data: {
   title: string;
   content: string;
@@ -135,9 +129,7 @@ export async function createForumPost(data: {
   return json.data;
 }
 
-/**
- * Delete a post from the database
- */
+// Hapus postingan dari forum
 export async function deleteForumPost(id: string): Promise<void> {
   const res = await fetch(`/api/forum/${id}`, {
     method: 'DELETE',
@@ -162,9 +154,7 @@ export async function deleteForumPost(id: string): Promise<void> {
   }
 }
 
-/**
- * Add a comment to a post in the database
- */
+// Tambah komentar postingan forum
 export async function submitForumComment(
   postId: string,
   data: { text: string; replyTo?: string; parentId?: string }
@@ -183,9 +173,7 @@ export async function submitForumComment(
   return json.data;
 }
 
-/**
- * Toggle like for a post in the database
- */
+// Toggle suka postingan forum
 export async function toggleForumLike(postId: string, liked: boolean): Promise<number> {
   const res = await fetch(`/api/forum/${postId}/like`, {
     method: 'POST',
@@ -230,12 +218,12 @@ export function isPostOwner(
   // 1. Admins have management access
   if (user.role === 'ADMIN') return true;
 
-  // 2. Match authorId if both exist
+  // 2. Cocokkan authorId pengguna
   if (post.authorId && user.id) {
     return post.authorId === user.id;
   }
 
-  // 3. Match author name (case insensitive)
+  // 3. Cocokkan nama penulis
   if (user.name && post.author && user.name.trim().toLowerCase() === post.author.trim().toLowerCase()) {
     return true;
   }

@@ -1,7 +1,4 @@
-/**
- * Pure, browser-safe forum utility functions.
- * Do NOT import database or server-only modules (Prisma, pg, etc.) in this file.
- */
+// Utilitas forum browser-safe
 
 export function formatRelativeTime(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date;

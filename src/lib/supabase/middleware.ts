@@ -33,10 +33,10 @@ export async function updateSession(request: NextRequest) {
       },
     });
 
-    // IMPORTANT: DO NOT remove getUser() as it refreshes expired auth tokens
+    // Refresh token sesi pengguna
     await supabase.auth.getUser();
   } catch {
-    // Unauthenticated or expired refresh token is expected for guest visitors
+    // Abaikan sesi tamu unauthenticated
   }
 
   return supabaseResponse;

@@ -26,11 +26,12 @@ export function CommunityAskBanner({
       <div className="rounded-2xl border border-primary/25 bg-card p-6 sm:p-7 shadow-xs transition-colors hover:border-primary/50">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">
                 {badgeLabel}
               </span>
-              <span className="text-xs text-muted-foreground">{subLabel}</span>
+              <span>•</span>
+              <span>{subLabel}</span>
             </div>
             <h3 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">
               {title}

@@ -70,7 +70,7 @@ export default function PwaPrompt() {
 
     if (isStandalone) return;
 
-    // Cek apakah user pernah menutup banner install dalam 24 jam terakhir
+    // Cek riwayat tutup banner
     const dismissedAt = localStorage.getItem("tanamanku_pwa_dismissed");
     const wasDismissedRecently =
       dismissedAt && Date.now() - Number(dismissedAt) < 24 * 60 * 60 * 1000;
@@ -106,7 +106,7 @@ export default function PwaPrompt() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("pwa-prompt-ready", handlePromptReady);
 
-    // Fungsi global agar tombol apapun di website (nav, profil, banner) langsung memicu download/install prompt
+    // Trigger global prompt PWA
     window.triggerPwaInstall = async () => {
       const promptEvent = window.deferredPwaPrompt;
       if (promptEvent) {
@@ -165,7 +165,7 @@ export default function PwaPrompt() {
 
   return (
     <>
-      {/* Banner Ajakan Install PWA */}
+      {/* Banner install PWA */}
       {showPrompt && (
         <div className="fixed bottom-20 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 z-50 sm:max-w-md animate-in fade-in slide-in-from-bottom-5 duration-300">
           <div className="rounded-2xl border border-primary/20 bg-card/95 p-4 shadow-xl backdrop-blur-md dark:border-primary/30">

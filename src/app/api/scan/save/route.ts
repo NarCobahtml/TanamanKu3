@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Resolve User (Wajib Login)
+    // 1. Verifikasi login user
     const supabase = await createClient();
     const {
       data: { user: authUser },
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
     const userId = dbUser.id;
 
-    // 2. Resolve / Upsert Disease in database
+    // 2. Upsert data penyakit
     const diseaseData = resolveDiseaseForClass(scanClass);
     const disease = await prisma.disease.upsert({
       where: { id: diseaseData.id },
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
       create: diseaseData,
     });
 
-    // 3. Handle photo upload if base64
+    // 3. Unggah foto base64
     let imageUrl = '/figma-assets/plant-monstera.webp';
     if (typeof photo === 'string' && photo.startsWith('data:image/')) {
       try {
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
       imageUrl = photo.trim();
     }
 
-    // 4. Create ScanRecord in PostgreSQL
+    // 4. Simpan riwayat scan
     const scanRecord = await prisma.scanRecord.create({
       data: {
         id: `scan-${Date.now()}`,

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 const FREE_SCAN_LIMIT = 5;
 
-// GET /api/scan: Dapatkan status kuota dan paket langganan user saat ini
+// Ambil kuota dan langganan
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -57,7 +57,7 @@ export async function GET() {
   }
 }
 
-// POST /api/scan: Jalankan scan daun lewat AI Roboflow dengan validasi auth & kuota paket
+// Scan daun via Roboflow
 export async function POST(request: Request) {
   // 1. Verifikasi Autentikasi Pengguna
   const supabase = await createClient();
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // 2. Cek Akun Pengguna di Database
+  // 2. Cek akun pengguna
   let dbUser = await prisma.user.findFirst({
     where: {
       OR: [{ id: authUser.id }, { email: authUser.email || "" }],
@@ -115,7 +115,7 @@ export async function POST(request: Request) {
     });
   }
 
-  // 3. Verifikasi Status Langganan & Batas Kuota
+  // 3. Verifikasi batas kuota
   const isPro =
     dbUser.subscriptionTier === "PRO" &&
     (!dbUser.subscriptionExpiresAt || dbUser.subscriptionExpiresAt > new Date());
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
     const file = form.get("file");
     if (!(file instanceof Blob) || file.size === 0) throw new Error("no file");
 
-    // Batasi ukuran gambar maksimal 10MB
+    // Validasi ukuran gambar maksimal
     if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
         { success: false, error: "Ukuran gambar terlalu besar. Maksimal 10MB." },
@@ -166,7 +166,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // 6. Kirim ke Upstream Engine (Roboflow)
+  // 6. Kirim ke Roboflow
   try {
     const upstream = new FormData();
     upstream.append("file", image, "capture.jpg");
@@ -182,7 +182,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 7. Tambah Pemakaian Kuota Scan di Database
+    // 7. Update kuota scan
     const updatedUser = await prisma.user.update({
       where: { id: dbUser.id },
       data: {

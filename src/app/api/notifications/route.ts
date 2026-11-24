@@ -23,7 +23,7 @@ export async function GET() {
       });
     }
 
-    // Seed initial notifications if user has none
+    // Seed notifikasi awal pengguna
     const count = await prisma.notification.count({ where: { userId } });
     if (count === 0 && userId) {
       try {

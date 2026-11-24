@@ -16,7 +16,7 @@ export async function GET(request: Request) {
       const normalizedEmail = authUser.email?.trim().toLowerCase();
 
       if (normalizedEmail) {
-        // Sync user profile to public.User in Prisma
+        // Sinkronisasi profil pengguna Prisma
         let user = await prisma.user.findUnique({
           where: { id: authUser.id },
         });
@@ -66,6 +66,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // If code exchange failed or no code present, redirect to login with error
+  // Redirect login jika gagal
   return NextResponse.redirect(`${origin}/login?error=auth-callback-failed`);
 }

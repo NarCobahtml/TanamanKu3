@@ -32,7 +32,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Hitung jumlah tanaman yang menggunakan masing-masing tipe
+    // Hitung jumlah per tipe
     const typesWithCount = await Promise.all(
       types.map(async (t) => {
         const count = await prisma.plant.count({

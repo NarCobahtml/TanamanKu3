@@ -89,7 +89,7 @@ export function OverviewTab({
         ))}
       </div>
 
-      {/* 2 Grid: Forum Categories & Activity Logs */}
+      {/* Grid kategori dan log */}
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Forum Categories Activity */}
         <div className="lg:col-span-7 rounded-2xl border border-border bg-card p-6 shadow-xs">
@@ -127,7 +127,7 @@ export function OverviewTab({
           </div>
         </div>
 
-        {/* System Activity & Logs */}
+        {/* Log aktivitas sistem */}
         <div className="lg:col-span-5 rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-4 border-b border-border">
@@ -184,7 +184,7 @@ export function OverviewTab({
         </div>
       </div>
 
-      {/* Quick User List Table */}
+      {/* Tabel pengguna cepat */}
       <div className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div>

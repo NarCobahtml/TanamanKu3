@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-/** Render title with `accent` phrase in Playfair italic, landing DNA. */
+// Judul dengan teks aksen
 function TitleAccent({ title, accent }: { title: string; accent?: string }) {
   if (!accent || !title.includes(accent)) return <>{title}</>;
   const i = title.indexOf(accent);
@@ -14,12 +14,7 @@ function TitleAccent({ title, accent }: { title: string; accent?: string }) {
   );
 }
 
-/**
- * Editorial hero band, landing gen-5 DNA. Overline label, big tracking-tight
- * title (Playfair italic accent), muted description, actions right; entrance
- * via hero-anim hero-fade. sage-wash default (content pages), ink for
- * contrast (scan result), plain for small detail sub-heroes.
- */
+// Hero band editorial
 export function PageBand({
   title,
   description,
@@ -34,15 +29,15 @@ export function PageBand({
   title: string;
   description?: string;
   action?: ReactNode;
-  /** Extra content under the title row (meta, stats, author). */
+  // Konten tambahan judul
   children?: ReactNode;
   className?: string;
-  /** Small caps label above the title (section context / breadcrumb). */
+  // Label konteks bagian
   overline?: string;
-  /** Phrase inside `title` rendered as Playfair italic accent. */
+  // Frasa aksen judul
   accent?: string;
   tone?: 'sage' | 'ink' | 'plain';
-  /** Smaller band for detail pages. */
+  // Band halaman detail
   compact?: boolean;
 }) {
   const ink = tone === 'ink';

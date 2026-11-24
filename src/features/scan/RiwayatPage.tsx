@@ -152,18 +152,11 @@ export default function RiwayatPage() {
                 {tr("scanBaru")}
               </Link>
             </Button>
-            {/* <Button
-              variant="outline"
-              className="border-border bg-card hover:bg-accent/60"
-              aria-label={tr("unduhRiwayat")}
-            >
-              <FileDown className="h-4 w-4" aria-hidden="true" />
-              {t("unduh")}
-            </Button> */}
+            {/* Tombol unduh riwayat */}
           </>
         }
       >
-        {/* Stat readout, tnum medical report style */}
+        {/* Statistik ringkasan riwayat scan */}
         <div className="flex flex-wrap gap-x-12 gap-y-6">
           <div>
             <p className="tnum text-4xl font-extrabold leading-none">

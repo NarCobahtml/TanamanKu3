@@ -15,8 +15,13 @@ export async function GET() {
       );
     }
 
-    const dbUser = await prisma.user.findUnique({
-      where: { id: authUser.id },
+    const dbUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { id: authUser.id },
+          ...(authUser.email ? [{ email: authUser.email.toLowerCase() }] : []),
+        ],
+      },
       select: { role: true },
     });
 
@@ -75,22 +80,32 @@ export async function GET() {
       };
     });
 
-    // Fetch posts for moderation table
-    const dbPosts = await prisma.post.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 20,
+    // Ambil postingan dengan laporan
+    const dbReportedPosts = await prisma.post.findMany({
+      where: {
+        OR: [
+          { reports: { some: {} } },
+          { isApproved: false },
+        ],
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 50,
       include: {
         author: {
           select: { name: true, email: true },
         },
-        _count: {
-          select: { comments: true },
+        reports: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            user: { select: { name: true, email: true } },
+          },
         },
       },
     });
 
-    const formattedModerations = dbPosts.map((p, idx) => {
-      const d = new Date(p.createdAt);
+    const formattedModerations = dbReportedPosts.map((p) => {
+      const latestReport = p.reports[0];
+      const d = latestReport ? new Date(latestReport.createdAt) : new Date(p.updatedAt);
       const date = d.toLocaleDateString('id-ID', {
         day: 'numeric',
         month: 'short',
@@ -99,31 +114,54 @@ export async function GET() {
 
       let category = 'Perawatan';
       let snippet = p.content;
+      let authorName = p.author?.name;
+      let authorEmail = p.author?.email;
+
       try {
         if (p.content.startsWith('{')) {
           const parsed = JSON.parse(p.content);
           category = parsed.category || 'Perawatan';
           snippet = Array.isArray(parsed.body) ? parsed.body[0] : parsed.body;
+          if (!authorName && parsed.authorName) {
+            authorName = parsed.authorName;
+          }
         }
       } catch {
         // fallback
       }
 
+      // Format alasan pelaporan lengkap
+      const pendingCount = p.reports.filter((r) => r.status === 'PENDING').length;
+      let reason = latestReport?.reason || 'Konten perlu ditinjau administrator';
+      if (latestReport?.details) {
+        reason += `: ${latestReport.details}`;
+      }
+
+      // Jika ada laporan berstatus PENDING, wajib berstatus 'Perlu Tindakan'
+      let status: 'Perlu Tindakan' | 'Diselesaikan' | 'Diabaikan' = 'Perlu Tindakan';
+      if (pendingCount > 0) {
+        status = 'Perlu Tindakan';
+      } else if (p.isApproved) {
+        status = 'Diabaikan';
+      } else {
+        status = 'Diselesaikan';
+      }
+
       return {
         id: p.id,
         postTitle: p.title,
-        author: p.author?.name || 'Komunitas',
-        authorEmail: p.author?.email || 'user@tumbuhkita.id',
-        reportReason: idx % 3 === 0 ? 'Konten terindikasi berulang/spam' : 'Verifikasi diagnosis ahli disarankan',
-        reportsCount: p.isApproved ? 0 : 1,
+        author: authorName || 'Komunitas',
+        authorEmail: authorEmail || 'user@tumbuhkita.id',
+        reportReason: reason,
+        reportsCount: Math.max(1, p.reports.length),
         category,
         date,
-        snippet: typeof snippet === 'string' ? snippet.slice(0, 80) + '...' : p.title,
-        status: (p.isApproved ? 'Diselesaikan' : 'Perlu Tindakan') as 'Perlu Tindakan' | 'Diselesaikan' | 'Diabaikan',
+        snippet: typeof snippet === 'string' ? snippet.slice(0, 100) + '...' : p.title,
+        status,
       };
     });
 
-    // Generate real transactions based on PRO tier users and subscriptions
+    // Buat riwayat transaksi PRO
     const proUsers = await prisma.user.findMany({
       where: { subscriptionTier: 'PRO' },
       orderBy: { updatedAt: 'desc' },

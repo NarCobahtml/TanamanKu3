@@ -15,7 +15,7 @@ export default function TkRevealClient({
     const el = ref.current;
     if (!el) return;
 
-    // Immediately mark visible if already within or near viewport
+    // Tampilkan elemen dalam viewport
     const rect = el.getBoundingClientRect();
     if (rect.top < window.innerHeight + 100 && rect.bottom > -50) {
       el.classList.add('is-visible');

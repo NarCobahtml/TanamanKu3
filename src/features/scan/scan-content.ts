@@ -1,5 +1,4 @@
-// Konten edukatif per kelas output model Roboflow (resnet34-t1, 4 kelas).
-// Akurasi TIDAK di sini, datang dari response Roboflow di runtime.
+// Konten edukasi hasil scan
 
 import type {
   ScanClass,

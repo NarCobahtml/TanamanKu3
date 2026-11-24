@@ -55,7 +55,7 @@ export default function SiramDesktopView({
     <div className="hidden lg:block">
       <AppShell>
         <div>
-          {/* SUB-HERO, breadcrumb + identitas + CTA */}
+          {/* Sub-hero informasi dan CTA */}
           <header className="sage-wash border-b border-border">
             <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 md:py-14">
               <nav
@@ -124,7 +124,7 @@ export default function SiramDesktopView({
             </div>
           </header>
 
-          {/* BODY, dua kolom editorial: cuaca+AI+waktu kiri | prediksi sticky kanan */}
+          {/* Tata letak dua kolom */}
           <div className="mx-auto grid w-full max-w-7xl gap-16 px-4 py-14 sm:px-6 lg:grid-cols-[1.5fr_1fr]">
             <div className="min-w-0 space-y-16">
               {/* Kondisi Cuaca */}
@@ -280,7 +280,7 @@ export default function SiramDesktopView({
               </section>
             </div>
 
-            {/* Aside sticky, prediksi 7 hari + CTA */}
+            {/* Prediksi cuaca 7 hari */}
             <aside className="min-w-0">
               <div className="space-y-6 lg:sticky lg:top-24">
                 <div className="overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40">

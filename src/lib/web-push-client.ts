@@ -54,7 +54,7 @@ export async function registerServerWebPush(): Promise<{
   const vapidPublicKey = rawVapidKey.replace(/["'\s]/g, '');
 
   try {
-    // 1. Minta izin notifikasi browser
+    // 1. Minta izin notifikasi
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
       return {
@@ -63,10 +63,10 @@ export async function registerServerWebPush(): Promise<{
       };
     }
 
-    // 2. Pastikan Service Worker terdaftar dan siap
+    // 2. Siapkan Service Worker
     const registration = await navigator.serviceWorker.ready;
 
-    // 3. Ambil subscription yang ada atau buat baru
+    // 3. Ambil/buat push subscription
     let subscription = await registration.pushManager.getSubscription();
     if (!subscription) {
       const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
@@ -76,7 +76,7 @@ export async function registerServerWebPush(): Promise<{
           applicationServerKey: convertedVapidKey as unknown as BufferSource,
         });
       } catch (firstErr) {
-        // Coba unsubscribe jika ada stale token dari key berbeda, lalu coba sekali lagi
+        // Reset subscription token kedaluwarsa
         const stale = await registration.pushManager.getSubscription();
         if (stale) {
           await stale.unsubscribe().catch(() => {});
@@ -90,7 +90,7 @@ export async function registerServerWebPush(): Promise<{
       }
     }
 
-    // 4. Kirim data subscription ke server
+    // 4. Simpan ke server
     const res = await fetch('/api/push/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -114,7 +114,7 @@ export async function registerServerWebPush(): Promise<{
     const err = error as { message?: string };
     const rawMsg = err.message || '';
 
-    // Deteksi jika penyebabnya adalah pemblokiran FCM oleh browser Brave
+    // Cek kompatibilitas browser Brave
     const isBrave =
       typeof navigator !== 'undefined' &&
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -158,7 +158,7 @@ export async function unsubscribeServerWebPush(): Promise<boolean> {
       body: JSON.stringify({ endpoint }),
     });
 
-    // 2. Unsubscribe dari browser push manager
+    // 2. Unsubscribe push manager
     await subscription.unsubscribe();
     return true;
   } catch (error) {

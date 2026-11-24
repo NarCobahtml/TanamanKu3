@@ -40,7 +40,7 @@ export default function ScanMobileView({
         aria-label={t("pratinjauKamera")}
       />
 
-      {/* Top Floating Bar: Back + Hint */}
+      {/* Bar navigasi atas kamera */}
       <div className="relative z-10 flex items-center justify-between p-4 pt-[calc(1rem+env(safe-area-inset-top))]">
         <button
           type="button"
@@ -55,11 +55,11 @@ export default function ScanMobileView({
           {t("bidikDaun")}
         </span>
 
-        {/* Placeholder to balance the back button */}
+        {/* Elemen penyeimbang tata letak */}
         <div className="w-11" />
       </div>
 
-      {/* Center Viewfinder / Reticle Overlay */}
+      {/* Area bidik tengah reticle */}
       <div className="relative z-10 flex flex-1 items-center justify-center px-8">
         <div className="relative aspect-square w-full max-w-[280px] xs:max-w-[300px]">
           {/* Dimmed surrounding via box-shadow */}
@@ -79,7 +79,7 @@ export default function ScanMobileView({
         </div>
       </div>
 
-      {/* Bottom Controls Bar: Gallery + Big Shutter */}
+      {/* Bar kontrol rana galeri */}
       <div className="relative z-10 flex items-center justify-between px-10 pb-[calc(2.25rem+env(safe-area-inset-bottom))] pt-3">
         {/* Gallery Pick Button */}
         <button
@@ -104,7 +104,7 @@ export default function ScanMobileView({
           </span>
         </button>
 
-        {/* Invisible spacer to balance layout */}
+        {/* Penyeimbang tata letak kontrol */}
         <div className="w-12" />
       </div>
 
@@ -116,7 +116,7 @@ export default function ScanMobileView({
         </div>
       )}
 
-      {/* Error overlay with retry and gallery fallback */}
+      {/* Overlay penanganan pesan galat */}
       {cameraState === 'error' && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-black/92 p-8 text-center text-white">
           <Camera className="h-12 w-12 text-white/40" />

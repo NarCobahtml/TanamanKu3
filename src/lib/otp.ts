@@ -1,11 +1,11 @@
 import crypto from 'node:crypto';
 import { prisma } from '@/lib/prisma';
 
-// 6 digit OTP: 000000-999999, dari crypto.randomInt (CSPRNG).
+// Konfigurasi panjang OTP
 const OTP_LENGTH = 6;
 const OTP_TTL_MS = 10 * 60 * 1000; // 10 menit
 const MAX_ATTEMPTS = 5;
-const RESEND_COOLDOWN_MS = 60 * 1000; // 1 menit antar resend
+const RESEND_COOLDOWN_MS = 60 * 1000; // Cooldown resend
 
 export const OTP_POLICY = {
   length: OTP_LENGTH,
@@ -15,11 +15,7 @@ export const OTP_POLICY = {
   maxPerHour: 5,
 };
 
-/**
- * OTP hanya 1 juta kombinasi, jadi hash polos bisa di-brute-force offline kalau DB bocor.
- * Karena itu hash dicampur pepper. Pepper diambil dari SUPABASE_SERVICE_ROLE_KEY
- * (server-only, tidak pernah masuk bundle client) supaya tidak menambah env var baru.
- */
+// Hash OTP dengan pepper
 function tokenHash(otp: string, userId: string): string {
   return crypto
     .createHash('sha256')
@@ -27,7 +23,7 @@ function tokenHash(otp: string, userId: string): string {
     .digest('hex');
 }
 
-/** Constant-time compare untuk hindari timing side-channel. */
+// Constant-time compare
 function hashEquals(a: string, b: string): boolean {
   const bufA = Buffer.from(a, 'hex');
   const bufB = Buffer.from(b, 'hex');
@@ -35,21 +31,18 @@ function hashEquals(a: string, b: string): boolean {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-/**
- * Issue OTP baru, membatalkan token aktif sebelumnya tanpa langsung menghapus riwayat
- * 1 jam terakhir agar kuota 5x per jam dapat dihitung secara akurat di DB.
- */
+// Terbitkan OTP baru
 export async function issueOtp(userId: string, email: string): Promise<{ otp: string; expiresAt: Date }> {
   const otp = String(crypto.randomInt(0, 10 ** OTP_LENGTH)).padStart(OTP_LENGTH, '0');
   const expiresAt = new Date(Date.now() + OTP_TTL_MS);
 
-  // Bersihkan riwayat token yang sudah lebih dari 1 jam
+  // Bersihkan riwayat token kedaluwarsa
   const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
   await prisma.verificationToken.deleteMany({
     where: { userId, createdAt: { lt: hourAgo } },
   });
 
-  // Nonaktifkan token aktif sebelumnya dengan mengubah expiresAt ke masa lalu
+  // Nonaktifkan token aktif sebelumnya
   await prisma.verificationToken.updateMany({
     where: { userId, expiresAt: { gt: new Date() } },
     data: { expiresAt: new Date(0) },
@@ -68,11 +61,7 @@ export type VerifyResult =
   | { ok: true }
   | { ok: false; reason: VerifyFailure; attemptsLeft: number };
 
-/**
- * Verifikasi OTP. Selalu ambil token aktif milik user lalu constant-time compare,
- * supaya attempt counter naik walau OTP salah (anti brute-force).
- * Sukses → semua token user dihapus + User.emailVerified di-set true.
- */
+// Verifikasi kode OTP
 export async function verifyOtp(userId: string, otp: string): Promise<VerifyResult> {
   const record = await prisma.verificationToken.findFirst({
     where: { userId, expiresAt: { gt: new Date() } },
@@ -90,7 +79,7 @@ export async function verifyOtp(userId: string, otp: string): Promise<VerifyResu
     return { ok: false, reason: 'NO_TOKEN', attemptsLeft: 0 };
   }
 
-  // Token sudah salah 5x → nonaktifkan, paksa minta kode baru.
+  // Batas percobaan tercapai
   if (record.attempts >= MAX_ATTEMPTS) {
     await prisma.verificationToken.update({
       where: { id: record.id },
@@ -116,9 +105,7 @@ export async function verifyOtp(userId: string, otp: string): Promise<VerifyResu
   return { ok: true };
 }
 
-/**
- * Issue Magic Reset Token (32 bytes hex, aman di URL) dengan masa aktif 15 menit.
- */
+// Terbitkan token reset password
 export async function issuePasswordResetToken(
   userId: string,
   email: string
@@ -126,7 +113,7 @@ export async function issuePasswordResetToken(
   const token = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 menit
 
-  // Bersihkan riwayat token yang sudah lebih dari 1 jam
+  // Bersihkan riwayat token kedaluwarsa
   const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
   await prisma.verificationToken.deleteMany({
     where: { userId, createdAt: { lt: hourAgo } },
@@ -150,10 +137,7 @@ export async function issuePasswordResetToken(
   return { token, expiresAt };
 }
 
-/**
- * Verifikasi Magic Reset Token.
- * Mengembalikan user record jika token valid dan belum expired.
- */
+// Verifikasi token reset password
 export async function verifyPasswordResetToken(token: string): Promise<
   | { ok: true; userId: string; email: string }
   | { ok: false; reason: VerifyFailure }
@@ -162,7 +146,7 @@ export async function verifyPasswordResetToken(token: string): Promise<
     return { ok: false, reason: 'NO_TOKEN' };
   }
 
-  // Cari semua token aktif yang belum expired
+  // Cari token aktif
   const activeTokens = await prisma.verificationToken.findMany({
     where: { expiresAt: { gt: new Date() } },
     select: { id: true, userId: true, email: true, tokenHash: true },
@@ -177,16 +161,12 @@ export async function verifyPasswordResetToken(token: string): Promise<
   return { ok: false, reason: 'EXPIRED' };
 }
 
-/**
- * Hapus token reset setelah berhasil digunakan untuk ganti kata sandi.
- */
+// Hapus token reset terpakai
 export async function consumePasswordResetToken(userId: string): Promise<void> {
   await prisma.verificationToken.deleteMany({ where: { userId } });
 }
 
-/**
- * True kalau user masih dalam cooldown resend. Dihitung dari createdAt token terakhir.
- */
+// Cek status cooldown resend
 export async function isResendBlocked(
   userId: string,
 ): Promise<{ blocked: boolean; retryAfterSeconds: number }> {

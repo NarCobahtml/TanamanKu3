@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 
-// POST /api/payment/notification: Midtrans HTTP Notification Webhook
-// Memverifikasi integritas signature SHA-512 (OWASP A08) dan meng-upgrade status langganan user
+// Webhook notifikasi pembayaran Midtrans
 export async function POST(request: Request) {
   try {
     const serverKey = process.env.MIDTRANS_SERVER_KEY;
@@ -41,8 +40,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Verifikasi Kriptografi SHA-512 Signature (OWASP A08: Software and Data Integrity)
-    // Formula resmi Midtrans: SHA512(order_id + status_code + gross_amount + ServerKey)
+    // 1. Verifikasi signature SHA-512
     const expectedSignature = crypto
       .createHash('sha512')
       .update(`${order_id}${status_code}${gross_amount}${serverKey.trim()}`)
@@ -62,7 +60,7 @@ export async function POST(request: Request) {
       (transaction_status === 'capture' && fraud_status === 'accept');
 
     if (isSuccess) {
-      // Temukan user berdasarkan custom_field1 atau email
+      // Cari user terkait pembayaran
       let targetUser = null;
       if (userId) {
         targetUser = await prisma.user.findUnique({ where: { id: userId } });

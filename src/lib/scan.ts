@@ -12,7 +12,7 @@ export interface ScanHistoryItem {
   createdAt: string;
 }
 
-// In-memory cache flag to avoid querying count on every single request
+// Cache in-memory flag status
 let isScanSeeded = false;
 
 const MOCK_DISEASES = [
@@ -158,7 +158,7 @@ export async function seedScanDataIfEmpty() {
       }
     }
 
-    // 2. Seed ScanRecords if table is empty
+    // 2. Seed ScanRecords kosong
     const scanCount = await prisma.scanRecord.count();
     if (scanCount === 0) {
       let seedUser = await prisma.user.findFirst();

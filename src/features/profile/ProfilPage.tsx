@@ -204,7 +204,7 @@ export default function ProfilPage() {
             setLocale={setLocale}
           />
 
-          {/* PWA Install Card in Profile */}
+          {/* Kartu instalasi aplikasi PWA */}
           <section className="rule scroll-mt-24 pt-6 sm:pt-10">
             <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3.5">

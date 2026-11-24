@@ -101,7 +101,7 @@ export const tanamanStore = {
 
   async tambahAsync(t: Omit<Tanaman, 'id'> & { id?: string }): Promise<Tanaman> {
     const list = tanamanStore.getSnapshot();
-    // Use purely numeric ID timestamp to avoid duplicates
+    // ID numerik hindari duplikasi
     const tempId = t.id && /^\d+$/.test(t.id) ? t.id : Date.now().toString();
     const optimisticPlant: Tanaman = {
       ...t,

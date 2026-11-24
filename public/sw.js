@@ -10,7 +10,7 @@ const STATIC_ASSETS = [
   '/apple-touch-icon.png'
 ];
 
-// 1. Install Event: Cache essential assets
+// 1. Install: cache aset
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -19,7 +19,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// 2. Activate Event: Clean up old caches
+// 2. Activate: bersihkan cache
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -32,12 +32,12 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. Fetch Event: Network-first with cache fallback for navigation & stale-while-revalidate for assets
+// 3. Fetch Event handler
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Jangan cache request API, POST/PUT/DELETE, atau Supabase
+  // Jangan cache API/Supabase
   if (
     request.method !== 'GET' ||
     url.pathname.startsWith('/api/') ||
@@ -46,7 +46,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Aset statis (gambar, font, css, js): Stale-While-Revalidate
+  // Cache aset statis
   if (
     request.destination === 'image' ||
     request.destination === 'font' ||
@@ -74,7 +74,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigasi HTML: Network First, fallback to cache
+  // Navigasi HTML network first
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -130,7 +130,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// 5. Message Event: Allow web clients to trigger local PWA notifications via Service Worker
+// 5. Handler pesan client
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
     const { title, options } = event.data;
@@ -144,7 +144,7 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// 6. Notification Click: Focus existing client or open target URL
+// 6. Handler klik notifikasi
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const targetPath = event.notification.data?.url || '/siram';

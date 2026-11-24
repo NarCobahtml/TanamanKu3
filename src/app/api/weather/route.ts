@@ -21,11 +21,11 @@ export async function GET(request: Request) {
     const latParam = searchParams.get('lat');
     const lonParam = searchParams.get('lon');
 
-    // Default to Jakarta if user coordinates are not yet available or denied
+    // Koordinat default Jakarta
     const lat = latParam ? parseFloat(latParam) : -6.2088;
     const lon = lonParam ? parseFloat(lonParam) : 106.8456;
 
-    // 1. Fetch real weather from Open-Meteo API (100% free, no API key required)
+    // 1. Ambil data Open-Meteo
     const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,is_day&hourly=temperature_2m,relative_humidity_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunset&timezone=auto`;
     const weatherRes = await fetch(openMeteoUrl, { next: { revalidate: 900 } });
 
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
 
     const weatherData = await weatherRes.json();
 
-    // 2. Reverse geocode location name
+    // 2. Reverse geocoding lokasi
     let locationName = 'Jakarta, Indonesia';
     let city = 'Jakarta';
     try {
@@ -60,11 +60,11 @@ export async function GET(request: Request) {
     const codeNow = current.weather_code;
     const { condition: conditionNow } = getWeatherCondition(codeNow);
 
-    // 4. Process daily sunset and temperature range
+    // 4. Hitung rentang suhu
     const daily = weatherData.daily;
     const maxTempToday = Math.round(daily.temperature_2m_max[0]);
     const minTempToday = Math.round(daily.temperature_2m_min[0]);
-    const sunsetRaw = daily.sunset[0]; // e.g. "2026-09-28T17:53"
+    const sunsetRaw = daily.sunset[0]; // Format ISO sunset
     let sunsetFormatted = '17:30';
     if (sunsetRaw) {
       const sunsetDate = new Date(sunsetRaw);
@@ -80,7 +80,7 @@ export async function GET(request: Request) {
       humidity: `${humidityNow}%`,
     };
 
-    // Process plant parameters if provided
+    // Proses parameter tanaman
     const plantName = searchParams.get('plantName') || undefined;
     const plantCategory = searchParams.get('plantCategory') || undefined;
     const plantType = searchParams.get('plantType') || undefined;
@@ -88,9 +88,9 @@ export async function GET(request: Request) {
     const { resolvePlantProfile, evaluatePlantHourlySlot } = await import('@/features/watering/plant-rules');
     const plantProfile = resolvePlantProfile(plantName, plantCategory, plantType);
 
-    // 5. Process next 5 hourly slots starting from current hour
+    // 5. Proses ramalan per-jam
     const hourly = weatherData.hourly;
-    const nowIsoHour = new Date().toISOString().slice(0, 13); // "2026-09-28T13"
+    const nowIsoHour = new Date().toISOString().slice(0, 13); // Jam ISO saat ini
     let startIndex = hourly.time.findIndex((t: string) => t.startsWith(nowIsoHour));
     if (startIndex === -1) startIndex = 0;
 
@@ -99,7 +99,7 @@ export async function GET(request: Request) {
       const idx = startIndex + i;
       if (idx >= hourly.time.length) break;
 
-      const timeStr = hourly.time[idx]; // "2026-09-28T14:00"
+      const timeStr = hourly.time[idx]; // Format waktu ISO
       const hour = parseInt(timeStr.slice(11, 13), 10);
       const slotTemp = Math.round(hourly.temperature_2m[idx]);
       const slotCode = hourly.weather_code[idx];
@@ -112,7 +112,7 @@ export async function GET(request: Request) {
         slotTimeLabel = `${hour} AM`;
       }
 
-      // Dynamic calculation based on plant botany profile & live hour weather
+      // Hitung rekomendasi jam siram
       const evalResult = evaluatePlantHourlySlot(
         hour,
         slotTemp,
@@ -147,7 +147,7 @@ export async function GET(request: Request) {
       });
     }
 
-    // 7. Dynamic AI summary tailored for this specific plant
+    // 7. Ringkasan AI tanaman
     const plantDisplayName = plantName || 'tanaman Anda';
     let aiSummary = `Untuk ${plantDisplayName} (${plantProfile.category}), kondisi lingkungan saat ini ${conditionNow.toLowerCase()} dengan suhu ${tempNow}°C dan kelembapan ${humidityNow}%.`;
     let aiSaran = 'Disarankan menyiram di pagi hari sebelum terik atau di sore hari.';
