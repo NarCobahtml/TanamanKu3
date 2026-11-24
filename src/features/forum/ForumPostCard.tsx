@@ -73,12 +73,12 @@ export function ForumPostCard({
                   e.stopPropagation();
                   onReport?.();
                 }}
-                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 active:scale-95 transition-all cursor-pointer"
                 title="Laporkan postingan ini"
-                aria-label="Laporkan postingan"
+                aria-label="Laporkan postingan ini"
               >
                 <Flag className="h-3.5 w-3.5" aria-hidden="true" />
-                <span className="hidden sm:inline">Laporkan</span>
+                <span>Laporkan</span>
               </button>
             )}
           </div>

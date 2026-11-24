@@ -92,7 +92,7 @@ export function ReportPostDialog({
 
     try {
       // Kirim laporan ke server
-      const res = await fetch(`/api/forum/${post.id}/report`, {
+      const res = await fetch(`/api/forum/${encodeURIComponent(post.id)}/report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
