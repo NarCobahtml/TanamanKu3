@@ -101,7 +101,7 @@ export function SettingsTab({
   };
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="pb-2 border-b border-border/50">
+      <div className="pb-2 border-b border-border/40">
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
           Pengaturan Sistem Admin
         </h1>
@@ -111,7 +111,7 @@ export function SettingsTab({
       </div>
 
       {/* Broadcast Announcement */}
-      <div className="rounded-xl border border-border/70 bg-card p-5 sm:p-6 shadow-2xs space-y-3.5">
+      <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6 shadow-xs space-y-3.5">
         <div>
           <h3 className="text-sm sm:text-base font-semibold text-foreground">
             Siarkan Pengumuman ke Pengguna (Broadcast)
@@ -127,13 +127,13 @@ export function SettingsTab({
             value={broadcastMessage}
             onChange={(e) => setBroadcastMessage(e.target.value)}
             disabled={isSubmittingBroadcast}
-            className="bg-card rounded-lg text-xs flex-1 h-9 border-border/70 focus-visible:ring-1"
+            className="bg-card rounded-xl text-xs flex-1 h-9 border-border/60 focus-visible:ring-1"
           />
           <Button
             type="submit"
             size="sm"
             disabled={isSubmittingBroadcast}
-            className="cursor-pointer h-9 px-4 rounded-lg text-xs font-semibold shrink-0 gap-1.5"
+            className="cursor-pointer h-9 px-4 rounded-xl text-xs font-medium shrink-0 gap-1.5 bg-foreground text-background hover:bg-foreground/90"
           >
             <Send className="h-3.5 w-3.5" />
             {isSubmittingBroadcast ? "Mengirim..." : "Kirim Banner"}
@@ -142,7 +142,7 @@ export function SettingsTab({
       </div>
 
       {/* Access Controls */}
-      <div className="rounded-xl border border-border/70 bg-card p-5 sm:p-6 shadow-2xs space-y-4">
+      <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6 shadow-xs space-y-4">
         <div>
           <h3 className="text-sm sm:text-base font-semibold text-foreground">
             Kontrol Akses Platform
@@ -152,7 +152,7 @@ export function SettingsTab({
           </p>
         </div>
 
-        <div className="divide-y divide-border/50">
+        <div className="divide-y divide-border/30">
           <div className="flex items-center justify-between py-3">
             <div>
               <p className="text-xs sm:text-sm font-semibold text-foreground">
@@ -165,10 +165,10 @@ export function SettingsTab({
             <Button
               variant={allowRegistration ? "default" : "outline"}
               size="sm"
-              className={`cursor-pointer h-8 px-3 rounded-lg text-xs font-medium ${
+              className={`cursor-pointer h-8 px-3 rounded-xl text-xs font-medium ${
                 allowRegistration
-                  ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                  : "border-border/80 hover:bg-muted"
+                  ? "bg-foreground text-background hover:bg-foreground/90"
+                  : "border-border/70 hover:bg-muted"
               }`}
               onClick={() => {
                 onUpdateSettings({ allowRegistration: !allowRegistration });
@@ -180,7 +180,7 @@ export function SettingsTab({
 
           <div className="flex items-center justify-between py-3">
             <div>
-              <p className="text-xs sm:text-sm font-semibold text-destructive">
+              <p className="text-xs sm:text-sm font-semibold text-foreground">
                 Mode Pemeliharaan (Maintenance Mode)
               </p>
               <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
@@ -188,9 +188,13 @@ export function SettingsTab({
               </p>
             </div>
             <Button
-              variant={maintenanceMode ? "destructive" : "outline"}
+              variant={maintenanceMode ? "default" : "outline"}
               size="sm"
-              className="cursor-pointer h-8 px-3 rounded-lg text-xs font-medium"
+              className={`cursor-pointer h-8 px-3 rounded-xl text-xs font-medium ${
+                maintenanceMode
+                  ? "bg-foreground text-background hover:bg-foreground/90"
+                  : "border-border/70 hover:bg-muted"
+              }`}
               onClick={() => {
                 onUpdateSettings({ maintenanceMode: !maintenanceMode });
               }}
@@ -202,10 +206,10 @@ export function SettingsTab({
       </div>
 
       {/* Diagnostik Web Push */}
-      <div className="rounded-xl border border-border/70 bg-card p-5 sm:p-6 shadow-2xs space-y-5">
+      <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6 shadow-xs space-y-5">
         <div>
           <div className="flex items-center gap-2">
-            <BellRing className="h-4 w-4 text-primary" />
+            <BellRing className="h-4 w-4 text-foreground" />
             <h3 className="text-sm sm:text-base font-semibold text-foreground">
               Testing & Manajemen Notifikasi Server (Web Push)
             </h3>
@@ -217,18 +221,11 @@ export function SettingsTab({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Kartu tes perangkat admin */}
-          <div className="rounded-lg border border-border/70 bg-muted/30 p-4 space-y-3 flex flex-col justify-between">
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-3 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-semibold text-foreground">Tes ke Perangkat Ini</h4>
-                <span
-                  className={cn(
-                    "text-[10px] px-2 py-0.5 rounded-md font-medium border",
-                    isRegistered
-                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
-                  )}
-                >
+                <span className="text-xs font-medium text-foreground">
                   {isRegistered ? "Perangkat Terdaftar" : "Belum Terdaftar"}
                 </span>
               </div>
@@ -243,7 +240,7 @@ export function SettingsTab({
                   variant="outline"
                   onClick={handleRegisterCurrentDevice}
                   disabled={isRegistering}
-                  className="text-xs cursor-pointer rounded-lg h-8 border-border"
+                  className="text-xs cursor-pointer rounded-xl h-8 border-border/70"
                 >
                   {isRegistering ? "Mendaftarkan..." : "Daftarkan Perangkat Ini"}
                 </Button>
@@ -252,7 +249,7 @@ export function SettingsTab({
                 size="sm"
                 onClick={handleSendTestPush}
                 disabled={isTesting}
-                className="text-xs cursor-pointer rounded-lg h-8 bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
+                className="text-xs cursor-pointer rounded-xl h-8 bg-foreground text-background hover:bg-foreground/90 font-medium"
               >
                 <Bell className="mr-1.5 h-3.5 w-3.5" />
                 {isTesting ? "Mengirim..." : "Kirim Tes Notifikasi"}
@@ -261,11 +258,11 @@ export function SettingsTab({
           </div>
 
           {/* Kartu broadcast simulasi cron */}
-          <div className="rounded-lg border border-border/70 bg-muted/30 p-4 space-y-3 flex flex-col justify-between">
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-3 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-semibold text-foreground">Kirim Jadwal Siram (Cron)</h4>
-                <span className="text-[10px] px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-medium">
+                <span className="text-xs text-muted-foreground font-medium">
                   Broadcast Masal
                 </span>
               </div>
@@ -279,20 +276,20 @@ export function SettingsTab({
                 variant="outline"
                 onClick={handleSendWateringReminders}
                 disabled={isSendingWatering}
-                className="text-xs cursor-pointer rounded-lg h-8 w-full sm:w-auto border-border hover:bg-muted font-medium"
+                className="text-xs cursor-pointer rounded-xl h-8 w-full sm:w-auto border-border/70 hover:bg-muted font-medium"
               >
-                <Sparkles className="mr-1.5 h-3.5 w-3.5 text-amber-500" />
+                <Sparkles className="mr-1.5 h-3.5 w-3.5 text-foreground" />
                 {isSendingWatering ? "Memproses..." : "Kirim Pengingat ke Semua Pengguna"}
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="rounded-lg border border-border/60 bg-muted/20 p-3 text-[11px] text-muted-foreground">
+        <div className="rounded-xl border border-border/50 bg-muted/20 p-3 text-[11px] text-muted-foreground">
           <p>
             💡 <strong className="text-foreground">Otomatisasi Cron Server:</strong> Anda dapat memanggil endpoint berikut via cron-job berkala (misal: tiap jam 07:00 WIB dan 16:00 WIB) dengan header <code className="bg-muted px-1.5 py-0.5 rounded text-[10px] font-mono">Authorization: Bearer {'<CRON_SECRET>'}</code>:
           </p>
-          <code className="block mt-1.5 font-mono text-[10px] bg-muted/60 p-2 rounded-md break-all select-all text-foreground border border-border/40">
+          <code className="block mt-1.5 font-mono text-[10px] bg-muted/60 p-2 rounded-lg break-all select-all text-foreground border border-border/30">
             POST /api/push/send-watering-reminders
           </code>
         </div>
