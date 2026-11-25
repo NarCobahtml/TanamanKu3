@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { OverviewCharts } from "./OverviewCharts";
 import type { AdminStat, UserItem, ForumCategoryStat } from "../types";
 
 interface OverviewTabProps {
@@ -90,6 +91,9 @@ export function OverviewTab({
           </div>
         ))}
       </div>
+
+      {/* Visual Analytics Charts (Portu Style) */}
+      <OverviewCharts />
 
       {/* Grid kategori dan log */}
       <div className="grid gap-6 lg:grid-cols-12">
