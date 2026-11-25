@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
@@ -13,6 +13,7 @@ import {
   VerifyOtpForm,
 } from "./components";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/lib/use-auth";
 import type { AuthFormProps, AuthStep } from "./types";
 
 const PENDING_USER_KEY = 'tumbuhkita_pending_user';
@@ -22,6 +23,7 @@ export default function AuthForm({
   verified,
 }: AuthFormProps) {
   const router = useRouter();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const t = useTranslations("auth");
   const tc = useTranslations("common");
   const isLogin = mode === "login";
@@ -30,6 +32,12 @@ export default function AuthForm({
   const [step, setStep] = useState<AuthStep>('credentials');
   const [pendingEmail, setPendingEmail] = useState('');
   const [devOtp, setDevOtp] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.replace("/home");
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   const handleSocialLogin = async (provider: "google" | "facebook") => {
     setErrorMessage(null);

@@ -34,7 +34,23 @@ export async function updateSession(request: NextRequest) {
     });
 
     // Refresh token sesi pengguna
-    await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const { pathname } = request.nextUrl;
+    const isAuthPage = pathname === '/login' || pathname === '/register';
+
+    if (user && isAuthPage) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/home';
+      redirectUrl.search = '';
+      const redirectResponse = NextResponse.redirect(redirectUrl);
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie);
+      });
+      return redirectResponse;
+    }
   } catch {
     // Abaikan sesi tamu unauthenticated
   }
