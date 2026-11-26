@@ -23,6 +23,7 @@ export default function Footer() {
       links: [
         { name: t('forumDiskusi'), href: '/forum' },
         { name: t('buatPostingan'), href: '/forum/create' },
+        { name: t('tentangKami'), href: '/tentang' },
       ],
     },
     {

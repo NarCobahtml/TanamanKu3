@@ -35,7 +35,7 @@ export default function Footer() {
             </p>
           </div>
 
-          <div className="flex gap-16">
+          <div className="flex flex-wrap gap-12 sm:gap-16">
             <div>
               <h3 className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
                 {n("produk")}
@@ -57,6 +57,29 @@ export default function Footer() {
                 className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 {n("komunitas")}
+              </Link>
+            </div>
+            <div>
+              <h3 className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+                {t("tentang")}
+              </h3>
+              <Link
+                href="/tentang"
+                className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                {t("tentangKami")}
+              </Link>
+              <Link
+                href="/tentang#visi-misi"
+                className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                {t("visiMisi")}
+              </Link>
+              <Link
+                href="/tentang#tim"
+                className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                {t("timPembuat")}
               </Link>
             </div>
             <div>

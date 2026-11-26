@@ -21,6 +21,7 @@ import {
 } from "@/components/shared/HealthStatus";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageCtaBand } from "@/components/shared/PageCtaBand";
+import { PlantImage } from "@/components/shared/PlantImage";
 import { FilterPill } from "@/components/ui/filter-pill";
 import TkRevealClient from "@/components/shared/tk-reveal-client";
 
@@ -53,7 +54,7 @@ const initialScans: ScanItem[] = [
     date: "30.08.2026",
     accuracy: 98,
     status: "sehat",
-    photo: undefined,
+    photo: "/figma-assets/plant-tomat-chery.webp",
   },
   {
     id: 3,
@@ -251,20 +252,19 @@ export default function RiwayatPage() {
                     >
                       <TableCell className="py-4 pl-4 sm:pl-6">
                         <span className="flex items-center gap-3">
-                          {s.photo ? (
-                            <img
-                              src={s.photo}
-                              alt={s.plant}
-                              className="h-10 w-10 rounded-lg object-cover"
-                            />
-                          ) : (
-                            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
-                              <ScanLine
-                                className="h-4 w-4"
-                                aria-hidden="true"
-                              />
-                            </span>
-                          )}
+                          <PlantImage
+                            src={s.photo}
+                            alt={s.plant}
+                            className="h-10 w-10 rounded-lg object-cover"
+                            fallback={
+                              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                                <ScanLine
+                                  className="h-4 w-4"
+                                  aria-hidden="true"
+                                />
+                              </span>
+                            }
+                          />
                           <span className="font-medium">{s.plant}</span>
                         </span>
                       </TableCell>

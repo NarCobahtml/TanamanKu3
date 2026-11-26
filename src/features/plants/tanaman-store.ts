@@ -1,9 +1,23 @@
 'use client';
 
 import { useSyncExternalStore, useEffect } from 'react';
+import { normalizePlantAssetUrl } from '@/lib/utils';
 import type { KategoriTanaman, StatusSiram, Tanaman } from './types';
 
 export type { KategoriTanaman, StatusSiram, Tanaman };
+
+function normalizeTanamanList(list: Tanaman[]): { items: Tanaman[]; changed: boolean } {
+  let changed = false;
+  const items = list.map((item) => {
+    const normalizedPhoto = normalizePlantAssetUrl(item.photo);
+    if (normalizedPhoto !== item.photo) {
+      changed = true;
+      return { ...item, photo: normalizedPhoto };
+    }
+    return item;
+  });
+  return { items, changed };
+}
 
 export const initialTanamanList: Tanaman[] = [
   { id: '1', nama: 'Monstera Deliciosa', jenis: 'hias', kategori: 'Indoor', status: 'hari-ini', nextWater: 'nw.hariIniSore', photo: '/figma-assets/monstera.avif' },
@@ -43,8 +57,14 @@ export const tanamanStore = {
         return memoryList;
       }
       if (item !== cachedRaw) {
-        cachedRaw = item;
-        memoryList = JSON.parse(item);
+        const parsed = JSON.parse(item) as Tanaman[];
+        const { items, changed } = normalizeTanamanList(parsed);
+        const normalizedRaw = changed ? JSON.stringify(items) : item;
+        cachedRaw = normalizedRaw;
+        memoryList = items;
+        if (changed) {
+          localStorage.setItem(STORAGE_KEY, normalizedRaw);
+        }
       }
       return memoryList;
     } catch {
@@ -84,14 +104,15 @@ export const tanamanStore = {
       if (!res.ok) return memoryList;
       const json = await res.json();
       if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-        memoryList = json.data;
-        const serialized = JSON.stringify(json.data);
+        const { items } = normalizeTanamanList(json.data as Tanaman[]);
+        memoryList = items;
+        const serialized = JSON.stringify(items);
         cachedRaw = serialized;
         if (typeof window !== 'undefined') {
           localStorage.setItem(STORAGE_KEY, serialized);
         }
         emitChange();
-        return json.data;
+        return items;
       }
     } catch (err) {
       console.warn('TanamanStore refresh warning:', err);

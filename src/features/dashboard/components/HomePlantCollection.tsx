@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Leaf, ArrowRight, Droplets } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PlantImage } from '@/components/shared/PlantImage';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
 import type { Tanaman } from '@/features/plants';
 import type { PlantHealth } from '../mock';
@@ -45,17 +46,16 @@ export function HomePlantCollection({ plants, healthById }: HomePlantCollectionP
                 href={`/siram/${plant.id}`}
                 className="group block overflow-hidden rounded-xl border border-border bg-card transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring hover:border-primary/40 hover:bg-accent/30"
               >
-                {plant.photo ? (
-                  <img
-                    src={plant.photo}
-                    alt={plant.nama}
-                    className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                  />
-                ) : (
-                  <div className="flex aspect-[4/3] w-full items-center justify-center bg-accent" aria-hidden="true">
-                    <Leaf className="size-10 text-primary/40" />
-                  </div>
-                )}
+                <PlantImage
+                  src={plant.photo}
+                  alt={plant.nama}
+                  className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  fallback={
+                    <div className="flex aspect-[4/3] w-full items-center justify-center bg-accent" aria-hidden="true">
+                      <Leaf className="size-10 text-primary/40" />
+                    </div>
+                  }
+                />
                 <div className="space-y-2 p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>

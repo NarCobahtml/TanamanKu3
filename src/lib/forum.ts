@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { normalizePlantAssetUrl } from '@/lib/utils';
 import { forumPosts as initialMockPosts } from '@/features/forum/mock';
 import type { ForumPost } from '@/features/forum/types';
 
@@ -84,7 +85,7 @@ export function formatForumPost(p: PrismaPostWithRelations): ForumPost {
     title: p.title,
     excerpt,
     content: meta.body,
-    image: p.imageUrl || undefined,
+    image: normalizePlantAssetUrl(p.imageUrl),
     likes: meta.likes,
     views: meta.views,
     comments,
