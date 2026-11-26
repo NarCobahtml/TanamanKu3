@@ -3,17 +3,23 @@
 import Link from 'next/link';
 import { Droplets, Leaf, Pencil, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { PlantImage } from '@/components/shared/PlantImage';
 import type { Tanaman } from './types';
 import { StatusSiramBadge } from './StatusSiramBadge';
 import { cn } from '@/lib/utils';
 
 export function PlantThumb({ t, className }: { t: Tanaman; className?: string }) {
-  return t.photo ? (
-    <img src={t.photo} alt={t.nama} className={cn('h-10 w-10 rounded-sm object-cover', className)} />
-  ) : (
-    <span className={cn('flex h-10 w-10 items-center justify-center bg-accent', className)} aria-hidden="true">
-      <Leaf className="size-5 text-primary/40" />
-    </span>
+  return (
+    <PlantImage
+      src={t.photo}
+      alt={t.nama}
+      className={cn('h-10 w-10 rounded-sm object-cover', className)}
+      fallback={
+        <span className={cn('flex h-10 w-10 items-center justify-center bg-accent', className)} aria-hidden="true">
+          <Leaf className="size-5 text-primary/40" />
+        </span>
+      }
+    />
   );
 }
 
@@ -33,17 +39,16 @@ export function PlantCard({
   return (
     <div className="group block overflow-hidden rounded-xl border border-border bg-card transition-colors focus-within:ring-2 focus-within:ring-ring hover:border-primary/40 hover:bg-accent/30">
       <Link href={`/siram/${plant.id}`} className="block focus:outline-none">
-        {plant.photo ? (
-          <img
-            src={plant.photo}
-            alt={plant.nama}
-            className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-          />
-        ) : (
-          <div className="flex aspect-[4/3] w-full items-center justify-center bg-accent" aria-hidden="true">
-            <Leaf className="size-10 text-primary/40" />
-          </div>
-        )}
+        <PlantImage
+          src={plant.photo}
+          alt={plant.nama}
+          className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          fallback={
+            <div className="flex aspect-[4/3] w-full items-center justify-center bg-accent" aria-hidden="true">
+              <Leaf className="size-10 text-primary/40" />
+            </div>
+          }
+        />
       </Link>
       <div className="space-y-2.5 p-4">
         <div className="flex items-start justify-between gap-2">

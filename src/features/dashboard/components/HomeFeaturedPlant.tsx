@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Leaf, ArrowRight, Camera, Bug, CalendarCheck } from 'lucide-react';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
 import { HealthStatus } from '@/components/shared/HealthStatus';
+import { PlantImage } from '@/components/shared/PlantImage';
 import type { Tanaman } from '@/features/plants';
 import type { PlantHealth } from '../mock';
 
@@ -24,17 +25,16 @@ export function HomeFeaturedPlant({ heroPlant, heroHealth }: HomeFeaturedPlantPr
             href={`/siram/${heroPlant.id}`}
             className="group relative block aspect-[16/10] w-full overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {heroPlant.photo ? (
-              <img
-                src={heroPlant.photo}
-                alt={heroPlant.nama}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            ) : (
-              <span className="flex h-full w-full items-center justify-center bg-accent" aria-hidden="true">
-                <Leaf className="size-12 text-primary/40" />
-              </span>
-            )}
+            <PlantImage
+              src={heroPlant.photo}
+              alt={heroPlant.nama}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              fallback={
+                <span className="flex h-full w-full items-center justify-center bg-accent" aria-hidden="true">
+                  <Leaf className="size-12 text-primary/40" />
+                </span>
+              }
+            />
             <span className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-black/70 to-transparent p-5 pt-12">
               <span className="min-w-0">
                 <span className="block font-bold text-white">{heroPlant.nama}</span>

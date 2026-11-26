@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { normalizePlantAssetUrl } from '@/lib/utils';
 
 async function getCurrentUserId(): Promise<string | null> {
   try {
@@ -37,7 +38,7 @@ export async function GET(
       kategori: plant.kategori || 'Indoor',
       status: plant.status || 'terjadwal',
       nextWater: plant.nextWater || 'nw.berikutnyaBesok',
-      photo: plant.photoUrl || undefined,
+      photo: normalizePlantAssetUrl(plant.photoUrl),
       notes: plant.notes,
       userId: plant.userId,
       createdAt: plant.createdAt,
@@ -139,7 +140,7 @@ export async function PUT(
       kategori: updated.kategori || 'Indoor',
       status: updated.status || 'terjadwal',
       nextWater: updated.nextWater || 'nw.berikutnyaBesok',
-      photo: updated.photoUrl || undefined,
+      photo: normalizePlantAssetUrl(updated.photoUrl),
       notes: updated.notes,
       userId: updated.userId,
       createdAt: updated.createdAt,

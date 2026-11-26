@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { normalizePlantAssetUrl } from '@/lib/utils';
 import { SCAN_CONTENT, type ScanClass } from '@/features/scan/scan-content';
 
 export interface ScanHistoryItem {
@@ -228,7 +229,7 @@ export function formatScanRecord(record: {
     date: dateFormatted,
     accuracy,
     status: isHealthy ? 'sehat' : 'terinfeksi',
-    photo: record.imageUrl && record.imageUrl.trim() ? record.imageUrl : undefined,
+    photo: normalizePlantAssetUrl(record.imageUrl),
     createdAt: record.createdAt.toISOString(),
   };
 }

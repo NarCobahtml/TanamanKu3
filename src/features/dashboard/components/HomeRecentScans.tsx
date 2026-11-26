@@ -6,6 +6,7 @@ import Skeleton from 'react-loading-skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { SectionHeader } from '@/components/shared/PageHeader';
 import { HealthStatus } from '@/components/shared/HealthStatus';
+import { PlantImage } from '@/components/shared/PlantImage';
 import TkRevealClient from '@/components/shared/tk-reveal-client';
 import type { recentScans } from '../mock';
 
@@ -35,13 +36,16 @@ export function HomeRecentScans({ scans, loading = false }: HomeRecentScansProps
             {scans.map((s) => (
               <div key={s.id} className="flex items-center justify-between gap-3 p-4">
                 <div className="flex min-w-0 items-center gap-3">
-                  {s.photo ? (
-                    <img src={s.photo} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
-                  ) : (
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
-                      <Leaf className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                  )}
+                  <PlantImage
+                    src={s.photo}
+                    alt=""
+                    className="h-10 w-10 shrink-0 rounded-lg object-cover"
+                    fallback={
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                        <Leaf className="h-4 w-4" aria-hidden="true" />
+                      </span>
+                    }
+                  />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-foreground">{s.plant}</p>
                     <p className="line-clamp-1 text-xs text-muted-foreground">{s.disease}</p>
@@ -71,13 +75,16 @@ export function HomeRecentScans({ scans, loading = false }: HomeRecentScansProps
                   <TableRow key={s.id} className="border-border transition-colors hover:bg-secondary">
                     <TableCell className="py-4 text-[15px]">
                       <span className="flex items-center gap-3">
-                        {s.photo ? (
-                          <img src={s.photo} alt="" className="h-9 w-9 rounded-lg object-cover" />
-                        ) : (
-                          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
-                            <Leaf className="h-4 w-4" aria-hidden="true" />
-                          </span>
-                        )}
+                        <PlantImage
+                          src={s.photo}
+                          alt=""
+                          className="h-9 w-9 rounded-lg object-cover"
+                          fallback={
+                            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                              <Leaf className="h-4 w-4" aria-hidden="true" />
+                            </span>
+                          }
+                        />
                         <span className="font-medium">{s.plant}</span>
                       </span>
                     </TableCell>
